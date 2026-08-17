@@ -1,0 +1,7 @@
+Open application/config/config.php
+
+$config['base_url'] = 'http://localhost/demo/free_download/';
+
+change this line your url
+
+$config['base_url'] = 'http://localhost/yourfolder location';

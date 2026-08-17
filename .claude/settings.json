@@ -1,0 +1,11 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(php -v)",
+      "Read(//c/laragon/etc/apache2/sites-enabled/**)",
+      "Read(//c/laragon/etc/apache2/**)",
+      "Read(//c/Windows/System32/drivers/etc/**)",
+      "Bash(powershell -Command \"Get-Process httpd,mysqld -ErrorAction SilentlyContinue | Select-Object ProcessName,Id\")"
+    ]
+  }
+}
