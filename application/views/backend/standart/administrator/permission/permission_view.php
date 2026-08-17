@@ -75,7 +75,7 @@ jQuery(document).ready(domo);
                     <br>
 
                     <div class="view-nav">
-                        <?php is_allowed('permission_update', function($permission) use($permission){?>
+                        <?php is_allowed('permission_update', function() use($permission){?>
                         <a class="btn btn-flat btn-info btn_edit btn_action" id="btn_edit" data-stype='back' title="edit permission (Ctrl+e)" href="<?= site_url('administrator/permission/edit/'.$permission->id); ?>"><i class="fa fa-edit" ></i>  <?= cclang('update_button', 'Permission'); ?></a>
                         <?php }) ?>
                         <a class="btn btn-flat btn-default btn_action" id="btn_back" title="back (Ctrl+x)" href="<?= site_url('administrator/permission/'); ?>"><i class="fa fa-undo" ></i>  <?= cclang('go_list_button', 'Permission'); ?></a>

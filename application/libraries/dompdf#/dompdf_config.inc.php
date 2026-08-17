@@ -422,16 +422,8 @@ if ( function_exists("spl_autoload_register") ) {
   }
 }
 
-else if ( !function_exists("__autoload") ) {
-  /**
-   * Default __autoload() function
-   *
-   * @param string $class
-   */
-  function __autoload($class) {
-    DOMPDF_autoload($class);
-  }
-}
+// Note: PHP's magic __autoload() function was removed in PHP 8.0, so the
+// legacy fallback that used to live here is no longer valid or reachable.
 
 // ### End of user-configurable options ###
 

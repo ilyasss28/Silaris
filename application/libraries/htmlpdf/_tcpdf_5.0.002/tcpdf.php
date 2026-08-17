@@ -4086,9 +4086,9 @@ if (!class_exists('TCPDF', false)) {
 			* UTF-8 (hex): 0xC2 0xAD (c2ad)
 			* UTF-8 character: chr(194).chr(173)
 			*/
-			$txt = preg_replace('/([\\xc2]{1}[\\xad]{1})/', '', $txt);
+			$txt = preg_replace('/([\\xc2][1][\\xad][1])/', '', $txt);
 			if (!$this->isunicode) {
-				$txt = preg_replace('/([\\xad]{1})/', '', $txt);
+				$txt = preg_replace('/([\\xad][1])/', '', $txt);
 			}
 			return $txt;
 		}
@@ -14072,10 +14072,10 @@ if (!class_exists('TCPDF', false)) {
 								}
 							}
 							// font style
-							if (isset($dom[$key]['style']['font-weight']) AND (strtolower($dom[$key]['style']['font-weight']{0}) == 'b')) {
+							if (isset($dom[$key]['style']['font-weight']) AND (strtolower($dom[$key]['style']['font-weight'][0]) == 'b')) {
 								$dom[$key]['fontstyle'] .= 'B';
 							}
-							if (isset($dom[$key]['style']['font-style']) AND (strtolower($dom[$key]['style']['font-style']{0}) == 'i')) {
+							if (isset($dom[$key]['style']['font-style']) AND (strtolower($dom[$key]['style']['font-style'][0]) == 'i')) {
 								$dom[$key]['fontstyle'] .= 'I';
 							}
 							// font color
@@ -14115,7 +14115,7 @@ if (!class_exists('TCPDF', false)) {
 							}
 							// check for text alignment
 							if (isset($dom[$key]['style']['text-align'])) {
-								$dom[$key]['align'] = strtoupper($dom[$key]['style']['text-align']{0});
+								$dom[$key]['align'] = strtoupper($dom[$key]['style']['text-align'][0]);
 							}
 							// check for border attribute
 							if (isset($dom[$key]['style']['border'])) {
@@ -14162,9 +14162,9 @@ if (!class_exists('TCPDF', false)) {
 							// font size
 							if (isset($dom[$key]['attribute']['size'])) {
 								if ($key > 0) {
-									if ($dom[$key]['attribute']['size']{0} == '+') {
+									if ($dom[$key]['attribute']['size'][0] == '+') {
 										$dom[$key]['fontsize'] = $dom[($dom[$key]['parent'])]['fontsize'] + intval(substr($dom[$key]['attribute']['size'], 1));
-									} elseif ($dom[$key]['attribute']['size']{0} == '-') {
+									} elseif ($dom[$key]['attribute']['size'][0] == '-') {
 										$dom[$key]['fontsize'] = $dom[($dom[$key]['parent'])]['fontsize'] - intval(substr($dom[$key]['attribute']['size'], 1));
 									} else {
 										$dom[$key]['fontsize'] = intval($dom[$key]['attribute']['size']);
@@ -14201,8 +14201,8 @@ if (!class_exists('TCPDF', false)) {
 						if (($dom[$key]['value'] == 'pre') OR ($dom[$key]['value'] == 'tt')) {
 							$dom[$key]['fontname'] = $this->default_monospaced_font;
 						}
-						if (($dom[$key]['value']{0} == 'h') AND (intval($dom[$key]['value']{1}) > 0) AND (intval($dom[$key]['value']{1}) < 7)) {
-							$headsize = (4 - intval($dom[$key]['value']{1})) * 2;
+						if (($dom[$key]['value'][0] == 'h') AND (intval($dom[$key]['value'][1]) > 0) AND (intval($dom[$key]['value'][1]) < 7)) {
+							$headsize = (4 - intval($dom[$key]['value'][1])) * 2;
 							$dom[$key]['fontsize'] = $dom[0]['fontsize'] + $headsize;
 							$dom[$key]['fontstyle'] .= 'B';
 						}
@@ -14255,7 +14255,7 @@ if (!class_exists('TCPDF', false)) {
 						}
 						// check for text alignment
 						if (isset($dom[$key]['attribute']['align']) AND (!$this->empty_string($dom[$key]['attribute']['align'])) AND ($dom[$key]['value'] !== 'img')) {
-							$dom[$key]['align'] = strtoupper($dom[$key]['attribute']['align']{0});
+							$dom[$key]['align'] = strtoupper($dom[$key]['attribute']['align'][0]);
 						}
 						// check for text rendering mode (the following attributes do not exist in HTML)
 						if (isset($dom[$key]['attribute']['stroke'])) {
@@ -18068,12 +18068,12 @@ if (!class_exists('TCPDF', false)) {
 			}
 			$word_string = $this->UTF8ArrSubString($word);
 			// some words will be returned as-is
-			$pattern = '/^([a-zA-Z0-9_\.\-]+)@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.)|(([a-zA-Z0-9\-]+\.)+))([a-zA-Z]{2,4}|[0-9]{1,3})(\]?)$/';
+			$pattern = '/^([a-zA-Z0-9_\.\-]+)@((\[[0-9][1,3]\.[0-9][1,3]\.[0-9][1,3]\.)|(([a-zA-Z0-9\-]+\.)+))([a-zA-Z][2,4]|[0-9][1,3])(\]?)$/';
 			if (preg_match($pattern, $word_string) > 0) {
 				// email
 				return $word;
 			}
-			$pattern = '/(([a-zA-Z0-9\-]+\.)?)((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.)|(([a-zA-Z0-9\-]+\.)+))([a-zA-Z]{2,4}|[0-9]{1,3})(\]?)$/';
+			$pattern = '/(([a-zA-Z0-9\-]+\.)?)((\[[0-9][1,3]\.[0-9][1,3]\.[0-9][1,3]\.)|(([a-zA-Z0-9\-]+\.)+))([a-zA-Z][2,4]|[0-9][1,3])(\]?)$/';
 			if (preg_match($pattern, $word_string) > 0) {
 				// URL
 				return $word;
@@ -19403,7 +19403,7 @@ if (!class_exists('TCPDF', false)) {
 				} elseif (isset($attribs['style'])) {
 					// CSS style syntax
 					$attrval = array();
-					if (preg_match('/[;\"\s]{1}'.$key.'[\s]*:[\s]*([^;\"\s]*)/si', $attribs['style'], $attrval) AND isset($attrval[1])) {
+					if (preg_match('/[;\"\s][1]'.$key.'[\s]*:[\s]*([^;\"\s]*)/si', $attribs['style'], $attrval) AND isset($attrval[1])) {
 						if ($attrval[1] == 'inherit') {
 							$svgstyle[$key] = $val;
 						} else {

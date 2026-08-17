@@ -5,7 +5,9 @@
       "Read(//c/laragon/etc/apache2/sites-enabled/**)",
       "Read(//c/laragon/etc/apache2/**)",
       "Read(//c/Windows/System32/drivers/etc/**)",
-      "Bash(powershell -Command \"Get-Process httpd,mysqld -ErrorAction SilentlyContinue | Select-Object ProcessName,Id\")"
+      "Bash(powershell -Command \"Get-Process httpd,mysqld -ErrorAction SilentlyContinue | Select-Object ProcessName,Id\")",
+      "Bash(curl -s -D - -o /tmp/login_resp2.html http://silaris.test/login)",
+      "Read(//tmp/**)"
     ]
   }
 }
