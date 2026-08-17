@@ -28,5 +28,5 @@
   <link href="<?php echo base_url('asset')?>/chart.js/Chart.css" rel="stylesheet">
 
   <!-- Modern theme overlay -->
-  <link href="<?php echo base_url('assets')?>/assets-guest/css/modern-guest.css?v=1" rel="stylesheet">
+  <link href="<?php echo base_url('assets')?>/assets-guest/css/modern-guest.css?v=<?php echo @filemtime(FCPATH.'assets/assets-guest/css/modern-guest.css'); ?>" rel="stylesheet">
 </head>

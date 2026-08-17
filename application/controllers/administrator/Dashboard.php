@@ -23,6 +23,7 @@ class Dashboard extends Admin
 			redirect('/','refresh');
 		}
 
+		$this->render('backend/standart/dashboard', []);
 	}
 
 	public function chart()
