@@ -37,6 +37,11 @@ captcha/*
 phploy
 phploy.ini
 
+# Database dumps - contain real user accounts/password hashes and
+# notaris personal data, must never be pushed to a remote.
+Database/silaris.sql
+db/tmc_builder.sql
+
 /vendor/*
 
 # IDE Files
