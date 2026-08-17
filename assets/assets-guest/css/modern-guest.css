@@ -39,7 +39,15 @@ body {
   color: var(--ink-700);
 }
 
-a { transition: color .15s ease; }
+/* Bootstrap 5's reboot sets `a { text-decoration: underline }` by
+   default - this site's links (nav, footer, cards) are styled through
+   color/background instead, so reset that globally. */
+a,
+a:hover,
+a:focus {
+  text-decoration: none;
+  transition: color .15s ease;
+}
 
 /* cap the whole site at a Tailwind "7xl" (1280px) reading width */
 .container {
@@ -357,8 +365,12 @@ a { transition: color .15s ease; }
 
 #clients { background: var(--surface); padding: 50px 0 60px; }
 .clients-carousel img {
-  max-height: 60px;
-  width: auto;
+  /* every partner logo gets the same bounding box regardless of its
+     native aspect ratio, so the row reads as one consistent size
+     instead of each logo being a different width/looking squashed */
+  width: 140px;
+  height: 64px;
+  object-fit: contain;
   margin: 0 auto;
   filter: grayscale(1) opacity(.65);
   transition: filter .15s ease;
@@ -370,8 +382,11 @@ a { transition: color .15s ease; }
 #footer {
   background:
     linear-gradient(180deg, rgba(5,6,62,.94), rgba(5,6,62,.97)),
-    url('../img/background.jpg') center / cover no-repeat;
+    url('/assets/assets-guest/img/background.jpg') center / cover no-repeat;
   color: rgba(255,255,255,.7);
+  /* style.css sets #footer { text-align: center }, which otherwise
+     inherits down into every column below */
+  text-align: left;
 }
 #footer .footer-top {
   padding: 56px 0 40px;
