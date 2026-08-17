@@ -140,7 +140,7 @@
       cursor: pointer;
       transition: background .15s ease, color .15s ease;
     }
-    .btn-signin:hover { background: var(--accent-dark); color: #fff; }
+    .btn-signin:hover { background: var(--accent-dark); color: var(--ink-900); }
     .callout-box {
       background: #FCEAEB;
       border: 1px solid #F3C3C6;

@@ -106,7 +106,7 @@ a { transition: color .15s ease; }
   background: var(--accent);
   color: var(--ink-900) !important;
 }
-.nav-menu a.btn-login:hover { background: var(--accent-dark); color: #fff !important; }
+.nav-menu a.btn-login:hover { background: var(--accent-dark); color: var(--ink-900) !important; }
 
 .mobile-nav-toggle { color: var(--brand) !important; }
 .mobile-nav { background: var(--brand) !important; }
@@ -200,7 +200,7 @@ a { transition: color .15s ease; }
   cursor: pointer;
   transition: background .15s ease;
 }
-.search-card input[type="submit"]:hover { background: var(--accent-dark); color: #fff; }
+.search-card input[type="submit"]:hover { background: var(--accent-dark); color: var(--ink-900); }
 
 /* ---------- hero quick stats ---------- */
 
@@ -368,7 +368,7 @@ a { transition: color .15s ease; }
 /* ---------- footer ---------- */
 
 #footer {
-  background: var(--ink-900);
+  background: var(--brand);
   color: rgba(255,255,255,.7);
 }
 #footer .footer-top {
