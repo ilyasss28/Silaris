@@ -8,16 +8,15 @@
 @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
 
 :root {
-  /* dominant navy */
-  --brand: #12294D;
-  --brand-dark: #0A1930;
-  --brand-light: #2F4C78;
-  --brand-tint: #E8EDF6;
+  /* official Kemenkumham brand colors */
+  --brand: #05063E;       /* kemenkumBlue */
+  --brand-dark: #030228;
+  --brand-light: #505178;
+  --brand-tint: #EBEBF0;
 
-  /* dominant yellow accent */
-  --accent: #F5B301;
-  --accent-dark: #C98E00;
-  --accent-tint: #FFF6DE;
+  --accent: #FECD08;      /* kemenkumYellow */
+  --accent-dark: #CBA406;
+  --accent-tint: #FFFAE6;
 
   --ink-900: #0F1B2D;
   --ink-800: #1E2A3E;
@@ -190,7 +189,7 @@ a:focus {
 }
 .sidebar-menu li.treeview-menu > li.active > a {
   color: var(--accent) !important;
-  background: rgba(245,179,1,.12) !important;
+  background: rgba(254,205,8,.12) !important;
   font-weight: 700;
 }
 .sidebar-menu li.treeview-menu > li > a:hover {

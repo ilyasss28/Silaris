@@ -11,10 +11,10 @@
 
   <style>
     :root {
-      --brand: #12294D;
-      --brand-dark: #0A1930;
-      --accent: #F5B301;
-      --accent-dark: #C98E00;
+      --brand: #05063E;
+      --brand-dark: #030228;
+      --accent: #FECD08;
+      --accent-dark: #CBA406;
       --ink-900: #0F1B2D;
       --ink-500: #6B7686;
       --border: #E3E7EF;
@@ -107,7 +107,7 @@
     .field input:focus {
       outline: none;
       border-color: var(--brand);
-      box-shadow: 0 0 0 3px rgba(18,41,77,.12);
+      box-shadow: 0 0 0 3px rgba(5,6,62,.12);
     }
     .field.has-error input {
       border-color: #C0242F;

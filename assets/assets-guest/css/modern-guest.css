@@ -9,14 +9,14 @@
 @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
 
 :root {
-  --brand: #12294D;
-  --brand-dark: #0A1930;
-  --brand-light: #2F4C78;
-  --brand-tint: #E8EDF6;
+  --brand: #05063E;       /* kemenkumBlue */
+  --brand-dark: #030228;
+  --brand-light: #505178;
+  --brand-tint: #EBEBF0;
 
-  --accent: #F5B301;
-  --accent-dark: #C98E00;
-  --accent-tint: #FFF6DE;
+  --accent: #FECD08;      /* kemenkumYellow */
+  --accent-dark: #CBA406;
+  --accent-tint: #FFFAE6;
 
   --ink-900: #0F1B2D;
   --ink-700: #3E4A5E;
@@ -116,7 +116,7 @@ a { transition: color .15s ease; }
 .guest-hero {
   padding: 84px 0 76px;
   background:
-    radial-gradient(circle at 12% 12%, rgba(245,179,1,.14), transparent 42%),
+    radial-gradient(circle at 12% 12%, rgba(254,205,8,.14), transparent 42%),
     radial-gradient(circle at 88% 90%, rgba(47,76,120,.35), transparent 45%),
     linear-gradient(160deg, var(--ink-900) 0%, var(--brand-dark) 55%, var(--brand) 100%);
   position: relative;
