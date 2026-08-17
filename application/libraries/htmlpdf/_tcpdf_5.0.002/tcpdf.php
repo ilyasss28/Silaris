@@ -5226,6 +5226,10 @@ if (!class_exists('TCPDF', false)) {
 		 * @since 2.3.000 (2008-03-05)
 		 */
 		public function unichr($c) {
+			// PHP 8's chr() requires a strict int; older PHP silently
+			// coerced non-numeric values (e.g. the placeholder '' this is
+			// sometimes called with) to 0 instead of throwing.
+			$c = (int) $c;
 			if (!$this->isunicode) {
 				return chr($c);
 			} elseif ($c <= 0x7F) {

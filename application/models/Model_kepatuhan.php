@@ -45,12 +45,16 @@ class Model_kepatuhan extends CI_Model
             }
         
             public function kolaka(){
-                $data = $this->db->select('*');
-                $data = $this->db->from('mpd_kolaka');
+                $this->db->select('*');
+                $this->db->from('mpd_kolaka');
                 $this->db->order_by('kd', 'ASC');
-                $data = $this->db->get();
-                return $data->result_array();
-            
+                $query = $this->db->get();
+                if ($query === FALSE) {
+                    log_message('error', 'Database query failed in kolaka (Model_kepatuhan): ' . $this->db->last_query());
+                    return [];
+                }
+                return $query->result_array();
+
                 }
             
                             

@@ -1,11 +1,11 @@
 <?php
 defined('BASEPATH') OR exit('No direct script access allowed');
 
-class Model_rekap_Laporan extends MY_Model {
+class Model_rekap_laporan_bulanan extends MY_Model {
 
-	private $primary_key 	= 'id';
-	private $table_name 	= 'Laporan';
-	private $field_search 	= ['username', 'Tanggal_Laporan', 'Laporan'];
+	private $primary_key 	= 'id_laporan_bulanan';
+	private $table_name 	= 'laporan_bulanan';
+	private $field_search 	= ['username', 'tanggal_laporan', 'file_laporan'];
 
 	public function __construct()
 	{
@@ -29,16 +29,16 @@ class Model_rekap_Laporan extends MY_Model {
         if (empty($field)) {
 	        foreach ($this->field_search as $field) {
 	            if ($iterasi == 1) {
-	                $where .= "Laporan.".$field . " LIKE '%" . $q . "%' ";
+	                $where .= "laporan_bulanan.".$field . " LIKE '%" . $q . "%' ";
 	            } else {
-	                $where .= "OR " . "Laporan.".$field . " LIKE '%" . $q . "%' ";
+	                $where .= "OR " . "laporan_bulanan.".$field . " LIKE '%" . $q . "%' ";
 	            }
 	            $iterasi++;
 	        }
 
 	        $where = '('.$where.')';
         } else {
-        	$where .= "(" . "Laporan.".$field . " LIKE '%" . $q . "%' )";
+        	$where .= "(" . "laporan_bulanan.".$field . " LIKE '%" . $q . "%' )";
         }
 
 		$this->join_avaiable()->filter_avaiable();
@@ -59,42 +59,42 @@ class Model_rekap_Laporan extends MY_Model {
         if (empty($field)) {
 	        foreach ($this->field_search as $field) {
 	            if ($iterasi == 1) {
-	                $where .= "Laporan.".$field . " LIKE '%" . $q . "%' ";
+	                $where .= "laporan_bulanan.".$field . " LIKE '%" . $q . "%' ";
 	            } else {
-	                $where .= "OR " . "Laporan.".$field . " LIKE '%" . $q . "%' ";
+	                $where .= "OR " . "laporan_bulanan.".$field . " LIKE '%" . $q . "%' ";
 	            }
 	            $iterasi++;
 	        }
 
 	        $where = '('.$where.')';
         } else {
-        	$where .= "(" . "Laporan.".$field . " LIKE '%" . $q . "%' )";
+        	$where .= "(" . "laporan_bulanan.".$field . " LIKE '%" . $q . "%' )";
         }
 
         if (is_array($select_field) AND count($select_field)) {
         	$this->db->select($select_field);
         }
-		
+
 		$this->join_avaiable()->filter_avaiable();
         $this->db->where($where);
         $this->db->limit($limit, $offset);
-        $this->db->order_by('Laporan.'.$this->primary_key, "DESC");
+        $this->db->order_by('laporan_bulanan.'.$this->primary_key, "DESC");
 		$query = $this->db->get($this->table_name);
 
 		return $query->result();
 	}
 
     public function join_avaiable() {
-        
+
         return $this;
     }
 
     public function filter_avaiable() {
-        
+
         return $this;
     }
 
 }
 
-/* End of file Model_rekap_Laporan.php */
-/* Location: ./application/models/Model_rekap_Laporan.php */
+/* End of file Model_rekap_laporan_bulanan.php */
+/* Location: ./application/models/Model_rekap_laporan_bulanan.php */
