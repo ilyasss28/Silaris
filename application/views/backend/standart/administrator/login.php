@@ -11,11 +11,15 @@
 
   <style>
     :root {
-      --brand: #8E1537;
-      --brand-dark: #6B0F29;
-      --ink-900: #171A26;
-      --ink-500: #6B7280;
-      --border: #E6E8F0;
+      --brand: #12294D;
+      --brand-dark: #0A1930;
+      --accent: #F5B301;
+      --accent-dark: #C98E00;
+      --ink-900: #0F1B2D;
+      --ink-500: #6B7686;
+      --border: #E3E7EF;
+      --radius-sm: 8px;
+      --control-h: 44px;
     }
     html, body {
       height: 100%;
@@ -55,6 +59,7 @@
     .login-card {
       background: #fff;
       border-radius: 16px;
+      border-top: 4px solid var(--accent);
       box-shadow: 0 24px 60px rgba(0,0,0,.28);
       padding: 32px 30px;
     }
@@ -85,15 +90,16 @@
     .field .fa {
       position: absolute;
       left: 13px;
-      top: 37px;
+      top: 40px;
       color: #B9BCC9;
     }
     .field input {
       width: 100%;
+      height: var(--control-h);
       box-sizing: border-box;
-      padding: 10px 12px 10px 36px;
+      padding: 0 12px 0 36px;
       border: 1.5px solid var(--border);
-      border-radius: 8px;
+      border-radius: var(--radius-sm);
       font-size: 14px;
       font-family: inherit;
       transition: border-color .15s ease, box-shadow .15s ease;
@@ -101,7 +107,7 @@
     .field input:focus {
       outline: none;
       border-color: var(--brand);
-      box-shadow: 0 0 0 3px rgba(142,21,55,.12);
+      box-shadow: 0 0 0 3px rgba(18,41,77,.12);
     }
     .field.has-error input {
       border-color: #C0242F;
@@ -123,17 +129,18 @@
     }
     .btn-signin {
       width: 100%;
+      height: var(--control-h);
+      box-sizing: border-box;
       border: none;
-      background: var(--brand);
-      color: #fff;
+      background: var(--accent);
+      color: var(--ink-900);
       font-weight: 700;
       font-size: 14.5px;
-      padding: 11px;
-      border-radius: 8px;
+      border-radius: var(--radius-sm);
       cursor: pointer;
-      transition: background .15s ease;
+      transition: background .15s ease, color .15s ease;
     }
-    .btn-signin:hover { background: var(--brand-dark); }
+    .btn-signin:hover { background: var(--accent-dark); color: #fff; }
     .callout-box {
       background: #FCEAEB;
       border: 1px solid #F3C3C6;

@@ -1,25 +1,37 @@
 /* =========================================================================
-   SILARIS modern public-site theme
+   SILARIS modern public-site theme - navy & yellow
    Loaded after the existing vendor/template CSS so it can layer a modern
    look on top without touching the other guest pages' own content classes.
+   Uses the same design tokens/scale as asset/css/modern-theme.css (admin)
+   so the public site and the admin panel read as one consistent product.
    ========================================================================= */
 
 @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
 
 :root {
-  --brand: #8E1537;
-  --brand-dark: #6B0F29;
-  --brand-light: #B23A5C;
-  --gold: #C9A227;
-  --ink-900: #171A26;
-  --ink-700: #3D4152;
-  --ink-500: #6B7280;
-  --surface: #F6F5FA;
+  --brand: #12294D;
+  --brand-dark: #0A1930;
+  --brand-light: #2F4C78;
+  --brand-tint: #E8EDF6;
+
+  --accent: #F5B301;
+  --accent-dark: #C98E00;
+  --accent-tint: #FFF6DE;
+
+  --ink-900: #0F1B2D;
+  --ink-700: #3E4A5E;
+  --ink-500: #6B7686;
+
+  --surface: #F2F4F8;
   --card: #FFFFFF;
-  --border: #E9E7F0;
+  --border: #E3E7EF;
+
+  --radius-sm: 8px;
   --radius: 14px;
-  --shadow: 0 10px 30px rgba(23, 21, 38, .08);
-  --shadow-lg: 0 24px 60px rgba(23, 21, 38, .16);
+  --shadow: 0 10px 30px rgba(15, 27, 45, .08);
+  --shadow-lg: 0 24px 60px rgba(15, 27, 45, .16);
+
+  --control-h: 38px;
 }
 
 body {
@@ -32,25 +44,26 @@ a { transition: color .15s ease; }
 /* ---------- top contact bar ---------- */
 
 #topbar {
-  background: var(--ink-900) !important;
-  color: rgba(255,255,255,.82);
+  background: var(--brand) !important;
+  color: rgba(255,255,255,.85);
   font-size: 13px;
   height: 38px;
+  border-bottom: 2px solid var(--accent);
 }
 #topbar .contact-info a,
 #topbar .contact-info i {
-  color: rgba(255,255,255,.82) !important;
+  color: rgba(255,255,255,.85) !important;
 }
 #topbar .social-links a {
   color: rgba(255,255,255,.7) !important;
   transition: color .15s ease;
 }
-#topbar .social-links a:hover { color: #fff !important; }
+#topbar .social-links a:hover { color: var(--accent) !important; }
 
 /* ---------- header / nav ---------- */
 
 #header {
-  background: rgba(255,255,255,.96) !important;
+  background: rgba(255,255,255,.97) !important;
   backdrop-filter: saturate(180%) blur(10px);
   box-shadow: var(--shadow);
   top: 38px !important;
@@ -67,10 +80,13 @@ a { transition: color .15s ease; }
 
 .nav-menu ul { display: flex; gap: 4px; }
 .nav-menu a {
+  display: inline-flex;
+  align-items: center;
+  height: var(--control-h);
   color: var(--ink-700) !important;
   font-weight: 600;
   font-size: 14.5px;
-  padding: 10px 16px !important;
+  padding: 0 16px !important;
   border-radius: 999px;
   transition: background .15s ease, color .15s ease;
 }
@@ -80,26 +96,27 @@ a { transition: color .15s ease; }
   color: #fff !important;
 }
 .nav-menu a.btn-login {
-  background: var(--brand);
-  color: #fff !important;
+  background: var(--accent);
+  color: var(--ink-900) !important;
 }
-.nav-menu a.btn-login:hover { background: var(--brand-dark); }
+.nav-menu a.btn-login:hover { background: var(--accent-dark); color: #fff !important; }
 
 .mobile-nav-toggle { color: var(--brand) !important; }
-.mobile-nav { background: var(--ink-900) !important; }
+.mobile-nav { background: var(--brand) !important; }
 
 /* ---------- hero / search ---------- */
 
 .guest-hero {
   padding: 150px 0 70px;
   background:
-    radial-gradient(circle at 15% 20%, rgba(142,21,55,.10), transparent 45%),
-    radial-gradient(circle at 85% 0%, rgba(201,162,39,.12), transparent 40%),
+    radial-gradient(circle at 15% 20%, rgba(18,41,77,.10), transparent 45%),
+    radial-gradient(circle at 85% 0%, rgba(245,179,1,.16), transparent 40%),
     var(--surface);
 }
 .guest-hero .eyebrow {
   display: inline-flex;
   align-items: center;
+  height: var(--control-h);
   gap: 8px;
   background: var(--card);
   border: 1px solid var(--border);
@@ -108,11 +125,12 @@ a { transition: color .15s ease; }
   font-size: 12.5px;
   letter-spacing: .04em;
   text-transform: uppercase;
-  padding: 6px 14px;
+  padding: 0 16px;
   border-radius: 999px;
   box-shadow: var(--shadow);
   margin-bottom: 18px;
 }
+.guest-hero .eyebrow i { color: var(--accent); }
 .guest-hero h1 {
   font-size: 30px;
   font-weight: 800;
@@ -137,25 +155,29 @@ a { transition: color .15s ease; }
 }
 .search-card input[type="text"] {
   flex: 1 1 240px;
+  height: 48px;
+  box-sizing: border-box;
   border: none;
-  padding: 14px 18px;
+  padding: 0 18px;
   font-size: 15px;
-  border-radius: 10px;
+  border-radius: var(--radius-sm);
   background: transparent;
   color: var(--ink-900);
 }
 .search-card input[type="text"]:focus { outline: none; background: var(--surface); }
 .search-card input[type="submit"] {
+  height: 48px;
+  box-sizing: border-box;
   border: none;
-  background: var(--brand);
-  color: #fff;
+  background: var(--accent);
+  color: var(--ink-900);
   font-weight: 700;
-  padding: 14px 26px;
-  border-radius: 10px;
+  padding: 0 26px;
+  border-radius: var(--radius-sm);
   cursor: pointer;
   transition: background .15s ease;
 }
-.search-card input[type="submit"]:hover { background: var(--brand-dark); }
+.search-card input[type="submit"]:hover { background: var(--accent-dark); color: #fff; }
 
 /* ---------- section headings ---------- */
 
@@ -173,16 +195,17 @@ a { transition: color .15s ease; }
 .icon-box2 {
   background: var(--card);
   border: 1px solid var(--border);
+  border-top: 3px solid var(--brand);
   border-radius: var(--radius);
   padding: 22px 24px;
   height: 100%;
   box-shadow: var(--shadow);
-  transition: transform .15s ease, box-shadow .15s ease;
+  transition: transform .15s ease, box-shadow .15s ease, border-top-color .15s ease;
 }
 .icon-box2:hover {
   transform: translateY(-4px);
   box-shadow: var(--shadow-lg);
-  border-color: var(--brand-light);
+  border-top-color: var(--accent);
 }
 .icon-box2 h3 { font-size: 17px; margin: 0 0 10px 0; }
 .icon-box2 h3 a { color: var(--ink-900) !important; font-weight: 700; }
@@ -190,7 +213,7 @@ a { transition: color .15s ease; }
 .icon-box2 .icofont-users { color: var(--brand); font-size: 20px; }
 .icon-box2 p { margin: 0; color: var(--ink-500); }
 .icon-box2 p b { color: var(--ink-900); font-size: 16px; }
-.icon-box2 .icofont-circled-right { color: var(--brand); font-size: 18px; }
+.icon-box2 .icofont-circled-right { color: var(--accent-dark); font-size: 18px; }
 
 /* ---------- map ---------- */
 
@@ -217,24 +240,25 @@ a { transition: color .15s ease; }
 /* ---------- footer ---------- */
 
 #footer {
-  background: var(--ink-900);
-  color: rgba(255,255,255,.72);
+  background: var(--brand);
+  color: rgba(255,255,255,.75);
 }
-#footer .footer-top { padding: 46px 0 26px; }
+#footer .footer-top { padding: 46px 0 26px; border-top: 3px solid var(--accent); }
 #footer h5 { color: #fff; font-weight: 800; letter-spacing: .02em; }
 #footer .footer-info p { line-height: 1.9; font-size: 14px; }
-#footer .footer-info i { color: var(--gold); margin-right: 6px; }
+#footer .footer-info i { color: var(--accent); margin-right: 6px; }
 #footer .footer-info strong { color: #fff; }
 #footer .credits {
-  border-top: 1px solid rgba(255,255,255,.1);
+  border-top: 1px solid rgba(255,255,255,.12);
   padding: 16px 0;
   font-size: 13px;
   text-align: center;
-  color: rgba(255,255,255,.55);
+  color: rgba(255,255,255,.6);
 }
 
 .back-to-top {
-  background: var(--brand) !important;
+  background: var(--accent) !important;
+  color: var(--ink-900) !important;
 }
 
 @media (max-width: 991px) {
