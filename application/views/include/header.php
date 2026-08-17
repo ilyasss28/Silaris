@@ -1,26 +1,14 @@
 <body>
-  <!-- ======= Top Bar ======= -->
-  <div id="topbar" class="d-none d-lg-flex align-items-center fixed-top">
-    <div class="container d-flex">
-      <div class="contact-info me-auto">
-        <i class="icofont-envelope"></i> <a href="mailto:sultra@kemenkum.go.id">sultra@kemenkum.go.id</a>
-        <i class="icofont-phone"></i> +62-813-5555-4600
-      </div>
-      <div class="social-links">
-        <a href="https://twitter.com/Kumham_Sultra" class="twitter"><i class="icofont-twitter"></i></a>
-        <a href="https://web.facebook.com/kanwil.kemenkumhamsultra.5" class="facebook"><i class="icofont-facebook"></i></a>
-        <a href="https://www.instagram.com/kanwilkemenkumhamsultra/" class="instagram"><i class="icofont-instagram"></i></a>
-      </div>
-    </div>
-  </div>
-
   <!-- ======= Header ======= -->
   <header id="header" class="fixed-top">
     <div class="container d-flex align-items-center">
       <h1 class="logo me-auto">
         <a href="<?php echo site_url('home'); ?>" class="d-flex align-items-center">
           <img src="<?php echo base_url('assets/assets-guest/img/kemenkumham.png'); ?>" alt="SILARIS">
-          <span class="logo-text">SILARIS</span>
+          <span class="logo-text">
+            <span class="logo-title">SILARIS</span>
+            <span class="logo-subtitle">Sistem Pelaporan Notaris</span>
+          </span>
         </a>
       </h1>
       <nav class="nav-menu d-none d-lg-block">

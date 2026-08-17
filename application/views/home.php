@@ -8,10 +8,10 @@
     <section class="guest-hero">
       <div class="container">
         <div class="row justify-content-center">
-          <div class="col-lg-8 text-center">
-            <span class="eyebrow"><i class="icofont-verification-check"></i> Kanwil Kemenkumham Sulawesi Tenggara</span>
-            <h1>Cari Notaris di Sulawesi Tenggara</h1>
-            <p class="lead">Temukan data notaris terdaftar berdasarkan wilayah kerja secara cepat dan mudah, langsung dari basis data resmi SILARIS.</p>
+          <div class="col-lg-9 text-center">
+            <span class="hero-badge"><i class="dot"></i> KANWIL KEMENKUMHAM SULAWESI TENGGARA <i class="dot"></i></span>
+            <h1 class="hero-title">TEMUKAN NOTARIS <em>ANDA</em></h1>
+            <p class="lead">Cari data notaris terdaftar di Sulawesi Tenggara berdasarkan nama atau wilayah kerja, langsung dari basis data resmi SILARIS.</p>
 
             <form id="w0" action="<?php echo base_url().'home/index'?>" method="get" class="search-card">
               <input type="hidden" name="r" value="site/detail-notaris">
