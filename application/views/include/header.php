@@ -17,8 +17,12 @@
   <!-- ======= Header ======= -->
   <header id="header" class="fixed-top">
     <div class="container d-flex align-items-center">
-      <h1 class="logo me-auto"><a href="<?php echo site_url('home'); ?>"><img src="<?php echo base_url('assets/assets-guest/img/kemenkumham.png'); ?>"></a></h1>
-      <h6 class="judul me-auto">Sistem Pelaporan Notaris (SILARIS)</h6>
+      <h1 class="logo me-auto">
+        <a href="<?php echo site_url('home'); ?>" class="d-flex align-items-center">
+          <img src="<?php echo base_url('assets/assets-guest/img/kemenkumham.png'); ?>" alt="SILARIS">
+          <span class="logo-text">SILARIS</span>
+        </a>
+      </h1>
       <nav class="nav-menu d-none d-lg-block">
         <ul>
           <li class="active"><a href="<?php echo site_url('home'); ?>">Beranda</a></li>

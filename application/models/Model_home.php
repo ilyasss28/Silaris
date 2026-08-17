@@ -26,16 +26,33 @@ public function get_where($table = null, $where = null)
 }
 
 public function get_wilayah(){
-        $this->db->select('*');
-        $this->db->from('jumlah_per_wilayah');
-        $this->db->order_by('wilayah', 'DESC');
+        // jumlah_per_wilayah is an empty/stale reference table, so the
+        // region breakdown is derived from the live data_notaris rows
+        // instead - the same source the count of notaris itself comes from.
+        $this->db->select('kode_wilayah, COUNT(*) as jumlah', FALSE);
+        $this->db->from('data_notaris');
+        $this->db->where('kode_wilayah IS NOT NULL', NULL, FALSE);
+        $this->db->group_by('kode_wilayah');
+        $this->db->order_by('jumlah', 'DESC');
         $query = $this->db->get();
         if ($query === FALSE) {
             log_message('error', 'Database query failed in get_wilayah: ' . $this->db->last_query());
             return [];
         }
-        return $query->result_array();
-    
+
+        $wilayah = [];
+        foreach ($query->result_array() as $row) {
+            $kode = trim($row['kode_wilayah']);
+            if ($kode === '' OR !ctype_alpha($kode)) {
+                continue; // skip malformed codes (e.g. stray numeric values)
+            }
+            $wilayah[] = [
+                'kode_wilayah' => $kode,
+                'wilayah'      => ucwords($kode),
+                'jumlah'       => $row['jumlah'],
+            ];
+        }
+        return $wilayah;
     }
 
 public function kendari(){

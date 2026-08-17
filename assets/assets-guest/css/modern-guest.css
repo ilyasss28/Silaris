@@ -41,6 +41,11 @@ body {
 
 a { transition: color .15s ease; }
 
+/* cap the whole site at a Tailwind "7xl" (1280px) reading width */
+.container {
+  max-width: 1280px !important;
+}
+
 /* ---------- top contact bar ---------- */
 
 #topbar {
@@ -68,14 +73,14 @@ a { transition: color .15s ease; }
   box-shadow: var(--shadow);
   top: 38px !important;
 }
-#header .logo img { height: 42px; }
-#header .judul {
-  color: var(--ink-500) !important;
-  font-weight: 600;
-  font-size: 13.5px !important;
-  margin: 0 0 0 12px;
-  padding-left: 12px;
-  border-left: 2px solid var(--border);
+#header .logo { margin: 0; }
+#header .logo a { gap: 10px; }
+#header .logo img { height: 36px; width: auto; }
+#header .logo .logo-text {
+  font-weight: 800;
+  font-size: 19px;
+  letter-spacing: .02em;
+  color: var(--ink-900);
 }
 
 .nav-menu ul { display: flex; gap: 4px; }
