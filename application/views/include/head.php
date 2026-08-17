@@ -20,7 +20,6 @@
   <link href="<?php echo base_url('assets')?>/assets-guest/vendor/boxicons/css/boxicons.min.css" rel="stylesheet">
   <link href="<?php echo base_url('assets')?>/assets-guest/vendor/animate.css/animate.min.css" rel="stylesheet">
   <link href="<?php echo base_url('assets')?>/assets-guest/vendor/owl.carousel/assets/owl.carousel.min.css" rel="stylesheet">
-  <link href="<?php echo base_url('assets')?>/assets-guest/vendor/venobox/venobox.css" rel="stylesheet">
 
   <!-- Template Main CSS Files -->
   <link href="<?php echo base_url('assets')?>/assets-guest/css/style.css" rel="stylesheet">

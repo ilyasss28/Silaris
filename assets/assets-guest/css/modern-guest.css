@@ -113,7 +113,7 @@ a { transition: color .15s ease; }
     radial-gradient(circle at 85% 0%, rgba(245,179,1,.16), transparent 40%),
     var(--surface);
 }
-.guest-hero .eyebrow {
+.eyebrow {
   display: inline-flex;
   align-items: center;
   height: var(--control-h);
@@ -130,7 +130,7 @@ a { transition: color .15s ease; }
   box-shadow: var(--shadow);
   margin-bottom: 18px;
 }
-.guest-hero .eyebrow i { color: var(--accent); }
+.eyebrow i { color: var(--accent); }
 .guest-hero h1 {
   font-size: 30px;
   font-weight: 800;
@@ -178,6 +178,92 @@ a { transition: color .15s ease; }
   transition: background .15s ease;
 }
 .search-card input[type="submit"]:hover { background: var(--accent-dark); color: #fff; }
+
+/* ---------- hero quick stats ---------- */
+
+.stat-row { margin-top: 34px; row-gap: 16px; }
+.stat-tile {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  padding: 16px 10px;
+}
+.stat-number {
+  font-size: 22px;
+  font-weight: 800;
+  color: var(--brand);
+}
+.stat-label {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--ink-500);
+  margin-top: 2px;
+}
+
+/* ---------- about / how it works ---------- */
+
+.about-section { background: var(--surface); padding: 70px 0; }
+.eyebrow-dark {
+  background: var(--brand-tint);
+  border-color: transparent;
+  box-shadow: none;
+}
+.about-section h2 {
+  font-weight: 800;
+  color: var(--ink-900);
+  font-size: 26px;
+  margin: 14px 0 12px;
+}
+.about-section > .container > .row > .col-lg-6 > p {
+  color: var(--ink-500);
+  font-size: 15px;
+  line-height: 1.8;
+}
+.check-list { list-style: none; padding: 0; margin: 18px 0 0; }
+.check-list li {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-weight: 600;
+  color: var(--ink-700);
+  padding: 8px 0;
+}
+.check-list i { color: var(--success); font-size: 18px; }
+
+.steps { display: flex; flex-direction: column; gap: 18px; }
+.step {
+  display: flex;
+  gap: 16px;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  padding: 18px;
+}
+.step-num {
+  flex: 0 0 auto;
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  background: var(--accent);
+  color: var(--ink-900);
+  font-weight: 800;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.step h4 {
+  margin: 0 0 4px;
+  font-size: 15.5px;
+  font-weight: 700;
+  color: var(--ink-900);
+}
+.step p {
+  margin: 0;
+  font-size: 13.5px;
+  color: var(--ink-500);
+}
 
 /* ---------- section headings ---------- */
 

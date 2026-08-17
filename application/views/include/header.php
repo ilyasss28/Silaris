@@ -2,7 +2,7 @@
   <!-- ======= Top Bar ======= -->
   <div id="topbar" class="d-none d-lg-flex align-items-center fixed-top">
     <div class="container d-flex">
-      <div class="contact-info mr-auto">
+      <div class="contact-info me-auto">
         <i class="icofont-envelope"></i> <a href="mailto:sultra@kemenkum.go.id">sultra@kemenkum.go.id</a>
         <i class="icofont-phone"></i> +62-813-5555-4600
       </div>
@@ -17,8 +17,8 @@
   <!-- ======= Header ======= -->
   <header id="header" class="fixed-top">
     <div class="container d-flex align-items-center">
-      <h1 class="logo mr-auto"><a href="<?php echo site_url('home'); ?>"><img src="<?php echo base_url('assets/assets-guest/img/kemenkumham.png'); ?>"></a></h1>
-      <h6 class="judul mr-auto">Sistem Pelaporan Notaris (SILARIS)</h6>
+      <h1 class="logo me-auto"><a href="<?php echo site_url('home'); ?>"><img src="<?php echo base_url('assets/assets-guest/img/kemenkumham.png'); ?>"></a></h1>
+      <h6 class="judul me-auto">Sistem Pelaporan Notaris (SILARIS)</h6>
       <nav class="nav-menu d-none d-lg-block">
         <ul>
           <li class="active"><a href="<?php echo site_url('home'); ?>">Beranda</a></li>
