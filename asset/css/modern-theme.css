@@ -1,0 +1,476 @@
+/* =========================================================================
+   SILARIS modern admin theme
+   Layered on top of AdminLTE 2 / Bootstrap 3 - overrides visuals only,
+   the underlying markup/classes/JS behavior are untouched so every
+   existing page keeps working.
+   ========================================================================= */
+
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
+
+:root {
+  --brand: #8E1537;
+  --brand-dark: #6B0F29;
+  --brand-light: #B23A5C;
+  --brand-tint: #FBEAEE;
+  --gold: #C9A227;
+
+  --ink-900: #171A26;
+  --ink-800: #232637;
+  --ink-700: #3D4152;
+  --ink-500: #6B7280;
+  --ink-300: #9CA3AF;
+
+  --surface: #F3F4F8;
+  --card: #FFFFFF;
+  --border: #E6E8F0;
+
+  --success: #15803D;
+  --success-tint: #E7F6EC;
+  --warning: #B45309;
+  --warning-tint: #FEF3E2;
+  --danger: #C0242F;
+  --danger-tint: #FCEAEB;
+  --info: #1D4ED8;
+  --info-tint: #EAF0FE;
+
+  --radius-sm: 6px;
+  --radius: 10px;
+  --radius-lg: 16px;
+  --shadow-sm: 0 1px 2px rgba(23, 26, 38, .06);
+  --shadow: 0 4px 16px rgba(23, 26, 38, .08);
+  --shadow-lg: 0 12px 32px rgba(23, 26, 38, .14);
+}
+
+/* ---------- base ---------------------------------------------------- */
+
+body,
+.wrapper {
+  background: var(--surface) !important;
+}
+
+body,
+.form-control,
+.btn,
+.box,
+input,
+select,
+textarea {
+  font-family: 'Plus Jakarta Sans', 'Source Sans Pro', -apple-system, BlinkMacSystemFont, sans-serif !important;
+}
+
+a {
+  color: var(--brand);
+}
+a:hover,
+a:focus {
+  color: var(--brand-dark);
+}
+
+::-webkit-scrollbar { width: 10px; height: 10px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: #D4D6E0; border-radius: 10px; }
+::-webkit-scrollbar-thumb:hover { background: #B7B9C8; }
+
+/* ---------- top header ----------------------------------------------- */
+
+.main-header {
+  background: var(--card) !important;
+  box-shadow: var(--shadow-sm);
+  border-bottom: 1px solid var(--border);
+}
+
+.main-header .logo {
+  background: var(--ink-900) !important;
+  color: #fff !important;
+  font-weight: 800;
+  letter-spacing: .03em;
+  border-bottom: none;
+  transition: background .15s ease;
+}
+.main-header .logo:hover { background: var(--ink-800) !important; }
+.main-header .logo .logo-lg b,
+.main-header .logo .logo-mini b { color: #fff; }
+
+.main-header .navbar {
+  background: transparent !important;
+}
+
+.main-header .sidebar-toggle {
+  color: var(--ink-700) !important;
+}
+.main-header .sidebar-toggle:hover {
+  background: var(--surface) !important;
+}
+
+.main-header .navbar .nav > li > a {
+  color: var(--ink-700) !important;
+}
+
+.main-header .navbar-custom-menu .user-menu .user-image {
+  border: 2px solid var(--brand-tint);
+  margin-top: -4px;
+}
+
+.main-header .user-menu .dropdown-menu {
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-lg);
+  overflow: hidden;
+}
+.main-header .user-menu .dropdown-menu li.user-header {
+  background: var(--ink-900) !important;
+}
+.main-header .user-menu .dropdown-menu li.user-footer {
+  background: var(--card);
+  border-top: 1px solid var(--border);
+}
+
+/* ---------- sidebar ---------------------------------------------------- */
+
+.main-sidebar,
+.left-side {
+  background: var(--ink-900) !important;
+  box-shadow: var(--shadow);
+}
+
+.sidebar-menu > li > a {
+  color: #C7C9DA !important;
+  font-weight: 500;
+  border-left: 3px solid transparent;
+  margin: 2px 10px;
+  border-radius: var(--radius-sm);
+  transition: background .12s ease, color .12s ease;
+}
+.sidebar-menu > li > a > .fa,
+.sidebar-menu > li > a > .glyphicon,
+.sidebar-menu > li > a > .ion {
+  width: 26px;
+  color: #9497B3 !important;
+}
+
+.sidebar-menu > li:hover > a,
+.sidebar-menu > li.active > a,
+.sidebar-menu > li > a:focus {
+  background: rgba(255,255,255,.06) !important;
+  color: #fff !important;
+}
+.sidebar-menu > li.active > a {
+  background: var(--brand) !important;
+  color: #fff !important;
+}
+.sidebar-menu > li.active > a > .fa,
+.sidebar-menu > li.active > a > .glyphicon,
+.sidebar-menu > li.active > a > .ion {
+  color: #fff !important;
+}
+
+.sidebar-menu li.treeview-menu > li > a {
+  color: #B4B6CC !important;
+  margin: 1px 10px 1px 24px;
+  border-radius: var(--radius-sm);
+}
+.sidebar-menu li.treeview-menu > li.active > a,
+.sidebar-menu li.treeview-menu > li > a:hover {
+  color: #fff !important;
+  background: rgba(255,255,255,.06) !important;
+}
+
+.sidebar-form {
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+}
+
+.sidebar a { text-decoration: none; }
+
+/* ---------- content shell ---------------------------------------------------- */
+
+.content-wrapper {
+  background: var(--surface) !important;
+}
+
+.content-header h1 {
+  color: var(--ink-900);
+  font-weight: 800;
+  font-size: 22px;
+}
+.content-header h1 small {
+  color: var(--ink-500);
+  font-weight: 500;
+}
+
+.breadcrumb {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  padding: 6px 16px;
+  box-shadow: var(--shadow-sm);
+}
+.breadcrumb > li + li::before {
+  color: var(--ink-300);
+}
+.breadcrumb > .active {
+  color: var(--brand);
+  font-weight: 600;
+}
+
+/* ---------- boxes / cards ---------------------------------------------------- */
+
+.box {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm);
+}
+.box.box-solid,
+.box-primary, .box-success, .box-warning, .box-danger, .box-info {
+  border-top: none !important;
+}
+.box::before {
+  content: '';
+}
+.box-header {
+  border-bottom: 1px solid var(--border);
+  padding: 16px 18px;
+}
+.box-header .box-title {
+  font-weight: 700;
+  color: var(--ink-900);
+}
+.box-body {
+  padding: 18px;
+}
+.box-footer {
+  background: transparent;
+  border-top: 1px solid var(--border);
+}
+
+/* widget-user-2 header block is used as the standard "list page" header
+   throughout the app (title + counter + action buttons) */
+.box-widget.widget-user-2 {
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+}
+.widget-user-header {
+  background: linear-gradient(135deg, var(--ink-900), var(--brand-dark)) !important;
+  padding: 22px 20px !important;
+  border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+}
+.widget-user-header .row {
+  margin: 0 0 6px 0;
+}
+.widget-user-username {
+  color: #fff !important;
+  font-weight: 800;
+}
+.widget-user-desc {
+  color: rgba(255,255,255,.75) !important;
+}
+.widget-user-desc .label {
+  border-radius: 999px;
+  padding: 3px 10px;
+}
+.widget-user-image {
+  display: none;
+}
+
+/* ---------- info boxes (dashboard stat tiles) ---------------------------------------------------- */
+
+.info-box {
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm);
+  border: 1px solid var(--border);
+  background: var(--card);
+  min-height: 90px;
+  transition: transform .12s ease, box-shadow .12s ease;
+}
+.info-box:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow);
+}
+.info-box-icon {
+  border-radius: var(--radius-lg) 0 0 var(--radius-lg);
+}
+.info-box-number { color: var(--ink-900); font-weight: 800; }
+.info-box-text { color: var(--ink-500); font-weight: 600; }
+
+.bg-aqua, .bg-blue  { background: var(--info) !important; }
+.bg-green  { background: var(--success) !important; }
+.bg-yellow { background: var(--gold) !important; }
+.bg-red    { background: var(--brand) !important; }
+.bg-light-blue { background: var(--brand-light) !important; }
+
+/* small-box (secondary dashboard stat style) */
+.small-box {
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm);
+}
+.small-box > .small-box-footer {
+  background: rgba(0,0,0,.05);
+}
+
+/* ---------- buttons ---------------------------------------------------- */
+
+.btn {
+  border-radius: var(--radius-sm) !important;
+  font-weight: 600;
+  border: 1px solid transparent;
+  transition: filter .12s ease, transform .12s ease;
+}
+.btn.btn-flat { border-radius: var(--radius-sm) !important; }
+.btn:active { transform: translateY(1px); }
+
+.btn-primary { background: var(--brand); border-color: var(--brand); }
+.btn-primary:hover, .btn-primary:focus { background: var(--brand-dark); border-color: var(--brand-dark); }
+
+.btn-success { background: var(--success); border-color: var(--success); }
+.btn-success:hover { filter: brightness(.92); }
+
+.btn-warning { background: var(--warning); border-color: var(--warning); }
+.btn-warning:hover { filter: brightness(.92); }
+
+.btn-danger { background: var(--danger); border-color: var(--danger); }
+.btn-danger:hover { filter: brightness(.92); }
+
+.btn-info { background: var(--info); border-color: var(--info); }
+.btn-info:hover { filter: brightness(.92); }
+
+.btn-default {
+  background: var(--card);
+  border-color: var(--border);
+  color: var(--ink-700);
+}
+.btn-default:hover { background: var(--surface); }
+
+/* ---------- forms ---------------------------------------------------- */
+
+.form-control {
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius-sm);
+  box-shadow: none;
+  padding: 8px 12px;
+  height: auto;
+  min-height: 36px;
+  color: var(--ink-900);
+}
+.form-control:focus {
+  border-color: var(--brand);
+  box-shadow: 0 0 0 3px var(--brand-tint);
+}
+label {
+  font-weight: 600;
+  color: var(--ink-700);
+}
+.has-error .form-control {
+  border-color: var(--danger);
+}
+.has-error .control-label,
+.help-block {
+  color: var(--danger);
+}
+
+.input-group-addon {
+  border-radius: var(--radius-sm);
+  background: var(--surface);
+  border-color: var(--border);
+}
+
+/* ---------- tables ---------------------------------------------------- */
+
+.table {
+  color: var(--ink-700);
+}
+.table > thead > tr > th {
+  border-bottom: 2px solid var(--border);
+  color: var(--ink-900);
+  font-weight: 700;
+  text-transform: uppercase;
+  font-size: 11.5px;
+  letter-spacing: .04em;
+}
+.table > tbody > tr > td,
+.table > tbody > tr > th {
+  border-top: 1px solid var(--border);
+  vertical-align: middle;
+}
+.table-bordered,
+.table-bordered > thead > tr > th,
+.table-bordered > tbody > tr > td {
+  border: 1px solid var(--border);
+}
+.table-striped > tbody > tr:nth-of-type(odd) {
+  background: #FAFAFC;
+}
+.table-hover > tbody > tr:hover {
+  background: var(--brand-tint);
+}
+
+.dataTables_paginate .pagination > li > a,
+.dataTables_paginate .pagination > li > span {
+  border-radius: var(--radius-sm) !important;
+  margin: 0 2px;
+  color: var(--ink-700);
+  border-color: var(--border);
+}
+.dataTables_paginate .pagination > .active > a {
+  background: var(--brand) !important;
+  border-color: var(--brand) !important;
+  color: #fff !important;
+}
+
+/* ---------- badges / labels / alerts ---------------------------------------------------- */
+
+.label {
+  border-radius: 999px;
+  font-weight: 600;
+  padding: 3px 10px;
+}
+.label-primary { background: var(--brand) !important; }
+.label-success { background: var(--success) !important; }
+.label-warning { background: var(--warning) !important; }
+.label-danger  { background: var(--danger) !important; }
+.label-info    { background: var(--info) !important; }
+.label-default { background: var(--ink-300) !important; color: #fff !important; }
+
+.callout,
+.alert {
+  border-radius: var(--radius);
+  border: 1px solid transparent;
+  box-shadow: var(--shadow-sm);
+}
+.callout-danger, .alert-danger   { background: var(--danger-tint); border-color: #F3C3C6; color: var(--danger); }
+.callout-warning, .alert-warning { background: var(--warning-tint); border-color: #F4DBAF; color: var(--warning); }
+.callout-success, .alert-success { background: var(--success-tint); border-color: #BEE3CB; color: var(--success); }
+.callout-info, .alert-info       { background: var(--info-tint); border-color: #C4D4FB; color: var(--info); }
+
+/* ---------- footer ---------------------------------------------------- */
+
+.main-footer {
+  background: var(--card);
+  border-top: 1px solid var(--border);
+  color: var(--ink-500);
+}
+
+/* ---------- misc polish ---------------------------------------------------- */
+
+.nav-tabs-custom {
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm);
+  border: 1px solid var(--border);
+}
+.nav-tabs-custom > .nav-tabs > li.active {
+  border-top-color: var(--brand) !important;
+}
+
+.modal-content {
+  border-radius: var(--radius-lg);
+  border: none;
+  box-shadow: var(--shadow-lg);
+}
+.modal-header {
+  border-bottom: 1px solid var(--border);
+}
+
+@media (max-width: 767px) {
+  .content-header h1 { font-size: 19px; }
+  .box-body { padding: 14px; }
+}
