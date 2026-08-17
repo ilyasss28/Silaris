@@ -166,7 +166,7 @@
 <body>
 <div class="login-shell">
   <div class="login-brand">
-    <img src="<?= base_url('assets/assets-guest/img/kemenkumham.png'); ?>" alt="Kemenkumham">
+    <img src="<?= base_url('assets/assets-guest/img/kemenkumham.png'); ?>" alt="Kemenkum">
     <div class="site-name"><?= get_option('site_name'); ?></div>
     <div class="site-tagline">Sistem Pelaporan Notaris</div>
   </div>

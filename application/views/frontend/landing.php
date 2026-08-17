@@ -21,7 +21,7 @@
         <div class="container">
             <div class="row">
                 <div class="col-lg-12 text-center">
-                    <h2 class="section-heading">Tentang PPID Kemenkumham Sultra</h2>
+                    <h2 class="section-heading">Tentang PPID Kemenkum Sultra</h2>
                     <h3 class="section-subheading text-muted">PPID adalah kepanjangan dari Pejabat Pengelola Informasi dan Dokumentasi, yang berfungsi sebagai pengelola dan penyampai dokumen yang dimiliki oleh Badan Publik sesuai dengan amanat UU 14/2008 tentang Keterbukaan Informasi Publik.</h3>
                 </div>
             </div>

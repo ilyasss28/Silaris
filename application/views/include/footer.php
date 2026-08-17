@@ -62,7 +62,7 @@
 
   <div class="footer-bottom">
     <div class="container d-flex flex-wrap justify-content-between align-items-center">
-      <div>Copyright &copy; 2023-<?php echo date('Y'); ?> Kanwil Kemenkumham Sulawesi Tenggara</div>
+      <div>Copyright &copy; 2023-<?php echo date('Y'); ?> Kanwil Kemenkum Sulawesi Tenggara</div>
       <div>Sistem Pelaporan Notaris (SILARIS)</div>
     </div>
   </div>

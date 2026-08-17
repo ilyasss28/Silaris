@@ -9,7 +9,7 @@
       <div class="container">
         <div class="row justify-content-center">
           <div class="col-lg-9 text-center">
-            <span class="hero-badge"><i class="dot"></i> KANWIL KEMENKUMHAM SULAWESI TENGGARA <i class="dot"></i></span>
+            <span class="hero-badge"><i class="dot"></i> KANWIL KEMENKUM SULAWESI TENGGARA <i class="dot"></i></span>
             <h1 class="hero-title">TEMUKAN NOTARIS <em>ANDA</em></h1>
             <p class="lead">Cari data notaris terdaftar di Sulawesi Tenggara berdasarkan nama atau wilayah kerja, langsung dari basis data resmi SILARIS.</p>
 

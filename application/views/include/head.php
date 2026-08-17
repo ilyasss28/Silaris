@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta content="width=device-width, initial-scale=1.0" name="viewport">
 
-  <title>SILARIS | Sistem Pelaporan Notaris Kanwil Kemenkumham Sultra</title>
+  <title>SILARIS | Sistem Pelaporan Notaris Kanwil Kemenkum Sultra</title>
 
   <!-- Favicons -->
   <link href="<?php echo base_url('assets')?>/assets-guest/img/logo/logo.png" rel="icon">
