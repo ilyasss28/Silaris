@@ -2,6 +2,9 @@
 
   <!-- ======= Hero ======= -->
   <section class="guest-hero page-hero">
+    <span class="hero-orb hero-orb-1" aria-hidden="true"></span>
+    <span class="hero-orb hero-orb-2" aria-hidden="true"></span>
+    <span class="hero-orb hero-orb-3" aria-hidden="true"></span>
     <div class="container">
       <div class="row justify-content-center">
         <div class="col-lg-9 text-center">
