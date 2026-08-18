@@ -88,28 +88,12 @@
     $(".mobile-nav, .mobile-nav-toggle").hide();
   }
 
-  // Navigation active state on scroll
-  var nav_sections = $('section');
-  var main_nav = $('.nav-menu, #mobile-nav');
-
-  $(window).on('scroll', function() {
-    var cur_pos = $(this).scrollTop() + 200;
-
-    nav_sections.each(function() {
-      var top = $(this).offset().top,
-        bottom = top + $(this).outerHeight();
-
-      if (cur_pos >= top && cur_pos <= bottom) {
-        if (cur_pos <= bottom) {
-          main_nav.find('li').removeClass('active');
-        }
-        main_nav.find('a[href="#' + $(this).attr('id') + '"]').parent('li').addClass('active');
-      }
-      if (cur_pos < 300) {
-        $(".nav-menu ul:first li:first").addClass('active');
-      }
-    });
-  });
+  // Note: this used to also toggle .active on .nav-menu/.mobile-nav items
+  // based on scroll position, matching in-page #anchor sections. SILARIS's
+  // nav links are real page URLs (not #anchors), so that logic never
+  // matched anything useful and its "force the first item active near the
+  // top of the page" fallback was actively overriding the server-rendered
+  // active state (application/views/include/header.php) on every scroll.
 
   // Toggle .header-scrolled class to #header when page is scrolled
   $(window).scroll(function() {
