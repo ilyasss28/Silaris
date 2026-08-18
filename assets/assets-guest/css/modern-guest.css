@@ -114,7 +114,10 @@ a:focus {
   background: var(--accent);
   color: var(--ink-900) !important;
 }
-.nav-menu a.btn-login:hover { background: var(--accent-dark); color: var(--ink-900) !important; }
+/* every other nav item turns blue-with-white-text on hover - match
+   that here too instead of darkening the yellow (white text on a
+   darkened yellow is a real contrast problem, not just inconsistent) */
+.nav-menu a.btn-login:hover { background: var(--brand); color: #fff !important; }
 
 .mobile-nav-toggle { color: var(--brand) !important; }
 .mobile-nav { background: var(--brand) !important; }
