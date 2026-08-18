@@ -537,7 +537,7 @@ a:focus {
   box-shadow: var(--shadow-lg);
   transition: background .15s ease, color .15s ease;
 }
-.btn-download-pdf:hover { background: var(--accent-dark); color: #fff !important; }
+.btn-download-pdf:hover { background: var(--accent-dark); color: var(--ink-900) !important; }
 
 .panduan-section { background: var(--card); padding: 0 0 80px; }
 .panduan-section-gap { margin-top: 56px; }
@@ -618,7 +618,7 @@ a:focus {
   background: var(--accent);
   color: var(--ink-900) !important;
 }
-.btn-help:hover { background: var(--accent-dark); color: #fff !important; }
+.btn-help:hover { background: var(--accent-dark); color: var(--ink-900) !important; }
 .btn-help-outline {
   background: transparent;
   border: 1.5px solid rgba(255,255,255,.4);
