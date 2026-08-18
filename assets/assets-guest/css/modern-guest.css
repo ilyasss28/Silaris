@@ -118,6 +118,19 @@ a:focus {
 
 .mobile-nav-toggle { color: var(--brand) !important; }
 .mobile-nav { background: var(--brand) !important; }
+/* style.css sets .mobile-nav a { color: #222222 }, which is
+   unreadable against the navy panel above - keep it white, and use
+   the accent yellow (already the site's hover convention against
+   navy, see footer links) instead of the old theme's green on hover. */
+.mobile-nav a {
+  color: #fff !important;
+}
+.mobile-nav a:hover,
+.mobile-nav .active > a,
+.mobile-nav li:hover > a {
+  color: var(--accent) !important;
+  background: rgba(255,255,255,.08);
+}
 
 /* ---------- hero / search ---------- */
 
