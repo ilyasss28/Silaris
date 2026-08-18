@@ -106,7 +106,9 @@ a:focus {
   transition: background .15s ease, color .15s ease;
 }
 .nav-menu a:hover,
-.nav-menu li.active > a {
+.nav-menu li.active > a,
+#header .nav-menu a:hover,
+#header .nav-menu li.active > a {
   background: var(--brand);
   color: #fff !important;
 }
@@ -116,8 +118,15 @@ a:focus {
 }
 /* every other nav item turns blue-with-white-text on hover - match
    that here too instead of darkening the yellow (white text on a
-   darkened yellow is a real contrast problem, not just inconsistent) */
-.nav-menu a.btn-login:hover { background: var(--brand); color: #fff !important; }
+   darkened yellow is a real contrast problem, not just inconsistent).
+   #header-prefixed duplicates above/below give these an ID-level
+   specificity floor so they can never lose to body.css's plain-class
+   .nav-menu a:hover / .active rules, regardless of source order. */
+.nav-menu a.btn-login:hover,
+#header .nav-menu a.btn-login:hover {
+  background: var(--brand);
+  color: #fff !important;
+}
 
 .mobile-nav-toggle { color: var(--brand) !important; }
 .mobile-nav { background: var(--brand) !important; }
