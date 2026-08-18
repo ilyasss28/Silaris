@@ -14,7 +14,7 @@
       <nav class="nav-menu d-none d-lg-block">
         <ul>
           <li class="active"><a href="<?php echo site_url('home'); ?>">Beranda</a></li>
-          <li><a href="https://drive.google.com/file/d/1Uq80Hc8keZSVG9sngEMYPKD2WjebvVoY/view?usp=sharing" target="_blank">Panduan</a></li>
+          <li><a href="<?php echo base_url('panduan'); ?>">Panduan</a></li>
           <li><a href="<?php echo base_url('kepatuhan/index'); ?>">Kepatuhan Notaris</a></li>
           <li><a href="<?php echo base_url('login'); ?>" class="btn-login">Login</a></li>
         </ul>

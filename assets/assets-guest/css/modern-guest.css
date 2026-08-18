@@ -364,6 +364,216 @@ a:focus {
 .icon-box2 p b { color: var(--ink-900); font-size: 16px; }
 .icon-box2 .icofont-circled-right { color: var(--accent-dark); font-size: 18px; }
 
+/* ---------- sub-page hero (kepatuhan, panduan) ---------- */
+
+.page-hero { padding-bottom: 56px; }
+
+/* ---------- breadcrumb ---------- */
+
+.breadcrumb {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  display: inline-flex;
+  padding: 8px 18px;
+  margin: 0 0 28px;
+  box-shadow: var(--shadow);
+  font-size: 13.5px;
+}
+.breadcrumb .homeLink { color: var(--ink-500) !important; font-weight: 600; }
+.breadcrumb .homeLink:hover { color: var(--brand) !important; }
+.breadcrumb .active { color: var(--brand); font-weight: 700; }
+
+.section-title.text-start { text-align: left; padding-bottom: 22px; }
+.section-title.text-start h2::before { display: none; }
+
+/* ---------- compliance page ---------- */
+
+.compliance-section { background: var(--card); padding: 0 0 80px; }
+
+.compliance-search {
+  display: flex;
+  gap: 8px;
+  max-width: 480px;
+  margin-bottom: 26px;
+}
+.compliance-search input {
+  flex: 1 1 auto;
+  height: var(--control-h);
+  box-sizing: border-box;
+  padding: 0 16px;
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius-sm);
+  font-size: 14px;
+}
+.compliance-search input:focus { outline: none; border-color: var(--brand); }
+.compliance-search button {
+  height: var(--control-h);
+  box-sizing: border-box;
+  border: none;
+  padding: 0 20px;
+  background: var(--brand);
+  color: #fff;
+  font-weight: 700;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+}
+.compliance-search button:hover { background: var(--brand-light); }
+
+.compliance-table-wrap {
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  overflow: hidden;
+}
+.compliance-table { margin: 0; width: 100%; }
+.compliance-table thead th {
+  background: var(--surface);
+  color: var(--ink-900);
+  font-weight: 700;
+  font-size: 11.5px;
+  text-transform: uppercase;
+  letter-spacing: .04em;
+  border-bottom: 2px solid var(--border);
+  padding: 14px 16px;
+  white-space: nowrap;
+}
+.compliance-table tbody td {
+  padding: 14px 16px;
+  vertical-align: middle;
+  border-top: 1px solid var(--border);
+  color: var(--ink-700);
+}
+.compliance-table tbody tr:hover { background: var(--brand-tint); }
+.compliance-name { font-weight: 700; color: var(--ink-900); }
+.compliance-username { color: var(--ink-500); font-size: 13px; }
+
+.status-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 12px;
+  border-radius: 999px;
+  font-size: 12.5px;
+  font-weight: 700;
+  white-space: nowrap;
+}
+.status-badge.status-ok { background: var(--success-tint, #E7F6EC); color: #15803D; }
+.status-badge.status-warn { background: #FCEAEB; color: #C0242F; }
+
+.compliance-empty {
+  text-align: center;
+  padding: 50px 20px !important;
+  color: var(--ink-500);
+}
+.compliance-empty i { font-size: 32px; display: block; margin-bottom: 10px; color: var(--ink-300, #9FA8B5); }
+
+/* ---------- panduan page ---------- */
+
+.btn-download-pdf {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  height: var(--control-h);
+  padding: 0 22px;
+  margin-top: 28px;
+  background: var(--accent);
+  color: var(--ink-900) !important;
+  font-weight: 700;
+  font-size: 14.5px;
+  border-radius: 999px;
+  box-shadow: var(--shadow-lg);
+  transition: background .15s ease, color .15s ease;
+}
+.btn-download-pdf:hover { background: var(--accent-dark); color: #fff !important; }
+
+.panduan-section { background: var(--card); padding: 0 0 80px; }
+.panduan-section-gap { margin-top: 56px; }
+
+.panduan-steps { margin-bottom: 4px; }
+.panduan-card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  padding: 24px 22px;
+  height: 100%;
+  position: relative;
+  transition: transform .15s ease, box-shadow .15s ease;
+}
+.panduan-card:hover { transform: translateY(-4px); box-shadow: var(--shadow-lg); }
+.panduan-num {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  background: var(--brand);
+  color: #fff;
+  font-weight: 800;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 14px;
+}
+.panduan-card h4 { font-size: 16px; font-weight: 700; color: var(--ink-900); margin: 0 0 8px; }
+.panduan-card p { font-size: 14px; color: var(--ink-500); margin: 0; line-height: 1.7; }
+.panduan-card p a { color: var(--brand); font-weight: 600; }
+
+.panduan-faq { margin-top: 4px; }
+.panduan-faq .accordion-item {
+  border: 1px solid var(--border);
+  border-radius: var(--radius) !important;
+  overflow: hidden;
+  margin-bottom: 12px;
+}
+.panduan-faq .accordion-button {
+  font-weight: 700;
+  color: var(--ink-900);
+  font-size: 15px;
+  padding: 18px 20px;
+}
+.panduan-faq .accordion-button:not(.collapsed) {
+  background: var(--brand-tint);
+  color: var(--brand);
+  box-shadow: none;
+}
+.panduan-faq .accordion-button:focus { box-shadow: 0 0 0 3px var(--brand-tint); }
+.panduan-faq .accordion-body { color: var(--ink-500); font-size: 14px; line-height: 1.8; padding: 4px 20px 20px; }
+.panduan-faq .accordion-body a { color: var(--brand); font-weight: 600; }
+
+.panduan-help-card {
+  margin-top: 56px;
+  background: var(--brand);
+  border-radius: var(--radius-lg, var(--radius));
+  padding: 30px 32px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 20px;
+  align-items: center;
+  justify-content: space-between;
+}
+.panduan-help-card h4 { color: #fff; font-weight: 800; margin: 0 0 4px; }
+.panduan-help-card p { color: rgba(255,255,255,.72); margin: 0; font-size: 14px; }
+.panduan-help-actions { display: flex; gap: 10px; flex-wrap: wrap; }
+.btn-help {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  height: 42px;
+  padding: 0 18px;
+  border-radius: var(--radius-sm);
+  font-weight: 700;
+  font-size: 14px;
+  background: var(--accent);
+  color: var(--ink-900) !important;
+}
+.btn-help:hover { background: var(--accent-dark); color: #fff !important; }
+.btn-help-outline {
+  background: transparent;
+  border: 1.5px solid rgba(255,255,255,.4);
+  color: #fff !important;
+}
+.btn-help-outline:hover { background: rgba(255,255,255,.1); color: #fff !important; }
+
 /* ---------- map ---------- */
 
 .map-wrap {

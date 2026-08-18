@@ -1,169 +1,112 @@
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-<style>
-
-    *{
-        box-sizing: border-box;
-        margin: 0; padding: 0;
-    }
-
-    body{
-        background-color: #f7f7f7;
-        font-family: Arial, sans-serif;
-        font-size: 16px;
-    }
-
-    table{
-        border-collapse: collapse;
-        margin: 20px auto;
-        width: 40%;
-    }    
-
-    th{
-        text-align: left;
-        background-color: #333;
-        color: #fff;
-        padding: 12px;
-    }
-
-    td{ padding: 12px }
-
-    .out-of-stock{ background-color : #f44336; color: #fff; }
-
-    .high-stock{ background-color: #8bc34a; color: #fff; }
-
-    .medium-stock{ background-color: #ffa726; color: #fff; }
-
-    .low-stock{ background-color: #ff7043; color: #fff; }
-    
-</style>
+<?php
+  $total_notaris = $summary['total_notaris'] ?? 0;
+  $total_laporan = $summary['total_laporan'] ?? 0;
+  $aktif_melapor = $summary['aktif_melapor'] ?? 0;
+  $tingkat       = $summary['tingkat_persen'] ?? 0;
+?>
 <main id="main">
 
-<!-- ======= Services Section ======= -->
-<section id="services" class="services">
-  <div class="container">
+  <!-- ======= Hero ======= -->
+  <section class="guest-hero page-hero">
+    <div class="container">
+      <div class="row justify-content-center">
+        <div class="col-lg-9 text-center">
+          <span class="hero-badge"><i class="dot"></i> MONITORING KEPATUHAN <i class="dot"></i></span>
+          <h1 class="hero-title">KEPATUHAN <em>NOTARIS</em></h1>
+          <p class="lead">Pemantauan kepatuhan notaris se-Sulawesi Tenggara dalam menyampaikan laporan bulanan kepada Kanwil Kemenkum, berdasarkan data laporan yang tercatat di SILARIS.</p>
 
-    <div class="section-title">
-      <h2>Notaris</h2>
-      <p>Kepatuhan Pengumpulan Laporan Notaris berdasarkan Tanggal Pengumpulan</p>
-    </div>
-    <ul class="breadcrumb"><li><a class="homeLink" href="<?php echo base_url().'home/index'?>"><i class="icofont-home"></i> Beranda /</a></li>
-      <li class="active">Daftar Notaris </li>
-    </ul>
-    
-    <!-- <div>
-        <canvas id="myChart"></canvas>
-    </div> -->
-
-      <!-- NOTARIS -->
-    <div class="row">
-      <div class="col-lg-8 mt-8 mt-lg-0 ">
-        <div class="row"> 
-                        <!-- /.card-header -->
-                        <div class="card-body">
-                            <table id="notaris">
-                            <thead>
-                              <tr>
-                                  <th>Nama Notaris</th>
-                                  <th>Januari</th>
-                                  <th>Februari</th>
-                                  <th>Maret</th>
-                                  <th>April</th>
-                                  <th>Mei</th>
-                                  <th>Juni</th>
-                                  <th>Juli</th>
-                                  <th>Agustus</th>
-                                  <th>September</th>
-                                  <th>Oktober</th>
-                                  <th>November</th>
-                                  <th>Desember</th>
-                              </tr>
-                            </thead>
-                            <tbody>
-                              <?php foreach ($notaris as $notaris) : ?>
-                              <tr class="laporan">
-                                  <td><?php echo $notaris['nama_notaris']; ?></td>
-                                  <td class="bulanini"><?php echo $notaris['Januari']; ?></td>
-                                  <td class="bulan"><?php echo $notaris['Februari']; ?></td>
-                                  <td class="bulan"><?php echo $notaris['Maret']; ?></td>
-                                  <td class="bulan"><?php echo $notaris['April']; ?></td>
-                                  <td class="bulan"><?php echo $notaris['Mei']; ?></td>
-                                  <td class="bulan"><?php echo $notaris['Juni']; ?></td>
-                                  <td class="bulan"><?php echo $notaris['Juli']; ?></td>
-                                  <td class="bulan"><?php echo $notaris['Agustus']; ?></td>
-                                  <td class="bulan"><?php echo $notaris['September']; ?></td>
-                                  <td class="bulan"><?php echo $notaris['Oktober']; ?></td>
-                                  <td class="bulan"><?php echo $notaris['November']; ?></td>
-                                  <td class="bulan"><?php echo $notaris['Desember']; ?></td>
-                              </tr>
-                              <?php endforeach ;?>
-                            </tbody>
-                            </table>
-                            <script>
-
-// Select all elements with the class "product-row"
-const rows = document.querySelectorAll(".laporan");
-
-// Loop through each "product-row" element
-for(let i = 0; i < rows.length; i++){
-
-    // Get the stock value of the current product
-const bulan = rows[i].querySelector(".bulanini").textContent;
-
-// Add a class to the current element based on stock value
-    // Product is out of stock	
-    if(bulan == 0){ 
-        rows[i].classList.add("out-of-stock");
-      } 
-
-     // Product has low stock
-    else if(bulan > 0 && bulan < 11){ 
-        rows[i].classList.add("high-stock"); 
-      }
-
-    // Product has medium stock
-    else if(bulan >= 11 && bulan < 20){ 
-        rows[i].classList.add("medium-stock");
-       } 
-    
-     // Product has high stock
-    else { rows[i].classList.add("high-stock"); }
-
-}
-
-</script>
-<script>
-  const ctx = document.getElementById('myChart');
-
-  new Chart(ctx, {
-    type: 'bar',
-    data: {
-      labels: ['Pengda Kendari Patuh', 'Pengda Kendari Tidak Patuh', 'Pengda Baubau Patuh', 'Pengda Baubau Tidak Patuh', 'Pengda Kolaka Patuh', 'Pengda Kolaka Tidak Patuh'],
-      datasets: [{
-        label: '# Kepatuhan per Pengda',
-        data: [68, 58, 24, 21, 17, 16],
-        backgroundColor: [
-      'rgba(75, 192, 192, 0.2)',
-      'rgba(255, 99, 132, 0.2)'
-
-    ],
-        borderWidth: 1
-      }]
-    },
-    options: {
-      scales: {
-        y: {
-          beginAtZero: true
-        }
-      }
-    }
-  });
-</script>
-                        </div>
-                        <!-- /.card-body -->
+          <div class="row stat-row justify-content-center">
+            <div class="col-6 col-md-3">
+              <div class="stat-tile">
+                <div class="stat-number"><?= $total_notaris; ?></div>
+                <div class="stat-label">Akun Notaris</div>
+              </div>
+            </div>
+            <div class="col-6 col-md-3">
+              <div class="stat-tile">
+                <div class="stat-number"><?= $aktif_melapor; ?></div>
+                <div class="stat-label">Aktif Melapor</div>
+              </div>
+            </div>
+            <div class="col-6 col-md-3">
+              <div class="stat-tile">
+                <div class="stat-number"><?= $total_laporan; ?></div>
+                <div class="stat-label">Laporan Diterima</div>
+              </div>
+            </div>
+            <div class="col-6 col-md-3">
+              <div class="stat-tile">
+                <div class="stat-number"><?= $tingkat; ?>%</div>
+                <div class="stat-label">Tingkat Kepatuhan</div>
+              </div>
+            </div>
+          </div>
         </div>
-        
       </div>
     </div>
-  </div>
-</section><!-- End Services Section -->
-    </main><!-- End #main -->            </div>
+  </section>
+
+  <!-- ======= Compliance table ======= -->
+  <section id="services" class="services compliance-section">
+    <div class="container">
+
+      <ul class="breadcrumb">
+        <li><a class="homeLink" href="<?php echo base_url().'home/index'?>"><i class="icofont-home"></i> Beranda /</a></li>
+        <li class="active">Kepatuhan Notaris</li>
+      </ul>
+
+      <div class="section-title text-start">
+        <h2>Daftar Kepatuhan Pelaporan</h2>
+        <p>Status penyampaian laporan bulanan per akun notaris. Notaris yang belum pernah menyampaikan laporan ditandai "Belum Melapor".</p>
+      </div>
+
+      <form method="get" class="compliance-search">
+        <input type="text" name="q" value="<?= isset($q) ? _ent($q) : ''; ?>" placeholder="Cari nama atau username notaris...">
+        <button type="submit"><i class="icofont-search"></i> Cari</button>
+      </form>
+
+      <div class="table-responsive compliance-table-wrap">
+        <table class="table compliance-table">
+          <thead>
+            <tr>
+              <th>Nama Notaris</th>
+              <th>Username</th>
+              <th class="text-center">Jumlah Laporan</th>
+              <th>Laporan Terakhir</th>
+              <th class="text-center">Status</th>
+            </tr>
+          </thead>
+          <tbody>
+            <?php if (empty($notaris)): ?>
+              <tr>
+                <td colspan="5" class="compliance-empty">
+                  <i class="icofont-search-document"></i>
+                  <p>Tidak ada data notaris yang cocok.</p>
+                </td>
+              </tr>
+            <?php else: ?>
+              <?php foreach ($notaris as $row): ?>
+                <?php $patuh = $row->jumlah_laporan > 0; ?>
+                <tr>
+                  <td class="compliance-name"><?= _ent(ucwords(strtolower($row->full_name))); ?></td>
+                  <td class="compliance-username">@<?= _ent($row->username); ?></td>
+                  <td class="text-center"><b><?= $row->jumlah_laporan; ?></b></td>
+                  <td><?= $row->laporan_terakhir ? date('d M Y', strtotime($row->laporan_terakhir)) : '&mdash;'; ?></td>
+                  <td class="text-center">
+                    <?php if ($patuh): ?>
+                      <span class="status-badge status-ok"><i class="icofont-check-circled"></i> Aktif Melapor</span>
+                    <?php else: ?>
+                      <span class="status-badge status-warn"><i class="icofont-close-circled"></i> Belum Melapor</span>
+                    <?php endif; ?>
+                  </td>
+                </tr>
+              <?php endforeach; ?>
+            <?php endif; ?>
+          </tbody>
+        </table>
+      </div>
+
+    </div>
+  </section>
+
+</main>

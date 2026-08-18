@@ -22,9 +22,13 @@ class Kepatuhan extends CI_Controller {
 	{
 		$this->load->view('include/head');
 		$this->load->view('include/header');
-		// $this->load->view('include/slider');
 		$this->load->model('Model_kepatuhan');
-		$data['notaris'] = $this->Model_kepatuhan->get_db();
+
+		$q = $this->input->get('q');
+		$data['q'] = $q;
+		$data['notaris'] = $this->Model_kepatuhan->get_compliance($q);
+		$data['summary'] = $this->Model_kepatuhan->get_compliance_summary();
+
 		$this->load->view('kepatuhan', $data);
 		$this->load->view('include/footer');
 		$this->load->view('include/js');
