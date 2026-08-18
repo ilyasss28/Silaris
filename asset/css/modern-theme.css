@@ -1,8 +1,12 @@
 /* =========================================================================
    SILARIS modern admin theme - navy & yellow
-   Layered on top of AdminLTE 2 / Bootstrap 3 - overrides visuals only,
-   the underlying markup/classes/JS behavior are untouched so every
-   existing page keeps working.
+   Layered on top of AdminLTE 4 / Bootstrap 5 - overrides visuals only.
+   The shell (header/sidebar/footer, main_layout.php) uses AdminLTE 4's
+   markup conventions (.app-header/.app-sidebar/.app-main/.app-footer,
+   .nav-item/.nav-link sidebar menu). Individual content views (boxes,
+   forms, tables) still use their original class names - those class
+   names don't depend on the AdminLTE/Bootstrap version, only the shell
+   markup did.
    ========================================================================= */
 
 @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
@@ -55,7 +59,7 @@
 /* ---------- base ---------------------------------------------------- */
 
 body,
-.wrapper {
+.app-wrapper {
   background: var(--surface) !important;
 }
 
@@ -84,69 +88,73 @@ a:focus {
 
 /* ---------- top header ----------------------------------------------- */
 
-.main-header {
+.app-header {
   background: var(--card) !important;
   box-shadow: var(--shadow-sm);
   border-bottom: 1px solid var(--border);
 }
 
-.main-header .logo {
-  background: var(--brand) !important;
-  color: #fff !important;
-  font-weight: 800;
-  letter-spacing: .03em;
-  border-bottom: 3px solid var(--accent);
-  transition: background .15s ease;
-}
-.main-header .logo:hover { background: var(--brand-light) !important; }
-.main-header .logo .logo-lg b,
-.main-header .logo .logo-mini b { color: #fff; }
-.main-header .logo .logo-mini b {
-  background: var(--accent);
-  color: var(--ink-900);
-  border-radius: var(--radius-sm);
-  padding: 2px 8px;
-}
-
-.main-header .navbar {
-  background: transparent !important;
-}
-
-.main-header .sidebar-toggle {
+.app-header .nav-link {
   color: var(--ink-700) !important;
 }
-.main-header .sidebar-toggle:hover {
+.app-header .nav-link:hover {
   background: var(--surface) !important;
+  border-radius: var(--radius-sm);
 }
 
-.main-header .navbar .nav > li > a {
-  color: var(--ink-700) !important;
-}
-
-.main-header .navbar-custom-menu .user-menu .user-image {
+.app-header .user-menu .user-image {
+  width: 30px;
+  height: 30px;
   border: 2px solid var(--accent);
-  margin-top: -4px;
   border-radius: 50%;
+  object-fit: cover;
 }
 
-.main-header .user-menu .dropdown-menu {
+.app-header .user-menu .dropdown-menu {
   border: 1px solid var(--border);
   border-radius: var(--radius);
   box-shadow: var(--shadow-lg);
   overflow: hidden;
+  padding: 0;
 }
-.main-header .user-menu .dropdown-menu li.user-header {
+.app-header .user-menu .dropdown-menu li.user-header {
   background: var(--brand) !important;
+  color: #fff;
+  text-align: center;
+  padding: 16px;
 }
-.main-header .user-menu .dropdown-menu li.user-footer {
+.app-header .user-menu .dropdown-menu li.user-header img {
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  border: 2px solid var(--accent);
+  margin-bottom: 8px;
+}
+.app-header .user-menu .dropdown-menu li.user-footer {
   background: var(--card);
   border-top: 1px solid var(--border);
+  padding: 10px;
+  display: flex;
+  justify-content: space-between;
+}
+
+/* ---------- sidebar brand (logo) ---------------------------------------------------- */
+
+.sidebar-brand {
+  background: var(--brand) !important;
+  border-bottom: 3px solid var(--accent);
+}
+.sidebar-brand .brand-link {
+  color: #fff !important;
+}
+.sidebar-brand .brand-text {
+  font-weight: 800 !important;
+  letter-spacing: .03em;
 }
 
 /* ---------- sidebar ---------------------------------------------------- */
 
-.main-sidebar,
-.left-side {
+.app-sidebar {
   background: var(--brand) !important;
   box-shadow: var(--shadow);
 }
@@ -159,11 +167,13 @@ a:focus {
   border-radius: var(--radius-sm);
   transition: background .12s ease, color .12s ease;
 }
-.sidebar-menu > li > a > .fa,
-.sidebar-menu > li > a > .glyphicon,
-.sidebar-menu > li > a > .ion {
+.sidebar-menu > li > a .nav-icon {
   width: 26px;
   color: #8C9BB5 !important;
+}
+.sidebar-menu .nav-arrow {
+  color: #8C9BB5 !important;
+  font-size: 11px;
 }
 
 .sidebar-menu > li:hover > a,
@@ -171,42 +181,51 @@ a:focus {
   background: rgba(255,255,255,.08) !important;
   color: #fff !important;
 }
-.sidebar-menu > li.active > a {
+/* AdminLTE 4 puts the active state on the link itself, not the <li> */
+.sidebar-menu > li > a.active {
   background: var(--accent) !important;
   color: var(--ink-900) !important;
   font-weight: 700;
 }
-.sidebar-menu > li.active > a > .fa,
-.sidebar-menu > li.active > a > .glyphicon,
-.sidebar-menu > li.active > a > .ion {
+.sidebar-menu > li > a.active .nav-icon,
+.sidebar-menu > li > a.active .nav-arrow {
   color: var(--ink-900) !important;
 }
 
-.sidebar-menu li.treeview-menu > li > a {
+.sidebar-menu ul.nav-treeview > li > a {
   color: #AEB9CC !important;
   margin: 1px 10px 1px 24px;
   border-radius: var(--radius-sm);
 }
-.sidebar-menu li.treeview-menu > li.active > a {
+.sidebar-menu ul.nav-treeview > li > a.active {
   color: var(--accent) !important;
   background: rgba(254,205,8,.12) !important;
   font-weight: 700;
 }
-.sidebar-menu li.treeview-menu > li > a:hover {
+.sidebar-menu ul.nav-treeview > li > a:hover {
   color: #fff !important;
   background: rgba(255,255,255,.08) !important;
 }
 
-.sidebar-form {
+.sidebar-menu .nav-header {
+  color: rgba(255,255,255,.45) !important;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  padding: 14px 16px 6px;
+}
+
+.sidebar-search {
   border-radius: var(--radius-sm);
   overflow: hidden;
 }
 
-.sidebar a { text-decoration: none; }
+.app-sidebar a { text-decoration: none; }
 
 /* ---------- content shell ---------------------------------------------------- */
 
-.content-wrapper {
+.app-main {
   background: var(--surface) !important;
 }
 
@@ -508,10 +527,11 @@ label {
 
 /* ---------- footer ---------------------------------------------------- */
 
-.main-footer {
+.app-footer {
   background: var(--card);
   border-top: 1px solid var(--border);
   color: var(--ink-500);
+  padding: 12px 20px;
 }
 
 /* ---------- misc polish ---------------------------------------------------- */

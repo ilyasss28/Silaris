@@ -393,17 +393,29 @@ a:focus {
 /* ---------- footer ---------- */
 
 #footer {
+  /* body.css sets background/color/padding on #footer itself with
+     !important, which silently wins over a plain (non-important)
+     declaration regardless of source order - every property that
+     file touches has to be matched with !important here too. */
   background:
     linear-gradient(180deg, rgba(5,6,62,.94), rgba(5,6,62,.97)),
-    url('/assets/assets-guest/img/background.jpg') center / cover no-repeat;
-  color: rgba(255,255,255,.7);
+    url('/assets/assets-guest/img/background.jpg') center / cover no-repeat !important;
+  color: rgba(255,255,255,.7) !important;
+  padding: 0 !important;
   /* style.css sets #footer { text-align: center }, which otherwise
      inherits down into every column below */
-  text-align: left;
+  text-align: left !important;
 }
 #footer .footer-top {
-  padding: 56px 0 40px;
-  border-top: 3px solid var(--accent);
+  /* body.css sets background/border-top/border-bottom on this element
+     with !important, including an opaque solid background color that
+     was completely covering the image set on the parent #footer above -
+     override every one of those (all need !important to beat body.css's
+     own !important declarations). */
+  background: transparent !important;
+  border-top: 3px solid var(--accent) !important;
+  border-bottom: none !important;
+  padding: 56px 0 40px !important;
 }
 #footer h5 {
   color: #fff;

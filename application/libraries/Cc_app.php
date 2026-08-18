@@ -460,22 +460,22 @@ class Cc_App
 			# if has sub menu
 			$hasSubMenu = false;
 			$active = ((app()->input->get('page') == $val['link']) ? 'active' :'');
-			$parentClass = 'class="'.$active.'"';
-			
+			$parentClass = 'class="nav-item '.$active.'"';
+
 			# Find sub menu
 			foreach ($data as $menu) {
 				if ($menu['parent'] == $key) {
 					$hasSubMenu = true;
-					$parentClass = "class='parent ".$active."'";
+					$parentClass = "class='nav-item".($active ? ' menu-open' : '')."'";
 					break;
 				}
 			}
 
 			# For label iconize handle, coz sub menu dont have icon
 			if ($val['parent'] == 0) {
-				$label = "<i class='icon ".$val['icon']."'></i><span>".$val['label']."</span>"; 
+				$label = "<i class='nav-icon ".$val['icon']."'></i><p>".$val['label'];
 			} else {
-				$label = "<i class='fa fa-circle-o '></i><span>".$val['label']."</span>"; 
+				$label = "<i class='nav-icon fa fa-circle-o '></i><p>".$val['label'];
 			}
 
 			# Get parent level menu
@@ -484,22 +484,20 @@ class Cc_App
 				# Write tag here
 				if ($val['type'] == 'menu') {
 					$html .= "<li ".$parentClass.">
-								<a href='".(webPageUrl($val['link']))."'>".$label;
+								<a href='".(webPageUrl($val['link']))."' class='nav-link ".$active."'>".$label;
 					if ($hasSubMenu) {
-						$html .= ' <span class="pull-right-container">
-					              <i class="fa fa-angle-left pull-right"></i>
-					            </span>';
+						$html .= ' <i class="nav-arrow fa fa-angle-left"></i>';
 					}
-					$html .= "</a>";
+					$html .= "</p></a>";
 
 
 
 				} else {
-					$html .= "<li class='header'>".$val['label'];
+					$html .= "<li class='nav-header'>".$val['label'];
 				}
 
 				if ($hasSubMenu) {
-					$html .= "<ul class='treeview-menu'>";
+					$html .= "<ul class='nav nav-treeview'>";
 					$html .= $this->renderSidebar($data, $key);
 					$html .= "</ul>";
 				}

@@ -203,20 +203,20 @@ if(!function_exists('display_menu_admin')) {
 		$ret = '';
 	    if ($result) {
 	    	if (($level > 1) AND ($parent > 0) ) {
-		    	$ret .= '<ul class="treeview-menu">';
+		    	$ret .= '<ul class="nav nav-treeview">';
 	    	} else {
 	    		$ret = '';
 	    	}
 		   	foreach ($result as $row) {
 
-		   
+
 
 		   		$perms = 'menu_'.strtolower(str_replace(' ', '_', $row->label ?? ''));
 
 		   		$links = explode('/', $row->link);
 
 				$segments = array_slice($ci->uri->segment_array(), 0, count($links));
-				
+
 		   		if (implode('/', $segments) == implode('/', $links)) {
 		   			$active = 'active';
 		   		} else {
@@ -225,25 +225,26 @@ if(!function_exists('display_menu_admin')) {
 		   		$link = filter_var($row->link, FILTER_VALIDATE_URL) ? $row->link : base_url($row->link);
 		   		if ($row->type == 'label') {
 		   			if ($ci->aauth->is_allowed($perms)) {
-		        		$ret .= '<li class="header treeview">'._ent($row->label).'</li>';
+		        		$ret .= '<li class="nav-header">'._ent($row->label).'</li>';
 		        	}
 		   		} else {
 			        if ($row->Count > 0) {
 			        	if ($ci->aauth->is_allowed($perms)) {
-				        	$ret .= '<li class="'.$active.' "> 
-										        	<a href="'.$link.'">';
+			        		$open = $active ? ' menu-open' : '';
+				        	$ret .= '<li class="nav-item'.$open.'">
+										        	<a href="'.$link.'" class="nav-link '.$active.'">';
 
 							if ($parent) {
-								$ret .= '<i class="fa fa-circle-o '._ent($row->icon_color).'"></i> <span>'._ent($row->label).'</span>
-									            <span class="pull-right-container">
-									              <i class="fa fa-angle-left pull-right"></i>
-									            </span>
+								$ret .= '<i class="nav-icon fa fa-circle-o '._ent($row->icon_color).'"></i>
+									          <p>'._ent($row->label).'
+									            <i class="nav-arrow fa fa-angle-left"></i>
+									          </p>
 									          </a>';
 							} else {
-								$ret .= '<i class="fa '._ent($row->icon).' '._ent($row->icon_color).'"></i> <span>'._ent($row->label).'</span>
-									            <span class="pull-right-container">
-									              <i class="fa fa-angle-left pull-right"></i>
-									            </span>
+								$ret .= '<i class="nav-icon fa '._ent($row->icon).' '._ent($row->icon_color).'"></i>
+									          <p>'._ent($row->label).'
+									            <i class="nav-arrow fa fa-angle-left"></i>
+									          </p>
 									          </a>';
 							}
 
@@ -252,18 +253,16 @@ if(!function_exists('display_menu_admin')) {
 						}
 			        } elseif ($row->Count==0) {
 			           if ($ci->aauth->is_allowed($perms)) {
-							$ret .= '<li class="'.$active.' "> 
-										        	<a href="'.$link.'">';
+							$ret .= '<li class="nav-item">
+										        	<a href="'.$link.'" class="nav-link '.$active.'">';
 
 							if ($parent) {
-								$ret .= '<i class="fa fa-circle-o '._ent($row->icon_color).'"></i> <span>'._ent($row->label).'</span>
-									            <span class="pull-right-container"></i>
-									            </span>
+								$ret .= '<i class="nav-icon fa fa-circle-o '._ent($row->icon_color).'"></i>
+									          <p>'._ent($row->label).'</p>
 									          </a>';
 							} else {
-								$ret .= '<i class="fa '._ent($row->icon).' '._ent($row->icon_color).'"></i> <span>'._ent($row->label).'</span>
-									            <span class="pull-right-container"></i>
-									            </span>
+								$ret .= '<i class="nav-icon fa '._ent($row->icon).' '._ent($row->icon_color).'"></i>
+									          <p>'._ent($row->label).'</p>
 									          </a>';
 							}
 
