@@ -442,7 +442,10 @@ class MY_Controller extends CI_Controller {
 */
 class Admin extends MY_Controller
 {
-    public $limit_page = 10;
+    // Tabel daftar admin dikelola oleh DataTables di browser. Muat seluruh
+    // dataset agar pencarian, pagination dan ekspor tidak hanya memproses
+    // sepuluh baris pertama. Controller API tetap memakai limit terpisah.
+    public $limit_page = 1000000;
 
     public function __construct()
     {
@@ -465,6 +468,22 @@ class Admin extends MY_Controller
     */
     public function render($view = '', $data = array(), $bool = FALSE)
     {
+        $legacy_page = preg_match(
+            '#^administrator/(?:crud/(?:add|edit)|rest/(?:add|edit|tool)|(?:user|group|permission|blog|menu)/(?:add|edit|edit_profile)|menu_type/add)(?:/|$)#i',
+            trim($this->uri->uri_string(), '/')
+        );
+
+        $partial_navigation = $this->input->is_ajax_request()
+            || $this->input->get_request_header('X-SILARIS-Navigation') === 'partial';
+
+        if ($legacy_page && $partial_navigation) {
+            $this->output
+                ->set_status_header(409)
+                ->set_header('X-SILARIS-Full-Reload: 1')
+                ->set_output('Full page navigation required');
+            return;
+        }
+
         $this->template->enable_parser(false);
         $this->template->set_partial('content', $view, $data);
         $this->template->build('backend/standart/main_layout', $data);
@@ -482,7 +501,7 @@ class Admin extends MY_Controller
     {
         if (!$this->aauth->is_loggedin()) {
             if ($redirect) {
-                redirect('login','refresh');
+                redirect('login');
             } else {
                 return false;
             }
@@ -493,7 +512,7 @@ class Admin extends MY_Controller
                 if ($redirect) {
                     $this->session->set_flashdata('f_message', 'Sorry you do not have permission to access ');
                     $this->session->set_flashdata('f_type', 'warning');
-                    redirect('administrator/dashboard','refresh');
+                    redirect('administrator/dashboard');
                 }
                 return false;
             }

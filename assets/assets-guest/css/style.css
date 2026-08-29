@@ -117,7 +117,7 @@ h1, h2, h3, h4, h5, h6 {
 
 #header.header-scrolled {
   top: 0;
-  box-shadow: 0px 2px 15px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05) !important;
 }
 
 #header .logo {
@@ -191,7 +191,7 @@ h1, h2, h3, h4, h5, h6 {
   visibility: hidden;
   padding: 10px 0;
   background: #fff;
-  box-shadow: 0px 0px 30px rgba(127, 137, 161, 0.25);
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05) !important;
   transition: 0.3s;
 }
 
@@ -781,7 +781,7 @@ section {
   padding: 70px 20px 80px 20px;
   transition: all ease-in-out 0.3s;
   background: #fff;
-  box-shadow: 0px 5px 90px 0px rgba(110, 123, 131, 0.1);
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05) !important;
 }
 
 .services .icon-box .icon {
@@ -831,7 +831,7 @@ section {
 
 .services .icon-box:hover {
   border-color: #fff;
-  box-shadow: 0px 0 35px 0 rgba(0, 0, 0, 0.08);
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05) !important;
 }
 
 .services .iconbox-blue i {
@@ -1086,13 +1086,16 @@ section {
 .team .member {
   text-align: center;
   margin-bottom: 20px;
-  box-shadow: 0px 0px 12px 0px rgba(34, 34, 34, 0.07);
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05) !important;
   padding: 30px 20px;
   background: #fff;
 }
 
 .team .member img {
-  max-width: 60%;
+  max-width: 75%;
+  aspect-ratio: 1 / 1;
+  object-fit: cover;
+  object-position: top;
   border-radius: 50%;
   margin: 0 0 30px 0;
 }
@@ -1101,10 +1104,12 @@ section {
   font-weight: 700;
   margin-bottom: 2px;
   font-size: 18px;
+  text-transform: capitalize;
 }
 
 .team .member span {
-  font-style: italic;
+  font-style: normal;
+  text-transform: capitalize;
   display: block;
   font-size: 13px;
 }
@@ -1143,7 +1148,7 @@ section {
   padding: 30px;
   background: #fff;
   width: 100%;
-  box-shadow: 0 0 24px 0 rgba(0, 0, 0, 0.12);
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05) !important;
 }
 
 .contact .info i {
@@ -1210,7 +1215,7 @@ section {
   border-bottom: 3px solid #5cb874;
   padding: 30px;
   background: #fff;
-  box-shadow: 0 0 24px 0 rgba(0, 0, 0, 0.12);
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05) !important;
 }
 
 .contact .php-email-form .form-group {
@@ -1410,7 +1415,7 @@ section {
   right: 0;
   bottom: -70px;
   background: #fff;
-  box-shadow: 0px 2px 15px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05) !important;
   z-index: 2;
 }
 

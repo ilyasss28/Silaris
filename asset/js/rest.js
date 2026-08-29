@@ -53,8 +53,8 @@ $(document).ready(function(){
 		var type = $(this).val();
 		var input_able = $(this).find('option:selected').attr('title');
 		var input_placeholder = $(this).find('option:selected').attr('data-placeholder');  
-		var id = $(this).parents('tr').find('#rest-id').val();
-		var name = $(this).parents('tr').find('#rest-name').val();
+		var id = $(this).parents('tr').find('.rest-id').val();
+		var name = $(this).parents('tr').find('.rest-name').val();
 
 		addValidation($(this), id, name, type, input_able, '', input_placeholder);
 	}); /*end validation change*/

@@ -23,17 +23,18 @@ class Auth extends Admin
 	public function login()
 	{
 		if ($this->aauth->is_loggedin()) {
-			redirect('administrator/user/profile','refresh');
+			redirect('administrator/dashboard');
 		}
 		$data = [];
 		$this->config->load('site');
 
 		$this->form_validation->set_rules('username', 'Username', 'trim|required');
 		$this->form_validation->set_rules('password', 'Password', 'trim|required');
+		$this->form_validation->set_rules('captcha', 'Captcha', 'trim|required|callback_valid_captcha');
 
 		if ($this->form_validation->run()) {
-			if ($this->aauth->login($this->input->post('username'), $this->input->post('password'), $this->input->post('remember'))) {
-				redirect('/administrator/user/profile','refresh');
+			if ($this->aauth->login($this->input->post('username'), $this->input->post('password'), 0)) {
+				redirect('administrator/dashboard');
 			} else {
 				$data['error'] = $this->aauth->print_errors(TRUE);
 			}
@@ -69,7 +70,7 @@ class Auth extends Admin
 			if ($save_user) {
 				set_message('Your account sucessfully created');
 				$this->aauth->add_member($save_user, 4);
-				redirect('administrator/login', 'refresh');
+				redirect('administrator/login');
 			} else {
 				$data['error'] = $this->aauth->print_errors();
 			}
@@ -102,7 +103,7 @@ class Auth extends Admin
 			} else {
 				set_message('Failed to send password reminder', 'danger');
 			}
-			redirect('administrator/login', 'refresh');
+			redirect('administrator/login');
 		} else {
 			$data['error'] = validation_errors();
 		}

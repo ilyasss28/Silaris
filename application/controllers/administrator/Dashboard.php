@@ -19,18 +19,14 @@ class Dashboard extends Admin
 
 	public function index()
 	{
-		if (!$this->aauth->is_allowed('dashboard')) {
-			redirect('/','refresh');
-		}
+		$this->is_allowed('dashboard');
 
 		$this->render('backend/standart/dashboard', []);
 	}
 
 	public function chart()
 	{
-		if (!$this->aauth->is_allowed('dashboard')) {
-			redirect('/','refresh');
-		}
+		$this->is_allowed('dashboard');
 
 		$data = [];
 		$this->render('backend/standart/chart', $data);

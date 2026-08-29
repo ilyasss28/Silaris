@@ -149,9 +149,9 @@ class CI_Profiler {
 	 * This function cycles through the entire array of mark points and
 	 * matches any two points that are named identically (ending in "_start"
 	 * and "_end" respectively).  It then compiles the execution times for
-	 * all points and returns it as an array
+	 * all points and returns them as an HTML string
 	 *
-	 * @return	array
+	 * @return	string
 	 */
 	protected function _compile_benchmarks()
 	{
@@ -514,7 +514,7 @@ class CI_Profiler {
 	{
 		if ( ! isset($this->CI->session))
 		{
-			return;
+			return '';
 		}
 
 		$output = '<fieldset id="ci_profiler_csession" style="border:1px solid #000;padding:6px 10px 10px 10px;margin:20px 0 20px 0;background-color:#eee;">'

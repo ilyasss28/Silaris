@@ -11,7 +11,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 class Tmc extends CI_Controller
 {
 	function index(){
-		redirect('login','refresh');
+		redirect('login');
 	}
 	
 }

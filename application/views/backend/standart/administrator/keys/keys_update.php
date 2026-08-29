@@ -53,9 +53,29 @@
                             <i class="required">*</i>
                             </label>
                             <div class="col-sm-8">
-                                <input type="text" class="form-control" name="key" id="key" placeholder="Key" value="<?= set_value('key', $keys->key); ?>">
+                                <div class="input-group">
+                                    <input type="text" class="form-control" name="key" id="key" placeholder="API key" autocomplete="off" value="<?= set_value('key', $keys->key); ?>">
+                                    <button type="button" class="btn btn-default" id="copy_key"><i class="fa fa-copy"></i> Salin</button>
+                                </div>
                                 <small class="info help-block">
-                                <b>Input Key</b> Max Length : 40.</small>
+                                Mengubah key akan membuat key lama tidak dapat digunakan lagi.</small>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="level" class="col-sm-2 control-label">Level <i class="required">*</i></label>
+                            <div class="col-sm-8">
+                                <input type="number" min="0" max="99" class="form-control" name="level" id="level" value="<?= set_value('level', $keys->level); ?>">
+                                <small class="info help-block">Level akses API, antara 0 sampai 99.</small>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="col-sm-2 control-label">Pengaturan</label>
+                            <div class="col-sm-8">
+                                <label class="checkbox-inline"><input type="checkbox" name="ignore_limits" value="1" <?= set_checkbox('ignore_limits', '1', (bool) $keys->ignore_limits); ?>> Abaikan batas request</label>
+                                <label class="checkbox-inline"><input type="checkbox" name="is_private_key" value="1" <?= set_checkbox('is_private_key', '1', (bool) $keys->is_private_key); ?>> Batasi berdasarkan alamat IP</label>
+                                <small class="info help-block">Jika pembatasan IP diaktifkan, isi daftar IP yang diizinkan di bawah.</small>
                             </div>
                         </div>
                                             
@@ -63,7 +83,7 @@
                             <label for="ip_addresses" class="col-sm-2 control-label">Ip Addresses 
                             </label>
                             <div class="col-sm-8">
-                                <textarea id="ip_addresses" name="ip_addresses" rows="10" class="textarea"><?= set_value('ip_addresses', $keys->ip_addresses); ?></textarea>
+                                <textarea id="ip_addresses" name="ip_addresses" rows="5" class="form-control textarea" placeholder="Contoh: 127.0.0.1, 192.168.1.10"><?= set_value('ip_addresses', $keys->ip_addresses); ?></textarea>
                                 <small class="info help-block">
                                 IP address can access this API.
                                 </small>
@@ -73,7 +93,7 @@
                         <div class="message"></div>
                         <div class="row-fluid col-md-7">
                             <button class="btn btn-flat btn-primary btn_save btn_action" id="btn_save" data-stype='stay' title="save (Ctrl+s)"><i class="fa fa-save" ></i> <?= cclang('save_button'); ?></button>
-                     <a class="btn btn-flat btn-info btn_save btn_action btn_save_back" id="btn_save" data-stype='back' title="<?= cclang('save_and_go_the_list_button'); ?> (Ctrl+d)"><i class="ion ion-ios-list-outline" ></i> <?= cclang('save_and_go_the_list_button'); ?></a>
+                     <a class="btn btn-flat btn-info btn_save btn_action btn_save_back" id="btn_save_back" data-stype='back' title="<?= cclang('save_and_go_the_list_button'); ?> (Ctrl+d)"><i class="ion ion-ios-list-outline" ></i> <?= cclang('save_and_go_the_list_button'); ?></a>
                      <a class="btn btn-flat btn-default btn_action" id="btn_cancel" title="<?= cclang('cancel_button'); ?> (Ctrl+x)"><i class="fa fa-undo" ></i> <?= cclang('cancel_button'); ?></a>
                      <span class="loading loading-hide"><img src="<?= BASE_ASSET; ?>/img/loading-spin-primary.svg"> <i><?= cclang('loading_saving_data'); ?></i></span>
                         </div>
@@ -90,6 +110,14 @@
 <!-- Page script -->
 <script>
   $(document).ready(function() {
+
+    $('#copy_key').on('click', function() {
+        var keyInput = document.getElementById('key');
+        keyInput.select();
+        keyInput.setSelectionRange(0, keyInput.value.length);
+        var copied = document.execCommand('copy');
+        if (copied) toastr.success('API key berhasil disalin.');
+    });
 
     $('#btn_cancel').click(function() {
         swal({

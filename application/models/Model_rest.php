@@ -81,15 +81,27 @@ class Model_rest extends MY_Model {
 
 	public function get_input_type()
 	{
-		$this->db->group_by('validation_group');
-		$result = $this->db->get('rest_input_type');
+		static $validation_groups = null;
 
-		$validation_group = '';
-		foreach ($result->result() as $row) {
-			$validation_group .= $row->validation_group. ' ';
+		if ($validation_groups !== null) {
+			return $validation_groups;
 		}
 
-		return $validation_group;
+		// Kompatibel dengan MySQL ONLY_FULL_GROUP_BY dan cukup mengambil
+		// kolom yang memang dibutuhkan oleh pilihan aturan validasi.
+		$this->db->select('validation_group');
+		$this->db->distinct();
+		$this->db->where('validation_group !=', '');
+		$result = $this->db->get('rest_input_type');
+
+		$groups = [];
+		foreach ($result->result() as $row) {
+			$groups[] = $row->validation_group;
+		}
+
+		$validation_groups = implode(' ', $groups);
+
+		return $validation_groups;
 
 	}
 

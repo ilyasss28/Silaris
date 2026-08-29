@@ -51,11 +51,29 @@ class Access extends Admin
 				]);
 		}
 
+		$group_id = (int) $this->input->post('group_id');
 		$permissions = $this->input->post('id');
-		$group_id = $this->input->post('group_id');
+		$permissions = is_array($permissions) ? array_values(array_unique(array_filter(array_map('intval', $permissions)))) : [];
 
+		if ($group_id < 1 || !$this->db->where('id', $group_id)->count_all_results('aauth_groups')) {
+			return $this->response([
+				'success' => false,
+				'message' => 'Grup pengguna tidak valid.',
+			], 422);
+		}
+
+		if (!empty($permissions)) {
+			$valid_permissions = $this->db
+				->select('id')
+				->where_in('id', $permissions)
+				->get('aauth_perms')
+				->result_array();
+			$permissions = array_map('intval', array_column($valid_permissions, 'id'));
+		}
+
+		$this->db->trans_start();
 		$this->db->delete('aauth_perm_to_group', ['group_id' => $group_id]);
-		if (count($permissions)) {
+		if (!empty($permissions)) {
 			$data = [];
 			foreach ($permissions as $perms) {
 				$data[] = [
@@ -63,10 +81,10 @@ class Access extends Admin
 					'group_id' => $group_id,
 				];
 			}
-			$save_access = $this->db->insert_batch('aauth_perm_to_group', $data);
-		} else {
-			$save_access = true;
+			$this->db->insert_batch('aauth_perm_to_group', $data);
 		}
+		$this->db->trans_complete();
+		$save_access = $this->db->trans_status();
 
 		if ($save_access) {
 			$this->data = [
@@ -95,6 +113,13 @@ class Access extends Admin
             echo '<center>Sorry you do not have permission to access</center>';
             exit;
         }
+        $group_id = (int) $group_id;
+        if ($group_id < 1 || !$this->db->where('id', $group_id)->count_all_results('aauth_groups')) {
+            $this->output->set_status_header(404);
+            echo '<li class="access-empty"><p>Grup pengguna tidak ditemukan.</p></li>';
+            return;
+        }
+
         $group_perms_groupping = [];
 
         $group_perms = $this->model_group->get_permission_group($group_id);
@@ -109,35 +134,33 @@ class Access extends Admin
             $group_perms_groupping[$group_name][] = $perms;
         }
 
-        foreach($group_perms_groupping as $group_name => $childs) { ?>
-            
-            <li>
-                <div class="box box-danger box-solid">
-                <div class="box-header with-border">
-                  <label class=" text-white toggle-select-all-access" data-target=".<?= $group_name; ?>"><h3 class="box-title" ><i class="fa fa-check-square"></i> <?= ucwords($group_name); ?></h3>
-                  </label>
+        if (empty($group_perms_groupping)) {
+            echo '<li class="access-empty"><i class="fa fa-key fa-2x"></i><p>Belum ada permission yang tersedia.</p></li>';
+            return;
+        }
 
-                  <div class="box-tools pull-right">
-                    <button type="button" class="btn btn-box-tool" data-widget="collapse"><i class="fa fa-minus"></i>
+        $group_index = 0;
+        foreach($group_perms_groupping as $group_name => $childs) {
+            $group_key = 'permission-group-' . $group_index++;
+            ?>
+            <li class="permission-group" data-permission-group="<?= $group_key; ?>">
+                <div class="permission-group-header">
+                    <button type="button" class="permission-group-toggle" data-target="<?= $group_key; ?>" title="Centang atau kosongkan seluruh permission pada kelompok ini">
+                        <i class="fa fa-check-square-o"></i>
+                        <span><?= _ent(ucwords(clean_snake_case($group_name))); ?></span>
                     </button>
-                  </div>
+                    <span class="permission-count"><?= count($childs); ?> permission</span>
                 </div>
-                
-
-                <div class="box-body" style="display: block;">
-                <ul>
+                <ul class="permission-items">
                     <?php foreach($childs as $perms) { ?>
-                    <li>
+                    <li class="permission-item">
                         <label>
-                            <input type="checkbox" class="flat-red check <?= $group_name; ?>" name="id[]" value="<?= $perms->id; ?>" <?= array_search($perms->id, $group_perms) ? 'checked' : ''; ?>>
-                            <?= _ent(ucwords(clean_snake_case($perms->name))); ?>
+                            <input type="checkbox" class="check" data-group="<?= $group_key; ?>" name="id[]" value="<?= (int) $perms->id; ?>" <?= in_array($perms->id, $group_perms) ? 'checked' : ''; ?>>
+                            <span><?= _ent(ucwords(clean_snake_case($perms->name))); ?></span>
                         </label>
                     </li>
                     <?php } ?>
                 </ul>
-
-                </div>
-              </div>
             </li>
             <?php
         }

@@ -89,7 +89,7 @@ jQuery(document).ready(domo);
                            </td> 
                            <td width="200">
                               <?php is_allowed('crud_view', function() use ($crud){?>
-                              <a href="<?= site_url($crud->table_name); ?>" class="label-default"><i class="fa fa-newspaper-o"></i> <?= cclang('view_button'); ?>
+                              <a href="<?= site_url('administrator/crud/view/' . $crud->id); ?>" class="label-default"><i class="fa fa-newspaper-o"></i> <?= cclang('view_button'); ?></a>
                               <?php }) ?>
                                <?php is_allowed('crud_update', function() use ($crud){?>
                               <a href="<?= site_url('administrator/crud/edit/' . $crud->id); ?>" class="label-default"><i class="fa fa-edit "></i> <?= cclang('update_button'); ?></a>

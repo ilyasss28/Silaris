@@ -93,13 +93,15 @@ jQuery(document).ready(domo);
                                 <a class="fancybox" rel="group" href="<?= $img_url; ?>">
                                   <img src="<?= $img_url; ?>" alt="Person" width="50" height="50">
                                 </a>
-                                <?= _ent($user->full_name); ?>
+                                <span class="user-notary-name"><?= _ent(format_person_name($user->full_name)); ?></span>
                               </div>
                            </td>
                            <td><?= _ent($user->username); ?></td>
                            <td>
-                              
-                           <input type="checkbox" name="status" data-user-id="<?= $user->id; ?>" class="switch-button" <?= $user->banned ?:'checked'; ?> >
+                              <div class="user-status-control <?= $user->banned ? 'is-inactive' : 'is-active'; ?>">
+                                 <input type="checkbox" name="status" data-user-id="<?= (int) $user->id; ?>" class="switch-button" <?= $user->banned ? '' : 'checked'; ?> aria-label="Status <?= _ent($user->full_name); ?>">
+                                 <span class="user-status-badge"><i class="fa fa-circle"></i><span class="user-status-text"><?= $user->banned ? 'Nonaktif' : 'Aktif'; ?></span></span>
+                              </div>
                            </td>
                            <td width="200">
                               <?php is_allowed('user_view', function() use ($user){?>
@@ -181,25 +183,53 @@ jQuery(document).ready(domo);
 <!-- Page script -->
 <script>
   $(document).ready(function() {
+    // Delegated handlers survive AJAX page changes, so remove the previous
+    // instance before the switch plugin initializes the newly loaded rows.
+    $(document).off('change.silarisUserStatus', 'input.switch-button');
+
     $('input[type="checkbox"].flat-red, input[type="radio"].flat-red').iCheck({
         checkboxClass: 'icheckbox_minimal-red',
         radioClass: 'iradio_minimal-red'
     });
 
     $('.switch-button').switchButton({
-        labels_placement: 'right',
-        on_label: '<?= cclang('active'); ?>',
-        off_label: '<?= cclang('inactive'); ?>'
+        show_labels: false,
+        width: 42,
+        height: 22,
+        button_width: 22,
+        clear: false
     });
 
-    $(document).on('change', 'input.switch-button', function() {
+    $(document).on('change.silarisUserStatus', 'input.switch-button', function() {
+        var $input = $(this);
+        if ($input.data('status-syncing')) return;
+
         var status = 'inactive';
-        var id = $(this).attr('data-user-id');
+        var id = $input.attr('data-user-id');
+        var isActive = $input.prop('checked');
+        var previousState = !isActive;
+        var $control = $input.closest('.user-status-control');
         var data = [];
 
-        if ($(this).prop('checked')) {
+        if (isActive) {
             status = 'active';
         }
+
+        function renderStatus(active) {
+            $control.toggleClass('is-active', active).toggleClass('is-inactive', !active);
+            $control.find('.user-status-text').text(active ? 'Aktif' : 'Nonaktif');
+        }
+
+        function rollbackStatus() {
+            $input.data('status-syncing', true);
+            $input.switchButton('option', 'checked', previousState);
+            $input.data('status-syncing', false);
+            renderStatus(previousState);
+        }
+
+        renderStatus(isActive);
+        $control.addClass('is-loading');
+        $input.prop('disabled', true);
 
         data.push({
             name: csrf,
@@ -224,12 +254,18 @@ jQuery(document).ready(domo);
                 if (data.success) {
                     toastr['success'](data.message);
                 } else {
+                    rollbackStatus();
                     toastr['warning'](data.message);
                 }
 
             })
             .fail(function() {
+                rollbackStatus();
                 toastr['error']('Error update status');
+            })
+            .always(function() {
+                $input.prop('disabled', false);
+                $control.removeClass('is-loading');
             });
     });
 

@@ -1,6 +1,26 @@
 <?php defined('BASEPATH') OR exit('No direct script access allowed');
 class Model_home extends CI_Model
 {
+    private $region_map = [
+        '7401' => ['slug' => 'kolaka',   'name' => 'Kabupaten Kolaka'],
+        '7402' => ['slug' => 'konawe',   'name' => 'Kabupaten Konawe'],
+        '7403' => ['slug' => 'muna',     'name' => 'Kabupaten Muna'],
+        '7404' => ['slug' => 'buton',    'name' => 'Kabupaten Buton'],
+        '7405' => ['slug' => 'konsel',   'name' => 'Kabupaten Konawe Selatan'],
+        '7406' => ['slug' => 'bombana',  'name' => 'Kabupaten Bombana'],
+        '7407' => ['slug' => 'wakatobi', 'name' => 'Kabupaten Wakatobi'],
+        '7408' => ['slug' => 'kolut',    'name' => 'Kabupaten Kolaka Utara'],
+        '7409' => ['slug' => 'konut',    'name' => 'Kabupaten Konawe Utara'],
+        '7410' => ['slug' => 'butur',    'name' => 'Kabupaten Buton Utara'],
+        '7411' => ['slug' => 'koltim',   'name' => 'Kabupaten Kolaka Timur'],
+        '7412' => ['slug' => 'konkep',   'name' => 'Kabupaten Konawe Kepulauan'],
+        '7413' => ['slug' => 'mubar',    'name' => 'Kabupaten Muna Barat'],
+        '7414' => ['slug' => 'buteng',   'name' => 'Kabupaten Buton Tengah'],
+        '7415' => ['slug' => 'busel',    'name' => 'Kabupaten Buton Selatan'],
+        '7471' => ['slug' => 'kendari',  'name' => 'Kota Kendari'],
+        '7472' => ['slug' => 'baubau',   'name' => 'Kota Baubau'],
+    ];
+
     function __construct() {
     parent:: __construct();
 }
@@ -14,7 +34,7 @@ $this->db->select('*');
             log_message('error', 'Database query failed in get_db: ' . $this->db->last_query());
             return [];
         }
-        return $query->result_array();
+        return $query->result();
 
 }
 
@@ -26,34 +46,83 @@ public function get_where($table = null, $where = null)
 }
 
 public function get_wilayah(){
-        // jumlah_per_wilayah is an empty/stale reference table, so the
-        // region breakdown is derived from the live data_notaris rows
-        // instead - the same source the count of notaris itself comes from.
         $this->db->select('kode_wilayah, COUNT(*) as jumlah', FALSE);
         $this->db->from('data_notaris');
         $this->db->where('kode_wilayah IS NOT NULL', NULL, FALSE);
         $this->db->group_by('kode_wilayah');
-        $this->db->order_by('jumlah', 'DESC');
         $query = $this->db->get();
         if ($query === FALSE) {
             log_message('error', 'Database query failed in get_wilayah: ' . $this->db->last_query());
             return [];
         }
 
-        $wilayah = [];
+        // Older rows use short slugs (kendari, konsel, etc.), while the
+        // current form stores official BPS-style numeric codes. Normalize
+        // both formats so no notary disappears and duplicate cards merge.
+        $slug_to_code = [];
+        foreach ($this->region_map as $code => $region) {
+            $slug_to_code[$region['slug']] = $code;
+        }
+
+        $totals = [];
         foreach ($query->result_array() as $row) {
-            $kode = trim($row['kode_wilayah']);
-            if ($kode === '' OR !ctype_alpha($kode)) {
-                continue; // skip malformed codes (e.g. stray numeric values)
+            $stored_code = strtolower(trim((string) $row['kode_wilayah']));
+            $official_code = isset($this->region_map[$stored_code])
+                ? $stored_code
+                : (isset($slug_to_code[$stored_code]) ? $slug_to_code[$stored_code] : null);
+
+            if ($official_code === null) {
+                log_message('error', 'Unknown notary region code ignored: ' . $stored_code);
+                continue;
             }
+
+            if (!isset($totals[$official_code])) {
+                $totals[$official_code] = 0;
+            }
+            $totals[$official_code] += (int) $row['jumlah'];
+        }
+
+        $wilayah = [];
+        foreach ($this->region_map as $code => $region) {
+            if (empty($totals[$code])) {
+                continue;
+            }
+
             $wilayah[] = [
-                'kode_wilayah' => $kode,
-                'wilayah'      => ucwords($kode),
-                'jumlah'       => $row['jumlah'],
+                'kode_wilayah' => $region['slug'],
+                'wilayah'      => $region['name'],
+                'jumlah'       => $totals[$code],
             ];
         }
         return $wilayah;
     }
+
+public function get_notaris_by_region($slug)
+{
+    $official_code = null;
+    foreach ($this->region_map as $code => $region) {
+        if ($region['slug'] === strtolower((string) $slug)) {
+            $official_code = $code;
+            break;
+        }
+    }
+
+    if ($official_code === null) {
+        return [];
+    }
+
+    $this->db->from('data_notaris');
+    $this->db->where_in('kode_wilayah', [$official_code, strtolower($slug)]);
+    $this->db->order_by('id_notaris', 'DESC');
+    $query = $this->db->get();
+
+    if ($query === FALSE) {
+        log_message('error', 'Database query failed in get_notaris_by_region: ' . $this->db->last_query());
+        return [];
+    }
+
+    return $query->result();
+}
 
 public function kendari(){
     $data = $this->db->select('*');

@@ -10,4 +10,14 @@
   <script src="<?php echo base_url('assets')?>/assets-guest/js/main.js"></script>
 
   <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBxQf9DUo33yhbxHajYPqKGIyvGOdW9dG0"></script>
+  
+  <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
+  <script>
+    AOS.init({
+      duration: 800,
+      once: true,
+      easing: 'ease-in-out',
+      offset: 100
+    });
+  </script>
 </body>

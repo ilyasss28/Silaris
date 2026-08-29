@@ -33,12 +33,12 @@
 <section class="content-header">
    <h1>
       User
-      <small><?= cclang('update', 'Profile'); ?></small>
+      <small>Edit Profil Saya</small>
    </h1>
    <ol class="breadcrumb">
       <li><a href="#"><i class="fa fa-dashboard"></i> Home</a></li>
-      <li class=""><a  href="<?= site_url('administrator/user'); ?>">User</a></li>
-      <li class="active"><?= cclang('update', 'Profile'); ?></li>
+      <li class=""><a href="<?= site_url('administrator/profile'); ?>">Profil Saya</a></li>
+      <li class="active">Edit Profil</li>
    </ol>
 </section>
 <!-- Main content -->
@@ -59,7 +59,7 @@
                      <h5 class="widget-user-desc"><?= cclang('update', 'Profile'); ?></h5>
                      <hr>
                   </div>
-                  <?= form_open(base_url('administrator/user/edit_profile_save/'.$this->uri->segment(4)), [
+                  <?= form_open(base_url('administrator/profile/save'), [
                     'name'    => 'form_user', 
                     'class'   => 'form-horizontal', 
                     'id'      => 'form_user', 
@@ -160,7 +160,7 @@
                      <div class="row-fluid col-md-7">
                         <button class="btn btn-flat btn-primary btn_save btn_action" id="btn_save" data-stype='stay' title="save (Ctrl+s)"><i class="fa fa-save" ></i> <?= cclang('save_button'); ?></button>
                      <a class="btn btn-flat btn-info btn_save btn_action btn_save_back" id="btn_save" data-stype='back' title="<?= cclang('save_and_go_the_list_button'); ?> (Ctrl+d)"><i class="ion ion-ios-list-outline" ></i> <?= cclang('save_and_go_the_list_button'); ?></a>
-                     <a class="btn btn-flat btn-default btn_action" id="btn_cancel" title="<?= cclang('cancel_button'); ?> (Ctrl+x)"><i class="fa fa-undo" ></i> <?= cclang('cancel_button'); ?></a>
+                     <a href="<?= site_url('administrator/profile'); ?>" class="btn btn-flat btn-default btn_action" id="btn_cancel" title="Kembali ke profil (Ctrl+x)"><i class="fa fa-undo"></i> Batal</a>
                      <span class="loading loading-hide"><img src="<?= BASE_ASSET; ?>/img/loading-spin-primary.svg"> <i><?= cclang('loading_saving_data'); ?></i></span>
                      </div>
                   <?= form_close(); ?>
@@ -178,27 +178,6 @@
 
 <script>
    $(document).ready(function() {
-    $('#btn_cancel').click(function() {
-         swal({
-                 title: "<?= cclang('are_you_sure'); ?>",
-                 text: "<?= cclang('data_to_be_deleted_can_not_be_restored'); ?>",
-                 type: "warning",
-                 showCancelButton: true,
-                 confirmButtonColor: "#DD6B55",
-                 confirmButtonText: "<?= cclang('yes_delete_it'); ?>",
-                 cancelButtonText: "<?= cclang('no_cancel_plx'); ?>",
-                 closeOnConfirm: true,
-                 closeOnCancel: true
-             },
-            function(isConfirm) {
-                if (isConfirm) {
-                    window.location.href = BASE_URL + 'administrator/user';
-                }
-            });
-
-        return false;
-    }); /*end btn cancel*/
-
     $('.btn_save').click(function() {
         $('.message').fadeOut();
 
@@ -225,7 +204,7 @@
                     $('#user_avatar_name').val('');
 
                     if (save_type == 'back') {
-                        window.location.href = BASE_URL + 'administrator/user/profile';
+                        window.location.href = BASE_URL + 'administrator/profile';
                         return;
                     }
 
@@ -283,16 +262,22 @@
         },
         multiple: false,
         validation: {
-            allowedExtensions: ['jpeg', 'jpg', 'gif', 'png']
+            allowedExtensions: ['jpeg', 'jpg', 'gif', 'png'],
+            sizeLimit: 5 * 1024 * 1024
         },
         showMessage: function(msg) {
             toastr['error'](msg);
         },
         callbacks: {
-            onComplete: function(id, name) {
+            onComplete: function(id, name, responseJSON) {
+                if (!responseJSON.success) {
+                    $('#user_avatar_uuid').val('');
+                    $('#user_avatar_name').val('');
+                    return;
+                }
                 var uuid = $('#user_avatar_galery').fineUploader('getUuid', id);
                 $('#user_avatar_uuid').val(uuid);
-                $('#user_avatar_name').val(name);
+                $('#user_avatar_name').val(responseJSON.uploadName || name);
             },
             onSubmit: function(id, name) {
                 var uuid = $('#user_avatar_uuid').val();

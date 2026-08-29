@@ -43,7 +43,11 @@ function addBodyRequest(key, value, type) {
   item.find('.value').val(value);
   item.find('.type').val(type);
   item.find('.container-input-type').hide();
-  item.find('.container-text').show();
+  if (type === 'file') {
+    item.find('.container-file').css('display', 'flex');
+  } else {
+    item.find('.container-text').show();
+  }
   $('#table-body tbody').append(item);
 }
 
@@ -65,7 +69,7 @@ $(document).ready(function() {
 
         parent.find('.container-input-type').hide();
         if (type == 'file') {
-            parent.find('.container-file').show();
+            parent.find('.container-file').css('display', 'flex');
         } else {
             parent.find('.container-text').show();
         }
@@ -88,7 +92,9 @@ $(document).ready(function() {
 
     $('.btn-toggle-param').click(function(event) {
         event.preventDefault();
-        $('#table-param').toggle();
+        var table = $('#table-param');
+        table.toggle();
+        $(this).attr('aria-expanded', table.is(':visible') ? 'true' : 'false');
     });
 
     $(document).on('focus', '#table-headers .key:last', function() {
@@ -103,7 +109,7 @@ $(document).ready(function() {
         addBodyRequest();
     });
 
-    $(document).on('click', 'a.btn-remove', function() {
+    $(document).on('click', '.btn-remove', function() {
         $(this).parents('tr').remove();
     });
 
@@ -117,7 +123,7 @@ $(document).ready(function() {
         $(this).addClass('active');
     });
 
-    $('#url, #table-headers input, #table-body input, #table-param input').on('keydown', function(event) {
+    $(document).on('keydown', '#url, #table-headers input, #table-body input, #table-param input', function(event) {
         if (event.keyCode == 13) {
             $('.btn-send').trigger('click');
         }
@@ -128,8 +134,8 @@ $(document).ready(function() {
 
         var submitButton = $(this);
         var defaultValue = submitButton.html();
-        var url = $('#url').val();
-        var method = $('.method-selected').html();
+        var url = $.trim($('#url').val());
+        var method = $.trim($('.method-selected').text());
         var requestBody = new FormData();
         var requestParam = [];
         var requestHeader = {};
@@ -167,9 +173,8 @@ $(document).ready(function() {
 
             if (type == 'file') {
                 var file = $(this).find('.file');
-                if (key.length) {
-                    var blob = new Blob([file[0].files[0]]);
-                    requestBody.append(key, blob, file.val());
+                if (key.length && file[0] && file[0].files.length) {
+                    requestBody.append(key, file[0].files[0], file[0].files[0].name);
                 }
             } else {
                 if (key.length) {
@@ -178,7 +183,7 @@ $(document).ready(function() {
             }
         });
 
-        submitButton.html('Sending..');
+        submitButton.prop('disabled', true).html('<i class="fa fa-circle-o-notch fa-spin"></i><span>Mengirim...</span>');
 
         var request;
 
@@ -202,7 +207,7 @@ $(document).ready(function() {
                 type: method,
                 dataType: 'JSON',
                 data: request,
-                async: false,
+                async: true,
                 cache: false,
                 contentType: false,
                 processData: false,
@@ -215,7 +220,7 @@ $(document).ready(function() {
             })
             .always(function(response, status, xhr) {
                 $('.loading').hide();
-                submitButton.html(defaultValue);
+                submitButton.prop('disabled', false).html(defaultValue);
                 var responseReff = response;
 
                 if (typeof xhr == 'object') {
@@ -226,7 +231,13 @@ $(document).ready(function() {
                     responseReff.statusText = 'OK';
                 }
 
-                $('.status').html(responseReff.status + ' ' + responseReff.statusText);
+                var statusCode = typeof responseReff.status === 'number' ? responseReff.status : 0;
+                $('.status')
+                    .removeClass(function(index, className) {
+                        return (className.match(/(^|\s)response-\S+/g) || []).join(' ');
+                    })
+                    .html(statusCode + ' ' + responseReff.statusText)
+                    .addClass('response-' + statusCode);
 
                 var request_time = new Date().getTime() - start_time;
                 $('.time-requested').html(request_time + ' ms');
@@ -241,8 +252,6 @@ $(document).ready(function() {
                         "data:text/html," + encodeURIComponent(responseReff.responseText) +
                         "></iframe>");
                 }
-                $('.status').addClass('response-' + responseReff.status);
-
                 $('.source-fresh').text(responseReff.responseText);
                 //ace editor 
                 ace.require("ace/ext/language_tools");

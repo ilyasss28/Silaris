@@ -20,6 +20,43 @@ class User extends Admin
 	}
 
 	/**
+	 * Move an avatar uploaded by Fine Uploader from the temporary directory.
+	 *
+	 * The upload library may sanitize the original client filename (for example,
+	 * replacing spaces with underscores), so only the filename returned by the
+	 * upload endpoint can safely be used here.
+	 */
+	private function move_uploaded_avatar($uuid, $file_name)
+	{
+		$uuid = basename((string) $uuid);
+		$file_name = basename((string) $file_name);
+
+		if ($uuid === '' || $file_name === '') {
+			return false;
+		}
+
+		$source = FCPATH . 'uploads/tmp/' . $uuid . '/' . $file_name;
+		$destination_dir = FCPATH . 'uploads/user/';
+
+		if (!is_file($source)) {
+			return false;
+		}
+
+		if (!is_dir($destination_dir) && !mkdir($destination_dir, 0755, true)) {
+			return false;
+		}
+
+		$destination_name = date('YmdHis') . '-' . $file_name;
+		$destination = $destination_dir . $destination_name;
+
+		if (!@rename($source, $destination)) {
+			return false;
+		}
+
+		return is_file($destination) ? $destination_name : false;
+	}
+
+	/**
 	* show all users
 	*
 	* @var $offset String
@@ -90,16 +127,15 @@ class User extends Admin
 				'kd_wilayah' => $this->input->post('kd_wilayah')
 			];
 
-			if (!empty($user_avatar_name)) {
+			if (!empty($user_avatar_name) && !empty($user_avatar_uuid)) {
+				$user_avatar_name_copy = $this->move_uploaded_avatar($user_avatar_uuid, $user_avatar_name);
 
-				$user_avatar_name_copy = date('YmdHis') . '-' . $user_avatar_name;
-
-				if (!is_dir(FCPATH . '/uploads/user')) {
-					mkdir(FCPATH . '/uploads/user');
+				if (!$user_avatar_name_copy) {
+					return $this->response([
+						'success' => false,
+						'message' => 'Error uploading avatar'
+					]);
 				}
-
-				@rename(FCPATH . 'uploads/tmp/' . $user_avatar_uuid . '/' . $user_avatar_name, 
-						FCPATH . 'uploads/user/' . $user_avatar_name_copy);
 
 				$save_data['avatar'] = $user_avatar_name_copy;
 			}
@@ -190,17 +226,13 @@ class User extends Admin
 
 			if (!empty($user_avatar_name)) {
 				if (!empty($user_avatar_uuid)) {
-					$user_avatar_name_copy = date('YmdHis') . '-' . $user_avatar_name;
-		
-					rename(FCPATH . '/uploads/tmp/' . $user_avatar_uuid . '/' . $user_avatar_name, 
-							FCPATH . '/uploads/user/' . $user_avatar_name_copy);
+					$user_avatar_name_copy = $this->move_uploaded_avatar($user_avatar_uuid, $user_avatar_name);
 
-					if (!is_file(FCPATH . '/uploads/user/' . $user_avatar_name_copy)) {
+					if (!$user_avatar_name_copy) {
 						return $this->response([
 							'success' => false,
 							'message' => 'Error uploading avatar'
 							]);
-						exit;
 					}
 
 					$save_data['avatar'] = $user_avatar_name_copy;
@@ -291,8 +323,12 @@ class User extends Admin
 		$this->is_allowed('user_view');
 
 		$this->data['user'] = $this->model_user->find($id);
+		if (!$this->data['user']) {
+			show_404();
+		}
+		$this->data['groups'] = $this->aauth->get_user_groups((int) $id);
 
-		$this->template->title('User Detail');
+		$this->template->title('Detail Profil Notaris');
 		$this->render('backend/standart/administrator/user/user_view', $this->data);
 	}
 
@@ -302,11 +338,18 @@ class User extends Admin
 	*/
 	public function profile()
 	{
+		if ($this->uri->segment(1) === 'profile'
+			|| ($this->uri->segment(2) === 'user' && $this->uri->segment(3) === 'profile')) {
+			redirect('administrator/profile');
+		}
+
 		$this->is_allowed('user_profile');
 
-		$this->data['user'] = $this->model_user->find($this->aauth->get_user()->id);
+		$id_user = (int) $this->aauth->get_user()->id;
+		$this->data['user'] = $this->model_user->find($id_user);
+		$this->data['groups'] = $this->aauth->get_user_groups($id_user);
 
-		$this->template->title('User Profile');
+		$this->template->title('Profil Saya');
 		$this->render('backend/standart/administrator/user/user_profile', $this->data);
 	}
 
@@ -316,6 +359,11 @@ class User extends Admin
 	*/
 	public function edit_profile()
 	{
+		if ($this->uri->segment(1) === 'profile'
+			|| ($this->uri->segment(2) === 'user' && $this->uri->segment(3) === 'edit_profile')) {
+			redirect('administrator/profile/edit');
+		}
+
 		$this->is_allowed('user_update_profile');
 		$id_user = $this->aauth->get_user()->id;
 		$this->data = [
@@ -332,7 +380,7 @@ class User extends Admin
 	*
 	* @var $id String
 	*/
-	public function edit_profile_save($id)
+	public function edit_profile_save($legacy_id = null)
 	{
 		if (!$this->is_allowed('user_update_profile', false)) {
 			return $this->response([
@@ -342,8 +390,15 @@ class User extends Admin
 		}
 
 		
+		$current_user = $this->aauth->get_user();
+		$id = (int) $current_user->id;
+
+		$this->form_validation->set_rules('email', 'Email', 'trim|required|valid_email');
 		$this->form_validation->set_rules('full_name', 'Full Name', 'trim|required');
 		$this->form_validation->set_rules('kd_wilayah', 'Kd wilayah', 'trim|required|max_length[10]');
+		if ($this->input->post('password')) {
+			$this->form_validation->set_rules('password', 'Password', 'min_length[6]');
+		}
 
 		if ($this->form_validation->run()) {
 			$user_avatar_uuid = $this->input->post('user_avatar_uuid');
@@ -356,17 +411,13 @@ class User extends Admin
 
 			if (!empty($user_avatar_name)) {
 				if (!empty($user_avatar_uuid)) {
-					$user_avatar_name_copy = date('YmdHis') . '-' . $user_avatar_name;
-		
-					rename(FCPATH . '/uploads/tmp/' . $user_avatar_uuid . '/' . $user_avatar_name, 
-							FCPATH . '/uploads/user/' . $user_avatar_name_copy);
+					$user_avatar_name_copy = $this->move_uploaded_avatar($user_avatar_uuid, $user_avatar_name);
 
-					if (!is_file(FCPATH . '/uploads/user/' . $user_avatar_name_copy)) {
+					if (!$user_avatar_name_copy) {
 						return $this->response([
 							'success' => false,
 							'message' => 'Error uploading avatar'
 							]);
-						exit;
 					}
 
 					$save_data['avatar'] = $user_avatar_name_copy;
@@ -379,12 +430,12 @@ class User extends Admin
 				$password = false;
 			}
 
-			$save_user = $this->aauth->update_user($id, $this->input->post('email'), $password, $this->input->post('username'), $save_data);
+			$save_user = $this->aauth->update_user($id, $this->input->post('email'), $password, $current_user->username, $save_data);
 
 			if ($save_user) {
 				$this->data['success'] = true;
 				$this->data['id'] 	   = $id;
-				$this->data['message'] = 'Your data has been successfully updated into the database. '.anchor('administrator/user', ' Go back to list');
+				$this->data['message'] = 'Profil akun berhasil diperbarui.';
 			} else {
 				$this->data['success'] = false;
 				$this->data['message'] = cclang('data_not_change').$this->aauth->print_errors();
@@ -424,21 +475,30 @@ class User extends Admin
 	*/
 	public function upload_avatar_file()
 	{
-		if (!$this->is_allowed('user_add', false)) {
+		$can_upload_avatar = $this->is_allowed('user_add', false)
+			|| $this->is_allowed('user_update', false)
+			|| $this->is_allowed('user_update_profile', false);
+
+		if (!$can_upload_avatar) {
 			return $this->response([
 				'success' => false,
 				'message' => cclang('sorry_you_do_not_have_permission_to_access')
 				]);
 		}
 
-		$uuid = $this->input->post('qquuid');
+		$uuid = basename((string) $this->input->post('qquuid'));
+		if ($uuid === '') {
+			return $this->response(array('success' => false, 'error' => 'Identitas unggahan tidak valid.'));
+		}
 
-		mkdir(FCPATH . '/uploads/tmp/' . $uuid);
+		if (!is_dir(FCPATH . '/uploads/tmp/' . $uuid)) {
+			mkdir(FCPATH . '/uploads/tmp/' . $uuid, 0755, true);
+		}
 
 		$config = [
 			'upload_path' 		=> './uploads/tmp/' . $uuid . '/',
 			'allowed_types' 	=> 'png|jpeg|jpg|gif',
-			'max_size'  		=> '1000'
+			'max_size'  		=> '5120'
 		];
 		
 		$this->load->library('upload', $config);
@@ -471,7 +531,19 @@ class User extends Admin
 	*/
 	public function delete_avatar_file($uuid)
 	{
-		if (!$this->is_allowed('user_delete', false)) {
+		$safe_uuid = basename((string) $uuid);
+		if ($safe_uuid === '' || $safe_uuid !== (string) $uuid) {
+			return $this->response(array('success' => false, 'message' => 'Identitas berkas tidak valid.'));
+		}
+		$uuid = $safe_uuid;
+		$delete_by = $this->input->get('by');
+		$is_own_avatar = $delete_by === 'id' && (int) $uuid === (int) $this->aauth->get_user()->id;
+		$is_temporary_avatar = $delete_by !== 'id';
+		$can_delete_avatar = $this->is_allowed('user_delete', false)
+			|| $this->is_allowed('user_update', false)
+			|| (($is_own_avatar || $is_temporary_avatar) && $this->is_allowed('user_update_profile', false));
+
+		if (!$can_delete_avatar) {
 			return $this->response([
 				'success' => false,
 				'message' => cclang('sorry_you_do_not_have_permission_to_access')
@@ -481,7 +553,6 @@ class User extends Admin
 		if (!empty($uuid)) {
 			$this->load->helper('file');
 
-			$delete_by = $this->input->get('by');
 			$delete_file = false;
 
 			if ($delete_by == 'id') {
@@ -528,7 +599,11 @@ class User extends Admin
 	*/
 	public function get_avatar_file($id)
 	{
-		if (!$this->is_allowed('user_update', false)) {
+		$is_own_avatar = (int) $id === (int) $this->aauth->get_user()->id;
+		$can_get_avatar = $this->is_allowed('user_update', false)
+			|| ($is_own_avatar && $this->is_allowed('user_update_profile', false));
+
+		if (!$can_get_avatar) {
 			return $this->response([
 				'success' => false,
 				'message' => cclang('sorry_you_do_not_have_permission_to_access')

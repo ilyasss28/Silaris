@@ -1,3 +1,8 @@
+<?php
+/**
+ * @var array $template
+ */
+?>
 <!DOCTYPE html>
 <html lang="id">
 <head>
@@ -6,6 +11,8 @@
   <meta name="description" content="<?= get_option('site_description'); ?>">
   <meta name="keywords" content="<?= get_option('keywords'); ?>">
   <meta name="author" content="<?= get_option('author'); ?>">
+  <meta name="csrf-name" content="<?= $this->security->get_csrf_token_name(); ?>">
+  <meta name="csrf-token" content="<?= $this->security->get_csrf_hash(); ?>">
 
   <title><?= get_option('site_name'); ?> | <?= $template['title']; ?></title>
   <meta content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" name="viewport">
@@ -17,6 +24,8 @@
   <link rel="stylesheet" href="<?= BASE_ASSET; ?>/admin-lte/plugins/iCheck/flat/blue.css">
   <link rel="stylesheet" href="<?= BASE_ASSET; ?>/admin-lte/plugins/morris/morris.css">
   <link rel="stylesheet" href="<?= BASE_ASSET; ?>/admin-lte/plugins/jvectormap/jquery-jvectormap-1.2.2.css">
+  <link rel="stylesheet" href="https://cdn.datatables.net/3.0.2/css/dataTables.dataTables.min.css">
+  <link rel="stylesheet" href="https://cdn.datatables.net/buttons/4.0.2/css/buttons.dataTables.min.css">
   <link rel="stylesheet" href="<?= BASE_ASSET; ?>/admin-lte/plugins/datepicker/datepicker3.css">
   <link rel="stylesheet" href="<?= BASE_ASSET; ?>/admin-lte/plugins/daterangepicker/daterangepicker.css">
   <link rel="stylesheet" href="<?= BASE_ASSET; ?>/admin-lte/plugins/bootstrap-wysihtml5/bootstrap3-wysihtml5.min.css">
@@ -32,8 +41,13 @@
   <link rel="stylesheet" href="<?= BASE_ASSET; ?>flag-icon/css/flag-icon.css" rel="stylesheet" media="all" />
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,600,700,300italic,400italic,600italic">
   <?= $this->cc_html->getCssFileTop(); ?>
+
+  <!-- Generated administrator views load page plugins inside their content.
+       jQuery must exist before those plugins are parsed on a full page load. -->
+<script src="<?= BASE_ASSET; ?>/jquery4/jquery.min.js"></script>
+  <script src="<?= BASE_ASSET; ?>/jquery4/jquery-compat-shim.js"></script>
 </head>
-<body class="layout-fixed sidebar-expand-lg">
+<body class="layout-fixed sidebar-expand-lg admin-silaris">
 <div class="app-wrapper">
 
   <nav class="app-header navbar navbar-expand bg-body">
@@ -44,30 +58,33 @@
             <i class="fa fa-bars"></i>
           </a>
         </li>
+        <li class="nav-item d-none d-sm-flex align-items-center">
+          <span class="admin-context">Panel Administrasi</span>
+        </li>
       </ul>
 
       <ul class="navbar-nav ms-auto">
         <li class="nav-item dropdown user-menu">
           <a href="#" class="nav-link dropdown-toggle d-flex align-items-center" data-bs-toggle="dropdown">
             <img src="<?= BASE_URL.'uploads/user/'.(!empty(get_user_data('avatar')) ? get_user_data('avatar') :'default.png'); ?>" class="user-image rounded-circle" alt="User Image">
-            <span class="d-none d-md-inline ms-2"><?= _ent(ucwords(clean_snake_case(get_user_data('full_name')))); ?></span>
+            <span class="d-none d-md-inline ms-2"><?= _ent(format_person_name(clean_snake_case(get_user_data('full_name')))); ?></span>
           </a>
           <ul class="dropdown-menu dropdown-menu-end">
             <li class="user-header">
               <img src="<?= BASE_URL.'uploads/user/'.(!empty(get_user_data('avatar')) ? get_user_data('avatar') :'default.png'); ?>" class="rounded-circle" alt="User Image">
 
               <p>
-                <?= _ent(ucwords(clean_snake_case($this->aauth->get_user()->full_name))); ?>
+                <?= _ent(format_person_name(clean_snake_case($this->aauth->get_user()->full_name))); ?>
                 <small>Login Terakhir, <?= date('Y-M-D', strtotime(get_user_data('last_login'))); ?></small>
               </p>
             </li>
 
             <li class="user-footer">
               <div class="float-start">
-                <a href="<?= site_url('administrator/user/profile'); ?>" class="btn btn-default btn-flat"><?= cclang('profile'); ?></a>
+                <a href="<?= site_url('administrator/profile'); ?>" class="btn btn-default btn-flat"><?= cclang('profile'); ?></a>
               </div>
               <div class="float-end">
-                <a href="<?= site_url('administrator/auth/logout'); ?>" class="btn btn-default btn-flat"><?= cclang('sign_out'); ?></a>
+                <a href="<?= site_url('administrator/logout'); ?>" class="btn btn-default btn-flat"><?= cclang('sign_out'); ?></a>
               </div>
             </li>
           </ul>
@@ -76,19 +93,47 @@
     </div>
   </nav>
 
-  <aside class="app-sidebar bg-body-secondary shadow" data-bs-theme="dark">
+  <aside class="app-sidebar" data-bs-theme="dark">
     <div class="sidebar-brand">
-      <a href="<?= site_url('/'); ?>" class="brand-link">
-        <span class="brand-text fw-light"><?= get_option('site_name'); ?></span>
+      <a href="<?= site_url('administrator/dashboard'); ?>" class="brand-link">
+        <span class="brand-mark">
+          <img src="<?= base_url('assets/assets-guest/img/kemenkumham.png'); ?>" alt="" aria-hidden="true">
+        </span>
+        <span class="brand-copy">
+          <strong><?= get_option('site_name'); ?></strong>
+          <small>Kemenkum Sulawesi Tenggara</small>
+        </span>
+        <span class="brand-mode">ADMIN</span>
       </a>
     </div>
 
     <div class="sidebar-wrapper">
-      <nav class="mt-2" aria-label="Main navigation">
+      <nav aria-label="Main navigation">
         <ul class="nav sidebar-menu flex-column" data-lte-toggle="treeview" data-accordion="false">
+          <!-- DASHBOARD MENU -->
+          <li class="nav-item">
+            <a href="<?= site_url('administrator/dashboard'); ?>" class="nav-link <?= ($this->uri->segment(2) == 'dashboard' || $this->uri->segment(2) == '') ? 'active' : ''; ?>">
+              <i class="nav-icon fa fa-th-large"></i>
+              <p>Dashboard</p>
+            </a>
+          </li>
+          <!-- DYNAMIC MENU -->
           <?= display_menu_admin(0, 1); ?>
         </ul>
       </nav>
+    </div>
+
+    <div class="sidebar-account">
+      <a href="<?= site_url('administrator/profile'); ?>" class="sidebar-account__profile" title="Buka profil saya">
+        <img src="<?= BASE_URL.'uploads/user/'.(!empty(get_user_data('avatar')) ? get_user_data('avatar') :'default.png'); ?>" alt="Foto <?= _ent(get_user_data('full_name')); ?>">
+        <span class="sidebar-account__copy">
+          <strong><?= _ent(format_person_name(clean_snake_case(get_user_data('full_name')))); ?></strong>
+          <small>Akun Administrator</small>
+        </span>
+      </a>
+      <a href="<?= site_url('administrator/logout'); ?>" class="sidebar-account__logout" title="Keluar" aria-label="Keluar dari akun">
+        <i class="fa fa-sign-out"></i>
+      </a>
     </div>
   </aside>
 
@@ -106,8 +151,8 @@
     <div class="float-end d-none d-sm-inline">
       <b><?= cclang('version') ?></b> <?= VERSION ?>
     </div>
-    <strong>Copyright &copy; 2016-<?=date('Y'); ?> <a href="#"><?= get_option('site_name'); ?></a>.</strong> All rights
-    reserved.
+    <strong>&copy; 2016-<?=date('Y'); ?> <?= get_option('site_name'); ?></strong>
+    <span class="footer-divider">Kantor Wilayah Kementerian Hukum Sulawesi Tenggara</span>
   </footer>
 
 </div>
@@ -116,16 +161,104 @@
 
 <?= $this->cc_html->getCssFileBottom(); ?>
 
-<script src="<?= BASE_ASSET; ?>/jquery4/jquery.min.js"></script>
-<script src="<?= BASE_ASSET; ?>/jquery4/jquery-compat-shim.js"></script>
 <script src="<?= BASE_ASSET; ?>/bootstrap5/js/bootstrap.bundle.min.js"></script>
 <script src="<?= BASE_ASSET; ?>/admin-lte4/js/adminlte.js"></script>
+
+<script>
+  // Bridge legacy Bootstrap 3 markup used by generated administrator views.
+  document.querySelectorAll('[data-toggle]').forEach(function (element) {
+    element.setAttribute('data-bs-toggle', element.getAttribute('data-toggle'));
+  });
+  document.querySelectorAll('[data-parent]').forEach(function (element) {
+    element.setAttribute('data-bs-parent', element.getAttribute('data-parent'));
+  });
+  document.querySelectorAll('.nav-tabs a[data-toggle="tab"], .nav-tabs a[data-bs-toggle="tab"]').forEach(function (tab) {
+    tab.classList.add('nav-link');
+    if (tab.parentElement.classList.contains('active')) {
+      tab.classList.add('active');
+    }
+    tab.addEventListener('shown.bs.tab', function () {
+      tab.closest('.nav-tabs').querySelectorAll('li').forEach(function (item) {
+        item.classList.toggle('active', item.contains(tab));
+      });
+    });
+  });
+</script>
 
 <script>
   var BASE_URL = "<?= base_url(); ?>";
   var HTTP_REFERER = "<?= isset($_SERVER['HTTP_REFERER']) ? $_SERVER['HTTP_REFERER'] : '/' ; ?>";
   var csrf = '<?= $this->security->get_csrf_token_name(); ?>';
   var token = '<?= $this->security->get_csrf_hash(); ?>';
+</script>
+
+<script>
+  (function () {
+    function getCancelFallbackUrl() {
+      var currentUrl = new URL(window.location.href);
+      var referer = document.referrer;
+
+      if (referer) {
+        try {
+          var refererUrl = new URL(referer, window.location.origin);
+          var isSafeReferer = refererUrl.origin === window.location.origin &&
+            !/(?:^|\/)delete(?:\/|$)/i.test(refererUrl.pathname);
+
+          if (isSafeReferer && refererUrl.href !== currentUrl.href) {
+            return refererUrl.href;
+          }
+        } catch (error) {
+          // Gunakan URL daftar yang diturunkan dari alamat halaman saat ini.
+        }
+      }
+
+      currentUrl.pathname = currentUrl.pathname.replace(
+        /\/(?:add|edit|update)(?:\/.*)?\/?$/i,
+        ''
+      );
+      currentUrl.search = '';
+      currentUrl.hash = '';
+
+      return currentUrl.href;
+    }
+
+    function cancelForm(event) {
+      if (event) {
+        event.preventDefault();
+        event.stopImmediatePropagation();
+      }
+
+      if (window.history.length > 1) {
+        window.history.back();
+        return false;
+      }
+
+      window.location.assign(getCancelFallbackUrl());
+      return false;
+    }
+
+    // Menangkap klik sebelum handler lama halaman menjalankan dialog penghapusan.
+    document.addEventListener('click', function (event) {
+      var cancelButton = event.target.closest('#btn_cancel');
+      if (cancelButton) {
+        cancelForm(event);
+      }
+    }, true);
+
+    $(document).ready(function () {
+      var cancelButton = $('#btn_cancel');
+
+      if (!cancelButton.length) {
+        return;
+      }
+
+      cancelButton
+        .attr('role', 'button')
+        .attr('href', getCancelFallbackUrl())
+        .off('click')
+        .on('click.adminCancel', cancelForm);
+    });
+  })();
 </script>
 
 <script src="<?= BASE_ASSET; ?>/admin-lte/plugins/iCheck/icheck.min.js"></script>
@@ -139,13 +272,24 @@
 <script src="<?= BASE_ASSET; ?>/editor/dist/js/medium-editor.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/chosen/1.6.2/chosen.jquery.min.js" type="text/javascript"></script>
 <script src="<?= BASE_ASSET; ?>jquery-ui/jquery-ui.js"></script>
-<script src="<?= BASE_ASSET; ?>jquery-switch-button/jquery.switchButton.js"></script>
+<script src="<?= BASE_ASSET; ?>jquery-switch-button/jquery.switchButton.js?v=<?= @filemtime(FCPATH.'asset/jquery-switch-button/jquery.switchButton.js'); ?>"></script>
 <script src="<?= BASE_ASSET; ?>/js/jquery.ui.touch-punch.js"></script>
 <script src="<?= BASE_ASSET; ?>js-scroll/script/jquery.jscrollpane.min.js"></script>
+<script src="https://cdn.datatables.net/3.0.2/js/dataTables.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.7/pdfmake.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.7/vfs_fonts.js"></script>
+<script src="https://cdn.datatables.net/buttons/4.0.2/js/dataTables.buttons.min.js"></script>
+<script src="https://cdn.datatables.net/buttons/4.0.2/js/buttons.colVis.min.js"></script>
+<script src="https://cdn.datatables.net/buttons/4.0.2/js/buttons.html5.min.js"></script>
+<script src="https://cdn.datatables.net/buttons/4.0.2/js/buttons.print.min.js"></script>
 
 <script src="<?= BASE_ASSET; ?>js/cc-extension.js"></script>
 <script src="<?= BASE_ASSET; ?>/js/cc-page-element.js"></script>
 <script src="<?= BASE_ASSET; ?>/js/custom.js"></script>
+<script src="<?= BASE_ASSET; ?>/js/admin-ui.js?v=<?= @filemtime(FCPATH.'asset/js/admin-ui.js'); ?>"></script>
+<script src="<?= BASE_ASSET; ?>/js/admin-datatables.js?v=<?= @filemtime(FCPATH.'asset/js/admin-datatables.js'); ?>"></script>
+<script src="<?= BASE_ASSET; ?>/js/admin-navigation.js?v=<?= @filemtime(FCPATH.'asset/js/admin-navigation.js'); ?>"></script>
 
 <?= $this->cc_html->getScriptFileBottom(); ?>
 
@@ -154,6 +298,9 @@
 
     toastr.options = {
       "positionClass": "toast-top-right",
+      "preventDuplicates": true,
+      "newestOnTop": true,
+      "timeOut": 3500,
     }
 
     var f_message = '<?= $this->session->flashdata('f_message'); ?>';

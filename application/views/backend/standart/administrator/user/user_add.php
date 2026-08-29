@@ -281,16 +281,22 @@ jQuery(document).ready(domo);
         },
         multiple: false,
         validation: {
-            allowedExtensions: ['jpeg', 'jpg', 'gif', 'png']
+            allowedExtensions: ['jpeg', 'jpg', 'gif', 'png'],
+            sizeLimit: 5 * 1024 * 1024
         },
         showMessage: function(msg) {
             toastr['error'](msg);
         },
         callbacks: {
-            onComplete: function(id, name) {
+            onComplete: function(id, name, responseJSON) {
+                if (!responseJSON.success) {
+                    $('#user_avatar_uuid').val('');
+                    $('#user_avatar_name').val('');
+                    return;
+                }
                 var uuid = $('#user_avatar_galery').fineUploader('getUuid', id);
                 $('#user_avatar_uuid').val(uuid);
-                $('#user_avatar_name').val(name);
+                $('#user_avatar_name').val(responseJSON.uploadName || name);
             },
             onSubmit: function(id, name) {
                 var uuid = $('#user_avatar_uuid').val();

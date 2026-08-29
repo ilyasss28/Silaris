@@ -1,55 +1,25 @@
 <?php
-  $total_notaris = is_array($notaris) ? count($notaris) : 0;
-  $total_wilayah = is_array($wilayah) ? count($wilayah) : 0;
+/**
+ * @var array $wilayah
+ */
 ?>
 <main id="main">
 
-    <!-- ======= Hero / Search ======= -->
-    <section class="guest-hero">
+    <!-- ======= Hero ======= -->
+    <section class="guest-hero hero-showcase">
       <span class="hero-orb hero-orb-1" aria-hidden="true"></span>
       <span class="hero-orb hero-orb-2" aria-hidden="true"></span>
       <span class="hero-orb hero-orb-3" aria-hidden="true"></span>
       <div class="container">
-        <div class="row justify-content-center">
-          <div class="col-lg-9 text-center">
-            <span class="hero-badge"><i class="dot"></i> KANWIL KEMENKUM SULAWESI TENGGARA <i class="dot"></i></span>
-            <h1 class="hero-title">TEMUKAN NOTARIS <em>ANDA</em></h1>
-            <p class="lead">Cari data notaris terdaftar di Sulawesi Tenggara berdasarkan nama atau wilayah kerja, langsung dari basis data resmi SILARIS.</p>
-
-            <form id="w0" action="<?php echo base_url().'home/index'?>" method="get" class="search-card">
-              <input type="hidden" name="r" value="site/detail-notaris">
-              <input type="text" id="nama" placeholder="Cari nama notaris...">
-              <input type="hidden" id="id_notaris" name="id">
-              <input type="submit" value="Cari">
-            </form>
-
-            <!-- ======= Quick stats ======= -->
-            <div class="row stat-row justify-content-center">
-              <div class="col-6 col-md-3">
-                <div class="stat-tile">
-                  <div class="stat-number"><?php echo $total_notaris; ?>+</div>
-                  <div class="stat-label">Notaris Terdaftar</div>
-                </div>
-              </div>
-              <div class="col-6 col-md-3">
-                <div class="stat-tile">
-                  <div class="stat-number"><?php echo $total_wilayah; ?></div>
-                  <div class="stat-label">Kabupaten / Kota</div>
-                </div>
-              </div>
-              <div class="col-6 col-md-3">
-                <div class="stat-tile">
-                  <div class="stat-number">24/7</div>
-                  <div class="stat-label">Layanan Pencarian Online</div>
-                </div>
-              </div>
-              <div class="col-6 col-md-3">
-                <div class="stat-tile">
-                  <div class="stat-number">Gratis</div>
-                  <div class="stat-label">Tanpa Biaya</div>
-                </div>
-              </div>
-            </div>
+        <div class="row hero-grid">
+          <div class="col-lg-6 hero-copy">
+            <span class="hero-badge fade-in-up" style="animation-delay: 0.1s;"><i class="dot"></i> Sistem Pelaporan Notaris <i class="dot"></i></span>
+            <h1 class="hero-title fade-in-up" style="animation-delay: 0.2s;">Kanwil Kemenkum <span class="highlight">Sultra</span></h1>
+            <p class="lead fade-in-up" style="animation-delay: 0.3s;">Kanal resmi pelaporan, pemeriksaan, dan pengawasan kenotariatan di wilayah Sulawesi Tenggara.</p>
+          </div>
+          <div class="col-lg-6 hero-media fade-in-up" style="animation-delay: 0.4s;">
+            <span class="hero-media-glow" aria-hidden="true"></span>
+            <img src="<?php echo base_url('assets')?>/assets-guest/img/Model.png" alt="Sistem Pelaporan Notaris - Kanwil Kemenkum Sulawesi Tenggara" class="hero-photo">
           </div>
         </div>
       </div>
@@ -59,7 +29,7 @@
     <section id="about" class="about-section">
       <div class="container">
         <div class="row align-items-center">
-          <div class="col-lg-6">
+          <div class="col-lg-6" data-aos="fade-right">
             <span class="eyebrow eyebrow-dark"><i class="icofont-info-circle"></i> Tentang SILARIS</span>
             <h2>Sistem Pelaporan Notaris Terintegrasi</h2>
             <p>SILARIS adalah kanal resmi Kantor Wilayah Kementerian Hukum dan HAM Sulawesi Tenggara untuk pelaporan dan pemantauan kepatuhan notaris. Melalui sistem ini, masyarakat dapat mencari data notaris terdaftar, sementara notaris dapat menyampaikan laporan bulanan secara daring.</p>
@@ -69,7 +39,7 @@
               <li><i class="icofont-check-circled"></i> Pelaporan kepatuhan notaris daring</li>
             </ul>
           </div>
-          <div class="col-lg-6">
+          <div class="col-lg-6" data-aos="fade-left" data-aos-delay="200">
             <div class="steps">
               <div class="step">
                 <div class="step-num">1</div>
@@ -102,16 +72,23 @@
     <section id="services" class="services">
       <div class="container">
 
-        <div class="section-title">
+        <div class="section-title" data-aos="fade-up">
           <h2>Sebaran Notaris</h2>
           <p>Sebaran Notaris di Kabupaten / Kota Wilayah Sulawesi Tenggara</p>
         </div>
 
         <div class="row">
-        <?php foreach ($wilayah as $wilayah) : ?>
-                <div class="col-lg-4 mb-4">
+        <?php $aos_delay = 100; foreach ($wilayah as $wilayah) : ?>
+                <div class="col-lg-4 mb-4" data-aos="zoom-in" data-aos-delay="<?php echo $aos_delay; ?>">
+                <?php 
+                $nama_wilayah = $wilayah['wilayah'];
+                $singkatan = array('Butur', 'Busel', 'Buteng', 'Konut', 'Konsel', 'Kolut', 'Koltim', 'Mubar');
+                $panjang = array('Buton Utara', 'Buton Selatan', 'Buton Tengah', 'Konawe Utara', 'Konawe Selatan', 'Kolaka Utara', 'Kolaka Timur', 'Muna Barat');
+                $nama_wilayah = str_ireplace($singkatan, $panjang, $nama_wilayah);
+                ?>
+                <a href="<?= site_url('daftar/'.$wilayah['kode_wilayah']); ?>" style="text-decoration: none; color: inherit; display: block;">
                   <div class="icon-box2">
-                    <h3><a href="<?php echo base_url('daftar/').$wilayah['kode_wilayah']?>"><?php echo $wilayah['wilayah']; ?></a></h3>
+                    <h3><?php echo $nama_wilayah; ?></h3>
                     <hr>
                     <div class="row align-items-center">
                       <div class="col-lg-1 col-2">
@@ -121,20 +98,21 @@
                         <p><b><?php echo $wilayah['jumlah']; ?></b> Notaris</p>
                       </div>
                       <div class="col-lg-1 col-2">
-                        <a href="<?php echo base_url('daftar/').$wilayah['kode_wilayah']?>"><i class="icofont-circled-right"></i></a>
+                        <i class="icofont-circled-right"></i>
                       </div>
                     </div>
                   </div>
+                </a>
                 </div>
-                <?php endforeach;?>
+                <?php $aos_delay = ($aos_delay >= 300) ? 100 : $aos_delay + 100; endforeach;?>
         </div>
 
         <!-- peta -->
-        <div class="section-title" style="margin-top: 40px;">
+        <div class="section-title" style="margin-top: 40px;" data-aos="fade-up">
           <h2>Peta Sebaran</h2>
           <p>Sebaran Notaris Dalam Peta</p>
         </div>
-        <div class="map-wrap">
+        <div class="map-wrap" data-aos="zoom-in" data-aos-delay="200">
           <iframe src="https://www.google.com/maps/d/u/0/embed?mid=1PsHUAFrHwxpJ0lW8Gpo8ojdFrG5ugm4&ehbc=2E312F" width="100%" height="500"></iframe>
         </div>
 
@@ -144,10 +122,10 @@
     <!-- ======= Our Clients Section ======= -->
     <section id="clients" class="clients">
       <div class="container">
-        <div class="section-title">
+        <div class="section-title" data-aos="fade-up">
           <h2>Mitra &amp; Kolaborasi</h2>
         </div>
-        <div class="owl-carousel clients-carousel">
+        <div class="owl-carousel clients-carousel" data-aos="fade-up" data-aos-delay="200">
           <img src="<?php echo base_url('assets')?>/assets-guest/img/logo/wbbm.png" alt="">
           <img src="<?php echo base_url('assets')?>/assets-guest/img/logo/kemenkumham.png" alt="">
           <img src="<?php echo base_url('assets')?>/assets-guest/img/logo/coorporate.png" alt="">

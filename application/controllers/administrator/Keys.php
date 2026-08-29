@@ -72,16 +72,31 @@ class Keys extends Admin
             ]);
         }
 
-        $this->form_validation->set_rules('key', 'Key', 'trim|required|max_length[40]');
+        $this->form_validation->set_rules('key', 'Key', 'trim|required|min_length[16]|max_length[40]');
+        $this->form_validation->set_rules('level', 'Level', 'trim|required|integer|greater_than_equal_to[0]|less_than_equal_to[99]');
 
         if ($this->form_validation->run()) {
 
+            $key = trim($this->input->post('key'));
+            if ($this->db->where('key', $key)->count_all_results('keys')) {
+                return $this->response(['success' => false, 'message' => 'API key sudah digunakan. Buat key yang berbeda.']);
+            }
+
+            $ip_addresses = $this->normalize_ip_addresses($this->input->post('ip_addresses'));
+            if ($ip_addresses === false) {
+                return $this->response(['success' => false, 'message' => 'Daftar IP tidak valid. Pisahkan setiap alamat IP dengan koma atau baris baru.']);
+            }
+            if ($this->input->post('is_private_key') && empty($ip_addresses)) {
+                return $this->response(['success' => false, 'message' => 'Isi minimal satu alamat IP ketika pembatasan IP diaktifkan.']);
+            }
+
             $save_data = [
-                'key'            => $this->input->post('key'),
-                'level'          => 0,
-                'ignore_limits'  => 1,
-                'is_private_key' => 0,
-                'ip_addresses'   => $this->input->post('ip_addresses'),
+                'user_id'        => (int) get_user_data('id'),
+                'key'            => $key,
+                'level'          => (int) $this->input->post('level'),
+                'ignore_limits'  => $this->input->post('ignore_limits') ? 1 : 0,
+                'is_private_key' => $this->input->post('is_private_key') ? 1 : 0,
+                'ip_addresses'   => $ip_addresses,
             ];
 
             $save_keys = $this->model_keys->store($save_data);
@@ -133,6 +148,10 @@ class Keys extends Admin
 
         $this->data['keys'] = $this->model_keys->find($id);
 
+        if (!$this->data['keys']) {
+            show_404();
+        }
+
         $this->template->title('API Keys Update');
         $this->render('backend/standart/administrator/keys/keys_update', $this->data);
     }
@@ -151,16 +170,35 @@ class Keys extends Admin
             ]);
         }
 
-        $this->form_validation->set_rules('key', 'Key', 'trim|required|max_length[40]');
+        $this->form_validation->set_rules('key', 'Key', 'trim|required|min_length[16]|max_length[40]');
+        $this->form_validation->set_rules('level', 'Level', 'trim|required|integer|greater_than_equal_to[0]|less_than_equal_to[99]');
 
         if ($this->form_validation->run()) {
 
+            $id = (int) $id;
+            if (!$this->model_keys->find($id)) {
+                return $this->response(['success' => false, 'message' => 'API key tidak ditemukan.']);
+            }
+
+            $key = trim($this->input->post('key'));
+            if ($this->db->where('key', $key)->where('id !=', $id)->count_all_results('keys')) {
+                return $this->response(['success' => false, 'message' => 'API key sudah digunakan. Buat key yang berbeda.']);
+            }
+
+            $ip_addresses = $this->normalize_ip_addresses($this->input->post('ip_addresses'));
+            if ($ip_addresses === false) {
+                return $this->response(['success' => false, 'message' => 'Daftar IP tidak valid. Pisahkan setiap alamat IP dengan koma atau baris baru.']);
+            }
+            if ($this->input->post('is_private_key') && empty($ip_addresses)) {
+                return $this->response(['success' => false, 'message' => 'Isi minimal satu alamat IP ketika pembatasan IP diaktifkan.']);
+            }
+
             $save_data = [
-                'key'            => $this->input->post('key'),
-                'level'          => $this->input->post('level'),
-                'ignore_limits'  => $this->input->post('ignore_limits'),
-                'is_private_key' => $this->input->post('is_private_key'),
-                'ip_addresses'   => $this->input->post('ip_addresses'),
+                'key'            => $key,
+                'level'          => (int) $this->input->post('level'),
+                'ignore_limits'  => $this->input->post('ignore_limits') ? 1 : 0,
+                'is_private_key' => $this->input->post('is_private_key') ? 1 : 0,
+                'ip_addresses'   => $ip_addresses,
             ];
 
             $save_keys = $this->model_keys->change($id, $save_data);
@@ -210,11 +248,12 @@ class Keys extends Admin
         $this->load->helper('file');
 
         $arr_id = $this->input->get('id');
+        $arr_id = is_array($arr_id) ? array_values(array_unique(array_map('intval', $arr_id))) : [];
         $remove = false;
 
         if (!empty($id)) {
             $remove = $this->_remove($id);
-        } elseif (count($arr_id) > 0) {
+        } elseif (!empty($arr_id)) {
             foreach ($arr_id as $id) {
                 $remove = $this->_remove($id);
             }
@@ -240,6 +279,10 @@ class Keys extends Admin
 
         $this->data['keys'] = $this->model_keys->find($id);
 
+        if (!$this->data['keys']) {
+            show_404();
+        }
+
         $this->template->title('API Keys Detail');
         $this->render('backend/standart/administrator/keys/keys_view', $this->data);
     }
@@ -251,9 +294,30 @@ class Keys extends Admin
      */
     private function _remove($id)
     {
-        $keys = $this->model_keys->find($id);
+        $id = (int) $id;
+        return $id > 0 && $this->model_keys->find($id) ? $this->model_keys->remove($id) : false;
+    }
 
-        return $this->model_keys->remove($id);
+    /**
+     * Normalize a comma/newline-separated IP allowlist for REST_Controller.
+     * An empty value means the key is not restricted by source IP.
+     */
+    private function normalize_ip_addresses($value)
+    {
+        $value = trim((string) $value);
+        if ($value === '') {
+            return null;
+        }
+
+        $addresses = preg_split('/[\s,;]+/', $value, -1, PREG_SPLIT_NO_EMPTY);
+        $addresses = array_values(array_unique(array_map('trim', $addresses)));
+        foreach ($addresses as $address) {
+            if (!filter_var($address, FILTER_VALIDATE_IP)) {
+                return false;
+            }
+        }
+
+        return implode(',', $addresses);
     }
 
     /**

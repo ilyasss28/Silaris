@@ -25,11 +25,11 @@
             <?php if ($row->primary_key == 1) { ?>
             <input type="hidden" name="primary_key" value="<?= $row->primary_key == 1? $row->name : ''; ?>" >
             <?php } ?>
-            <input type="hidden" class="rest-id" id="rest-id" value="<?= $i; ?>" >
-            <input type="hidden" class="rest-name" id="rest-name" value="<?= $row->name; ?>" >
-            <input type="hidden" class="rest-data-type" id="rest-data-type" value="<?= $row->type; ?>" >
-            <input type="hidden" class="rest-primarykey" id="rest-primarykey" value="<?= $row->primary_key; ?>" >
-            <input type="hidden" class="rest-max-length" id="rest-max-length" value="<?= $row->max_length; ?>" >
+            <input type="hidden" class="rest-id" value="<?= $i; ?>" >
+            <input type="hidden" class="rest-name" value="<?= _ent($row->name); ?>" >
+            <input type="hidden" class="rest-data-type" value="<?= _ent($row->type); ?>" >
+            <input type="hidden" class="rest-primarykey" value="<?= $row->primary_key; ?>" >
+            <input type="hidden" class="rest-max-length" value="<?= $row->max_length; ?>" >
          </td>
          <td>
             <?= $row->name; ?>   
@@ -49,14 +49,17 @@
          <td>
             <div class="col-md-12">
                <div class="form-group ">
-                  <select  class="form-control chosen chosen-select input_type" name="rest[<?=$i; ?>][<?=$row->name; ?>][input_type]" id="input_type" tabi-ndex="5" data-placeholder="Select Type" >
+                  <select class="form-control chosen chosen-select input_type" name="rest[<?=$i; ?>][<?=$row->name; ?>][input_type]" data-placeholder="Pilih tipe input">
                      <option value="" class="<?= $this->model_rest->get_input_type(); ?>"></option>
-                     <?php foreach (db_get_all_data('rest_input_type') as $input): 
-                        if ($input->type == 'input') {
-                           $selected = 'selected';
-                        } else {
-                           $selected = '';
+                     <?php
+                        $default_input = 'input';
+                        if (preg_match('/image|photo|img|file/i', $row->name)) {
+                           $default_input = 'file';
+                        } elseif (in_array(strtolower($row->type), ['timestamp', 'datetime', 'date'], true)) {
+                           $default_input = 'timestamp';
                         }
+                        foreach (db_get_all_data('rest_input_type') as $input):
+                           $selected = $input->type === $default_input ? 'selected' : '';
                      ?>
                      <option value="<?= $input->type; ?>" class="<?= $input->type; ?>" title="<?= $input->validation_group; ?>"  <?= $selected; ?>><?= _ent(ucwords(clean_snake_case($input->type))); ?></option>
                      <?php endforeach; ?>
@@ -67,7 +70,7 @@
          <td>
             <div class="col-md-12">
                <div class="form-group ">
-                  <select  class="form-control chosen chosen-select validation" name="rest[<?=$i; ?>][<?=$row->name; ?>][validation]" id="validation" tabi-ndex="5" data-placeholder="+ Add Rules">
+                  <select class="form-control chosen chosen-select validation" name="rest[<?=$i; ?>][<?=$row->name; ?>][validation]" data-placeholder="+ Tambah aturan">
                       <option value="" class="input file number text datetime select"></option>
                       <?php 
                       foreach (db_get_all_data('crud_input_validation') as $input): 

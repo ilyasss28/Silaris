@@ -1,7 +1,7 @@
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.12.4/css/bootstrap-select.min.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-select@1.14.0-beta3/dist/css/bootstrap-select.min.css">
 
 <!-- Latest compiled and minified JavaScript -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.12.4/js/bootstrap-select.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap-select@1.14.0-beta3/dist/js/bootstrap-select.min.js"></script>
   <link rel="stylesheet" href="<?= BASE_ASSET; ?>flag-icon/css/flag-icon.css" rel="stylesheet" media="all" />
 
 
@@ -80,11 +80,11 @@ jQuery(document).ready(domo);
                       <!-- Custom Tabs -->
                       <div class="nav-tabs-custom">
                         <ul class="nav nav-tabs">
-                          <li class="<?= empty($this->input->get('tab')) ? 'active' : '' ?>"><a href="#tab_general" class="tab_group" data-toggle="tab"><i class="fa fa-compass text-green"></i> <?= cclang('site_general'); ?></a></li>
+                          <li class="<?= empty($this->input->get('tab')) ? 'active' : '' ?>"><a href="#tab_general" class="tab_group" data-bs-toggle="tab"><i class="fa fa-compass text-green"></i> <?= cclang('site_general'); ?></a></li>
 
-                          <li class=""><a href="#tab_oauth" class="tab_group" data-toggle="tab"><i class="fa fa-chrome text-green"></i> Oauth</a></li>
+                          <li class=""><a href="#tab_oauth" class="tab_group" data-bs-toggle="tab"><i class="fa fa-chrome text-green"></i> Oauth</a></li>
 
-                          <li class=""><a href="#tab_system" class="tab_group" data-toggle="tab"><i class="fa fa-tv text-green"></i> <?= cclang('system'); ?></a></li>
+                          <li class=""><a href="#tab_system" class="tab_group" data-bs-toggle="tab"><i class="fa fa-tv text-green"></i> <?= cclang('system'); ?></a></li>
                        
                           <?= cicool()->renderTabSetting() ?>
                        
@@ -215,7 +215,7 @@ jQuery(document).ready(domo);
                                     <div class="panel panel-default">
                                       <div class="panel-heading">
                                         <h4 class="panel-title">
-                                          <a data-toggle="collapse" data-parent="#accordion" href="#collapse1">
+                                          <a data-bs-toggle="collapse" data-bs-parent="#accordion" href="#collapse1">
                                           <b class="text-green"><?= cclang('session') ?></b> <?= cclang('configuration') ?></a>
                                         </h4>
                                       </div>
@@ -280,7 +280,7 @@ jQuery(document).ready(domo);
                                     <div class="panel panel-default">
                                       <div class="panel-heading">
                                         <h4 class="panel-title">
-                                          <a data-toggle="collapse" data-parent="#accordion" href="#collapse2">
+                                          <a data-bs-toggle="collapse" data-bs-parent="#accordion" href="#collapse2">
                                           <b class="text-green">CSRF</b> <?= cclang('configuration') ?></a>
                                         </h4>
                                       </div>
@@ -328,7 +328,7 @@ jQuery(document).ready(domo);
                                     <div class="panel panel-default">
                                       <div class="panel-heading">
                                         <h4 class="panel-title">
-                                          <a data-toggle="collapse" data-parent="#accordion" href="#collapse3">
+                                          <a data-bs-toggle="collapse" data-bs-parent="#accordion" href="#collapse3">
                                           <b class="text-green"><?= cclang('other') ?></b> <?= cclang('configuration') ?></a>
                                         </h4>
                                       </div>
@@ -396,7 +396,7 @@ jQuery(document).ready(domo);
                                     <div class="panel panel-default">
                                       <div class="panel-heading">
                                         <h4 class="panel-title">
-                                          <a data-toggle="collapse" data-parent="#accordion" href="#collapse1">
+                                          <a data-bs-toggle="collapse" data-bs-parent="#accordion" href="#collapse1">
                                           <b class="text-green">Google</b> </a>
                                         </h4>
                                       </div>

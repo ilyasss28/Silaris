@@ -9,7 +9,7 @@
         </div>
 
 
-        <ul class="breadcrumb"><li><a class="homeLink" href="<?php echo base_url().'home/index'?>"><i class="icofont-home"></i> Beranda/</a></li>
+        <ul class="breadcrumb"><li><a class="homeLink" href="<?= site_url('home'); ?>"><i class="icofont-home"></i> Beranda/</a></li>
 <li class="active"> Profil <?php echo $nama_notaris; ?></li>
 </ul>      <!-- NOTARIS -->
       <div class="row">
@@ -86,7 +86,7 @@
                     
                                         
                     <ol class="carousel-indicators">
-                                                    <li data-target="#myCarousel" data-slide-to="0" class="active" ></li>
+                                                    <li data-bs-target="#myCarousel" data-bs-slide-to="0" class="active"></li>
                                             </ol>
 
                     

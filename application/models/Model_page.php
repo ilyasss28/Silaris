@@ -82,7 +82,7 @@ class Model_page extends MY_Model {
 		return $query->result();
 	}
 
-	public function get_page_by_slug($slug = null, $page_type) {
+	public function get_page_by_slug($slug = null, $page_type = null) {
 		$this->db->where('link', $slug);
 		$this->db->where('type', $page_type);
 		$query = $this->db->get($this->table_name);

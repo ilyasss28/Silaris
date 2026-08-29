@@ -52,7 +52,7 @@
                   <div class="form-group ">
                      <label for="table_name" class="col-sm-2 control-label">Table <i class="required">*</i></label>
                      <div class="col-sm-8">
-                        <select  class="form-control chosen chosen-select chosen-select-with-deselect" name="table_name" id="table_name" tabi-ndex="5" data-placeholder="Select Table" >
+                        <select class="form-control chosen chosen-select chosen-select-with-deselect" name="table_name" id="table_name" data-placeholder="Pilih tabel" required>
                            <option value=""></option>
                            <?php foreach ($tables as $row): ?>
                            <option value="<?= $row; ?>"><?= $row; ?></option>
@@ -66,9 +66,9 @@
                      </div>
                   </div>
                   <div class="form-group ">
-                     <label for="label" class="col-sm-2 control-label">Subject <i class="required">*</i></label>
+                     <label for="subject" class="col-sm-2 control-label">Subject <i class="required">*</i></label>
                      <div class="col-sm-8">
-                        <input type="text" class="form-control" name="subject" id="subject" placeholder="Subject" value="<?= set_value('subject'); ?>">
+                        <input type="text" class="form-control" name="subject" id="subject" placeholder="Subject" value="<?= set_value('subject'); ?>" required>
                         <small class="info help-block">The subject of rest.</small>
                      </div>
                   </div>
@@ -96,9 +96,9 @@
                   <div class="message no-message-padding">
                   </div>
                   <div class="view-nav">
-                      <button class="btn btn-flat btn-primary btn_save btn_action" id="btn_save" data-stype='stay' title="save (Ctrl+s)"><i class="fa fa-save" ></i> <?= cclang('save_button'); ?></button>
-                     <a class="btn btn-flat btn-info btn_save btn_action btn_save_back" id="btn_save" data-stype='back' title="<?= cclang('save_and_go_the_list_button'); ?> (Ctrl+d)"><i class="ion ion-ios-list-outline" ></i> <?= cclang('save_and_go_the_list_button'); ?></a>
-                     <a class="btn btn-flat btn-default btn_action" id="btn_cancel" title="<?= cclang('cancel_button'); ?> (Ctrl+x)"><i class="fa fa-undo" ></i> <?= cclang('cancel_button'); ?></a>
+                     <button type="button" class="btn btn-flat btn-primary btn_save btn_action" id="btn_save" data-stype="stay" title="Simpan (Ctrl+s)"><i class="fa fa-save"></i> <?= cclang('save_button'); ?></button>
+                     <button type="button" class="btn btn-flat btn-info btn_save btn_action btn_save_back" id="btn_save_back" data-stype="back" title="<?= cclang('save_and_go_the_list_button'); ?> (Ctrl+d)"><i class="ion ion-ios-list-outline"></i> <?= cclang('save_and_go_the_list_button'); ?></button>
+                     <a class="btn btn-flat btn-default btn_action" id="btn_cancel" href="<?= site_url('administrator/rest'); ?>" title="Kembali ke daftar REST (Ctrl+x)"><i class="fa fa-undo"></i> <?= cclang('cancel_button'); ?></a>
                      <span class="loading loading-hide"><img src="<?= BASE_ASSET; ?>/img/loading-spin-primary.svg"> <i><?= cclang('loading_saving_data'); ?></i></span>
                   </div>
                   <?= form_close(); ?>
@@ -110,151 +110,152 @@
       </div>
    </div>
 </section>
-<script src="<?= BASE_ASSET; ?>ckeditor/ckeditor.js"></script>
 <script src="<?= BASE_ASSET; ?>js/rest.js"></script>
 <!-- Page script -->
 <script>
-$(document).ready(function() {
-    $('#table_name').val('').trigger('chosen:updated');
+$(function () {
+    var request = null;
+    var saving = false;
+    var fieldsReady = false;
+    var $form = $('#form_rest');
+    var $table = $('#table_name');
+    var $buttons = $('.btn_save');
 
-    $('.btn_save').click(function() {
+    function showMessage(text, type) {
+        var $message = $('.message');
+        if ($.fn.printMessage) {
+            $message.printMessage({message: text, type: type || 'warning'});
+        } else {
+            $message.attr('class', 'message alert alert-' + (type === 'success' ? 'success' : 'warning')).html(text);
+        }
+        $message.stop(true, true).fadeIn();
+    }
+
+    function setLoading(state) {
+        $('.loading2').toggle(state);
+        $('.wrapper-rest').attr('aria-busy', state ? 'true' : 'false');
+        $table.prop('disabled', state).trigger('chosen:updated');
+        $buttons.prop('disabled', state || !fieldsReady || saving);
+    }
+
+    function initializeFields() {
+        if ($.fn.chosen) {
+            $('.wrapper-rest .chosen-select').each(function () {
+                if (!$(this).data('chosen')) $(this).chosen({width: '100%'});
+            });
+        }
+        if ($.fn.iCheck) {
+            $('.wrapper-rest input.flat-red').each(function () {
+                if (!$(this).parent().hasClass('icheckbox_minimal-red')) {
+                    $(this).iCheck({checkboxClass: 'icheckbox_minimal-red', radioClass: 'iradio_minimal-red'});
+                }
+            });
+        }
+
+        $('.wrapper-rest .input_type').each(function () { updateValidation($(this)); });
+        $('.wrapper-rest .validation').each(function () {
+            var $validation = $(this);
+            var $row = $validation.closest('tr');
+            var id = $row.find('.rest-id').val();
+            var name = $row.find('.rest-name').val();
+            var dataType = String($row.find('.rest-data-type').val() || '').toLowerCase();
+            var primaryKey = $row.find('.rest-primarykey').val();
+            var maxLength = parseInt($row.find('.rest-max-length').val(), 10) || 0;
+
+            if (primaryKey != 1) {
+                addValidation($validation, id, name, 'required', 'no');
+                if (maxLength > 0) addValidation($validation, id, name, 'max_length', 'yes', maxLength);
+            }
+            if (/^(tinyint|smallint|mediumint|int|bigint|decimal|float|double|number)$/.test(dataType)) {
+                addValidation($validation, id, name, 'number', 'no');
+            }
+        });
+    }
+
+    $table.val('').trigger('chosen:updated');
+    $buttons.prop('disabled', true);
+
+    $table.off('change.restBuilder').on('change.restBuilder', function () {
+        var tableName = $.trim($(this).val());
+        if (request) request.abort();
+        fieldsReady = false;
+        $('.message').hide();
+        $('.wrapper-rest').empty();
+        $buttons.prop('disabled', true);
+        if (!tableName) return;
+
+        setLoading(true);
+        request = $.ajax({
+            url: BASE_URL + '/administrator/rest/get_field_data/' + encodeURIComponent(tableName),
+            type: 'GET',
+            dataType: 'json'
+        }).done(function (res) {
+            if (!res || !res.success || !res.html) {
+                showMessage((res && res.message) || 'Struktur tabel tidak dapat dimuat.');
+                return;
+            }
+            $('#subject').val(res.subject || '');
+            $('.wrapper-rest').html(res.html);
+            initializeFields();
+            fieldsReady = true;
+        }).fail(function (xhr, status) {
+            if (status !== 'abort') {
+                var message = xhr.responseJSON && xhr.responseJSON.message ? xhr.responseJSON.message : 'Struktur tabel gagal dimuat. Silakan coba kembali.';
+                showMessage(message);
+            }
+        }).always(function () {
+            request = null;
+            setLoading(false);
+        });
+    });
+
+    $buttons.off('click.restBuilder').on('click.restBuilder', function () {
+        if (saving || !fieldsReady) return false;
         $('.message').hide();
 
-        var form_rest = $('#form_rest');
-        var data_post = form_rest.serializeArray();
-        var save_type = $(this).attr('data-stype');
+        if (!$table.val() || !$form.find('input[name="primary_key"]').length || !$form.find('[name^="rest["]').length) {
+            showMessage('Pilih tabel yang memiliki primary key dan tunggu sampai konfigurasi field selesai dimuat.');
+            return false;
+        }
+        if (!$form[0].checkValidity()) {
+            $form[0].reportValidity();
+            return false;
+        }
 
-        data_post.push({
-            name: 'save_type',
-            value: save_type
-        });
-
+        var saveType = $(this).data('stype');
+        var data = $form.serializeArray();
+        data.push({name: 'save_type', value: saveType});
+        saving = true;
+        $buttons.prop('disabled', true);
         $('.loading').show();
 
-        $.ajax({
-                url: BASE_URL + '/administrator/rest/add_save',
-                type: 'POST',
-                dataType: 'json',
-                data: data_post,
-            })
-            .done(function(res) {
-                if (res.success) {
-
-                    if (save_type == 'back') {
+        $.ajax({url: BASE_URL + '/administrator/rest/add_save', type: 'POST', dataType: 'json', data: data})
+            .done(function (res) {
+                if (res && res.success) {
+                    if (saveType === 'back' && res.redirect) {
                         window.location.href = res.redirect;
                         return;
                     }
-
-                    $('.message').printMessage({
-                        message: res.message
-                    });
-                    $('.message').fadeIn();
-
+                    showMessage(res.message || 'REST API berhasil dibuat.', 'success');
                 } else {
-                    $('.message').printMessage({
-                        message: res.message,
-                        type: 'warning'
-                    });
-                    $('.message').fadeIn();
+                    showMessage((res && res.message) || 'REST API tidak dapat disimpan.');
                 }
-
             })
-            .fail(function() {
-                $('.message').printMessage({
-                    message: 'Error save data',
-                    type: 'warning'
-                });
+            .fail(function (xhr) {
+                var message = xhr.responseJSON && xhr.responseJSON.message ? xhr.responseJSON.message : 'Terjadi kesalahan saat menyimpan REST API.';
+                showMessage(message);
             })
-            .always(function() {
+            .always(function () {
+                saving = false;
                 $('.loading').hide();
-                $('html, body').animate({
-                    scrollTop: $(document).height()
-                }, 3000);
+                setLoading(false);
             });
-
         return false;
-    }); /*end btn save*/
-
-    $('#table_name').on('change', function() {
-        var table = $(this).val();
-        $('.loading2').show();
-        $.ajax({
-                url: BASE_URL + '/administrator/rest/get_field_data/' + table,
-                type: 'GET',
-                dataType: 'JSON',
-            })
-            .done(function(res) {
-                if (res.success) {
-                    $('#subject, #title').val(res.subject);
-                    $('.wrapper-rest').html(res.html);
-                    var config = {
-                        '.chosen-select': {},
-                        '.chosen-select-deselect': {
-                            allow_single_deselect: true
-                        },
-                        '.chosen-select-no-single': {
-                            disable_search_threshold: 10
-                        },
-                        '.chosen-select-no-results': {
-                            no_results_text: 'Oops, nothing found!'
-                        },
-                        '.chosen-select-width': {
-                            width: "95%"
-                        }
-                    }
-                    for (var selector in config) {
-                        $(document).find(selector).chosen(config[selector]);
-                    }
-
-                    //check all
-                    $('input[type="checkbox"].flat-red, input[type="radio"].flat-red').iCheck({
-                        checkboxClass: 'icheckbox_minimal-red',
-                        radioClass: 'iradio_minimal-red'
-                    });
-
-                    /*update validation*/
-                    $(document).find('table tr .input_type').each(function() {
-                        updateValidation($(this));
-                    });
-
-
-                    /*added devfault validation rules*/
-                    $(document).find('table tr .validation').each(function() {
-
-                        var parent = $(this).parents('tr');
-                        var id = parent.find('#rest-id').val();
-                        var name = parent.find('#rest-name').val();
-                        var data_type = parent.find('#rest-data-type').val();
-                        var primarykey = parent.find('#rest-primarykey').val();
-                        var max_length = parent.find('#rest-max-length').val();
-
-                        if (primarykey != 1) {
-                            addValidation($(this), id, name, 'required', 'no');
-
-                            if (max_length != 0) {
-                                addValidation($(this), id, name, 'max_length', 'yes', max_length);
-                            }
-                        }
-
-                        if (data_type == 'number') {
-                            addValidation($(this), id, name, 'number', 'no');
-                        }
-
-                    });
-
-                } /*end response success*/
-
-            })
-            .fail(function() {
-                $('.message').printMessage({
-                    message: 'Error getting data',
-                    type: 'warning'
-                });
-            })
-            .always(function() {
-                $('.loading2').hide();
-            });
     });
 
-}); /*end doc ready*/
+    $('#btn_cancel').off('click').on('click.restBuilder', function (event) {
+        event.preventDefault();
+        window.location.href = $(this).attr('href');
+    });
+});
 </script>

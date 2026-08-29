@@ -81,15 +81,28 @@ class Model_crud extends MY_Model {
 
 	public function get_input_type()
 	{
-		$this->db->group_by('validation_group');
-		$result = $this->db->get('crud_input_type');
+		static $validation_groups = null;
 
-		$validation_group = '';
-		foreach ($result->result() as $row) {
-			$validation_group .= $row->validation_group. ' ';
+		if ($validation_groups !== null) {
+			return $validation_groups;
 		}
 
-		return $validation_group;
+		// Ambil hanya kolom yang memang dibutuhkan. SELECT * + GROUP BY
+		// ditolak oleh MySQL saat ONLY_FULL_GROUP_BY aktif dan membuat field
+		// dinamis pada halaman Tambah CRUD gagal dimuat.
+		$this->db->select('validation_group');
+		$this->db->distinct();
+		$this->db->where('validation_group !=', '');
+		$result = $this->db->get('crud_input_type');
+
+		$groups = [];
+		foreach ($result->result() as $row) {
+			$groups[] = $row->validation_group;
+		}
+
+		$validation_groups = implode(' ', $groups);
+
+		return $validation_groups;
 
 	}
 
@@ -141,8 +154,11 @@ class Model_crud extends MY_Model {
 
 	public function get_new_field($id)
 	{
-		$crud_field = $this->model_crud->get_crud_field($id);
-		$crud = $this->model_crud->find($id);
+		$crud_field = $this->get_crud_field($id);
+		$crud = $this->find($id);
+		if (!$crud || !$this->db->table_exists($crud->table_name)) {
+			return [];
+		}
 		$all_fields = $this->db->field_data($crud->table_name);
 
 		$all_fields_key = [];
@@ -160,12 +176,13 @@ class Model_crud extends MY_Model {
 		$new_diff = array_diff($all_field_data_field_name,$current_crud_field_name);
 		$new_fields = [];
 
+		$next_sort = count($crud_field) + 1;
 		foreach ($new_diff as $field_name) {
-			$new_fields[] = 
+			$new_fields[] =
 			(object)[
-				
-				'id' => 37,
-			    'crud_id' => 1,
+
+				'id' => 'new_'.$field_name,
+			    'crud_id' => $id,
 			    'field_name' => $all_fields_key[$field_name]->name,
 			    'field_label' => $all_fields_key[$field_name]->name,
 			    'input_type' => 'input',
@@ -173,7 +190,7 @@ class Model_crud extends MY_Model {
 			    'show_add_form' => 'yes',
 			    'show_update_form' => 'yes',
 			    'show_detail_page' => 'yes',
-			    'sort' => 1,
+			    'sort' => $next_sort++,
 			    'relation_table' => '' ,
 			    'relation_value' => '',
 			    'relation_label' => '',

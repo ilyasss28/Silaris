@@ -190,7 +190,6 @@
       </div>
    </div>
 </section>
-<script src="<?= BASE_ASSET; ?>ckeditor/ckeditor.js"></script>
 <script src="<?= BASE_ASSET; ?>js/rest.js"></script>
 <!-- Page script -->
 <script>

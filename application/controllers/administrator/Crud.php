@@ -103,8 +103,12 @@ class Crud extends Admin
 	{
 		$this->is_allowed('crud_update');
 
-		$crud_field = $this->model_crud->get_crud_field($id);
 		$crud = $this->model_crud->find($id);
+		if (!$crud || !$this->db->table_exists($crud->table_name)) {
+			show_404();
+		}
+
+		$crud_field = $this->model_crud->get_crud_field($id);
 
 		$new_crud_field = $this->model_crud->get_new_field($id);
 
@@ -116,8 +120,27 @@ class Crud extends Admin
 			'crud_field_validation' => $this->model_crud->get_crud_field_validation($id),
 			'crud_field_option' => $this->model_crud->get_crud_field_option($id),
 		];
-		$this->template->title('Crud Update');
+		$this->template->title('Edit CRUD - ' . $crud->subject);
 		$this->render('backend/standart/administrator/crud/crud_update', $this->data);
+	}
+
+	/**
+	 * Display one CRUD builder configuration.
+	 */
+	public function view($id)
+	{
+		$this->is_allowed('crud_view');
+
+		$crud = $this->model_crud->find($id);
+		if (!$crud) {
+			show_404();
+		}
+
+		$this->data['crud'] = $crud;
+		$this->data['crud_fields'] = $this->model_crud->get_crud_field($id);
+		$this->data['table_exists'] = $this->db->table_exists($crud->table_name);
+		$this->template->title('Detail CRUD - ' . $crud->subject);
+		$this->render('backend/standart/administrator/crud/crud_view', $this->data);
 	}
 
 	/**
@@ -135,21 +158,74 @@ class Crud extends Admin
 			exit;
 		}
 
+		$crud = $this->model_crud->find($id);
+		if (!$crud) {
+			return $this->response(array('success' => false, 'message' => 'Konfigurasi CRUD tidak ditemukan.'));
+		}
+
+		$table_name = trim((string) $this->input->post('table_name'));
+		$primary_key = trim((string) $this->input->post('primary_key'));
+		$posted_fields = $this->input->post('crud');
+		if ($table_name !== $crud->table_name || !$this->db->table_exists($crud->table_name)) {
+			return $this->response(array('success' => false, 'message' => 'Tabel CRUD tidak valid atau sudah tidak tersedia.'));
+		}
+		if ($primary_key !== $crud->primary_key || !in_array($primary_key, $this->db->list_fields($crud->table_name), true)) {
+			return $this->response(array('success' => false, 'message' => 'Primary key CRUD tidak valid.'));
+		}
+		if (!is_array($posted_fields) || empty($posted_fields)) {
+			return $this->response(array('success' => false, 'message' => 'Minimal satu field harus tersedia pada konfigurasi CRUD.'));
+		}
+
+		$available_fields = $this->db->list_fields($crud->table_name);
+		foreach ($posted_fields as $posted_field) {
+			$field_name = is_array($posted_field) ? key($posted_field) : null;
+			if (!$field_name || !in_array($field_name, $available_fields, true)) {
+				return $this->response(array('success' => false, 'message' => 'Terdapat field yang tidak valid pada konfigurasi CRUD.'));
+			}
+		}
+
 		$this->form_validation->set_rules('subject', 'Subject', 'trim|required|alpha_numeric_spaces');
 		$this->form_validation->set_rules('title', 'Subject', 'trim|alpha_numeric_spaces');
 		$this->form_validation->set_rules('primary_key', 'Primary Key of Table', 'trim|required');
 
-		echo $this->save_crud();
+		return $this->output
+			->set_content_type('application/json')
+			->set_output($this->save_crud());
 	}
 
 	public function save_crud()
 	{
 
 		if ($this->form_validation->run()) {
+			$crud_config = $this->input->post('crud');
+			if (!is_array($crud_config) || empty($crud_config)) {
+				return $this->response(array(
+					'success' => false,
+					'message' => 'Konfigurasi field CRUD tidak boleh kosong.'
+				));
+			}
+			$table_name = trim((string) $this->input->post('table_name'));
+			if ($table_name === '' || !$this->db->table_exists($table_name)) {
+				return $this->response(array('success' => false, 'message' => 'Tabel sumber CRUD tidak tersedia.'));
+			}
+			$available_fields = $this->db->list_fields($table_name);
+			$submitted_field_names = array();
+			foreach ($crud_config as $field_config) {
+				$field_name = is_array($field_config) ? key($field_config) : null;
+				if (!$field_name || !in_array($field_name, $available_fields, true) || in_array($field_name, $submitted_field_names, true)) {
+					return $this->response(array('success' => false, 'message' => 'Konfigurasi field berisi data yang tidak valid atau duplikat.'));
+				}
+				$submitted_field_names[] = $field_name;
+			}
+			$primary_key = trim((string) $this->input->post('primary_key'));
+			if ($primary_key === '' || !in_array($primary_key, $available_fields, true) || !in_array($primary_key, $submitted_field_names, true)) {
+				return $this->response(array('success' => false, 'message' => 'Primary key wajib tersedia dalam konfigurasi field CRUD.'));
+			}
+
 			$this->load->library('parser');
 			$this->load->helper('file');
 			$this->load->library('crud_builder', [
-				'crud' => $_POST['crud']
+				'crud' => $crud_config
 				]);
 
 			$this->data = [
@@ -171,14 +247,15 @@ class Crud extends Admin
 				$this->data['title'] = $this->input->post('subject');
 			}
 
-			$table_name = $this->input->post('table_name');
-
 			$view_path = FCPATH . '/application/views/modul/'.$table_name.'/';
 			$controller_path = FCPATH . '/application/controllers/';
 			$model_path = FCPATH . '/application/models/';
 
-			if (!is_dir($view_path)) {
-				mkdir($view_path);
+			if (!is_dir($view_path) && !mkdir($view_path, 0755, true)) {
+				return $this->response(array('success' => false, 'message' => 'Folder view modul tidak dapat dibuat.'));
+			}
+			if (!is_writable($view_path) || !is_writable($controller_path) || !is_writable($model_path)) {
+				return $this->response(array('success' => false, 'message' => 'Folder hasil generator tidak memiliki izin tulis.'));
 			}
 
 			$validate = $this->crud_builder->validateAll();
@@ -194,34 +271,54 @@ class Crud extends Admin
 			$template_crud_path = 'core_template/crud/';
 
 			$builder_list = $this->parser->parse($template_crud_path.'builder_list', $this->data, true);
-			write_file($view_path.$table_name.'_list.php', $builder_list);
+			if (!write_file($view_path.$table_name.'_list.php', $builder_list)) {
+				return $this->response(array('success' => false, 'message' => 'Halaman daftar CRUD gagal dibuat.'));
+			}
 
 			$builder_list = $this->parser->parse($template_crud_path.'builder_controller', $this->data, true);
-			write_file($controller_path.ucwords($table_name).'.php', $builder_list);
+			if (!write_file($controller_path.ucwords($table_name).'.php', $builder_list)) {
+				return $this->response(array('success' => false, 'message' => 'Controller CRUD gagal dibuat.'));
+			}
 
 			$builder_list = $this->parser->parse($template_crud_path.'builder_model', $this->data, true);
-			write_file($model_path.'Model_'.$table_name.'.php', $builder_list);
+			if (!write_file($model_path.'Model_'.$table_name.'.php', $builder_list)) {
+				return $this->response(array('success' => false, 'message' => 'Model CRUD gagal dibuat.'));
+			}
 
 			if ($this->input->post('create')) {
 				$builder_list = $this->parser->parse($template_crud_path.'builder_add', $this->data, true);
-				write_file($view_path.$table_name.'_add.php', $builder_list);
+				if (!write_file($view_path.$table_name.'_add.php', $builder_list)) {
+					return $this->response(array('success' => false, 'message' => 'Halaman tambah CRUD gagal dibuat.'));
+				}
 				$this->aauth->create_perm($table_name.'_add');
+			} elseif (is_file($view_path.$table_name.'_add.php') && !unlink($view_path.$table_name.'_add.php')) {
+				return $this->response(array('success' => false, 'message' => 'Halaman tambah lama tidak dapat dinonaktifkan.'));
 			}
 
 			if ($this->input->post('update')) {
 				$builder_list = $this->parser->parse($template_crud_path.'builder_update', $this->data, true);
-				write_file($view_path.$table_name.'_update.php', $builder_list);
+				if (!write_file($view_path.$table_name.'_update.php', $builder_list)) {
+					return $this->response(array('success' => false, 'message' => 'Halaman edit CRUD gagal dibuat.'));
+				}
 				$this->aauth->create_perm($table_name.'_update');
+			} elseif (is_file($view_path.$table_name.'_update.php') && !unlink($view_path.$table_name.'_update.php')) {
+				return $this->response(array('success' => false, 'message' => 'Halaman edit lama tidak dapat dinonaktifkan.'));
 			}
 			
 			if ($this->input->post('read')) {
 				$builder_list = $this->parser->parse($template_crud_path.'builder_view', $this->data, true);
-				write_file($view_path.$table_name.'_view.php', $builder_list);
+				if (!write_file($view_path.$table_name.'_view.php', $builder_list)) {
+					return $this->response(array('success' => false, 'message' => 'Halaman detail CRUD gagal dibuat.'));
+				}
 				$this->aauth->create_perm($table_name.'_view');
+			} elseif (is_file($view_path.$table_name.'_view.php') && !unlink($view_path.$table_name.'_view.php')) {
+				return $this->response(array('success' => false, 'message' => 'Halaman detail lama tidak dapat dinonaktifkan.'));
 			}
 
 			$this->aauth->create_perm($table_name.'_delete');
 			$this->aauth->create_perm($table_name.'_list');
+
+			$this->db->trans_begin();
 
 			$save_data = [
 				'table_name' 		=> $this->input->post('table_name'),
@@ -238,17 +335,20 @@ class Crud extends Admin
 			} else {
 				$id_crud = $this->model_crud->store($save_data);
 			}
+			if (!$id_crud) {
+				$this->db->trans_rollback();
+				return $this->response(array('success' => false, 'message' => 'Konfigurasi utama CRUD gagal disimpan.'));
+			}
 			$save_data_field = [];
 			$this->db->delete('crud_field', ['crud_id' => $id_crud]);
 			$this->db->delete('crud_field_validation', ['crud_id' => $id_crud]);
 			$this->db->delete('crud_custom_option', ['crud_id' => $id_crud]);
 
-			foreach ($this->input->post('crud') as $val) {
+			foreach ($crud_config as $val) {
 				$field_name = array_keys($val)[0];
 				$field_label = isset($val[$field_name]['label']) ? $val[$field_name]['label'] : '';
 				$input_type = isset($val[$field_name]['input_type']) ? $val[$field_name]['input_type'] : '';
 				$show_in_column = isset($val[$field_name]['show_in_column']) ? $val[$field_name]['show_in_column'] : '';
-				$show_in_add_form = isset($val[$field_name]['show_in_add_form']) ? $val[$field_name]['show_in_add_form'] : '';
 				$show_in_add_form = isset($val[$field_name]['show_in_add_form']) ? $val[$field_name]['show_in_add_form'] : '';
 				$show_in_update_form = isset($val[$field_name]['show_in_update_form']) ? $val[$field_name]['show_in_update_form'] : '';
 				$show_in_detail_page = isset($val[$field_name]['show_in_detail_page']) ? $val[$field_name]['show_in_detail_page'] : '';
@@ -312,16 +412,22 @@ class Crud extends Admin
 				}
 			}
 
+			if ($this->db->trans_status() === false) {
+				$this->db->trans_rollback();
+				return $this->response(array('success' => false, 'message' => 'Konfigurasi CRUD gagal disimpan ke database.'));
+			}
+			$this->db->trans_commit();
+
 			if ($this->input->post('save_type') == 'stay') {
 				$this->response['success'] = true;
 				$this->response['message'] = cclang('success_save_data_stay', [
 					anchor('administrator/crud', ' Go back to list'),
-					anchor('administrator/'.$this->input->post('table_name'), ' View')
+					anchor($this->input->post('table_name'), ' View')
 				]);
 			} else {
 				set_message(
 					cclang('success_save_data_redirect', [
-					anchor('administrator/'.$this->input->post('table_name'), ' View')
+					anchor($this->input->post('table_name'), ' View')
 				]), 'success');
         		$this->response['success'] = true;
 				$this->response['redirect'] = site_url('administrator/crud');
@@ -424,12 +530,21 @@ class Crud extends Admin
 	*/
 	public function get_field_data($table)
 	{
-		if (in_array($table, get_table_not_allowed_for_builder())) {
+		if (!$this->is_allowed('crud_add', false)) {
 			return $this->response([
 				'success' => false,
 				'message' => cclang('sorry_you_do_not_have_permission_to_access')
+			]);
+		}
+
+		$table = trim((string) $table);
+		$available_tables = $this->db->list_tables();
+
+		if ($table === '' || !in_array($table, $available_tables, true) || in_array($table, get_table_not_allowed_for_builder(), true)) {
+			return $this->response([
+				'success' => false,
+				'message' => 'Tabel tidak tersedia atau tidak dapat digunakan oleh CRUD Builder.'
 				]);
-			exit;
 		}
 		
 		$this->data['html'] = $this->load->view('backend/standart/administrator/crud/crud_field_data.php', ['table' => $table], true);

@@ -100,12 +100,12 @@ jQuery(document).ready(domo);
                         <!-- Custom Tabs -->
                         <div class="nav-tabs-custom">
                           <ul class="nav nav-tabs">
-                            <li><a class="btn-call-page-test" data-url="<?= base_url('administrator/rest/get_rest_test_all/'.$rest->id); ?>" href="#tab_1" data-toggle="tab">API <?= cclang('all'); ?> <span class="method">GET</span></a></li>
-                            <li><a class="btn-call-page-test" data-url="<?= base_url('administrator/rest/get_rest_test_add/'.$rest->id); ?>" href="#tab_1" data-toggle="tab">API <?= cclang('add'); ?> <span class="method">POST</span></a></li>
-                            <li><a class="btn-call-page-test" data-url="<?= base_url('administrator/rest/get_rest_test_update/'.$rest->id); ?>" href="#tab_1" data-toggle="tab">API <?= cclang('update'); ?> <span class="method">POST</span></a></li>
-                            <li><a class="btn-call-page-test" data-url="<?= base_url('administrator/rest/get_rest_test_detail/'.$rest->id); ?>" href="#tab_1" data-toggle="tab">API <?= cclang('detail'); ?> <span class="method">GET</span></a></li>
-                            <li><a class="btn-call-page-test" data-url="<?= base_url('administrator/rest/get_rest_test_delete/'.$rest->id); ?>" href="#tab_1" data-toggle="tab">API <?= cclang('delete'); ?> <span class="method">POST</span></a></li>
-                            <li class="active"><a href="#tab_6" data-toggle="tab"><?= cclang('detail'); ?> Rest</a></li>
+                            <li><a class="btn-call-page-test" data-url="<?= base_url('administrator/rest/get_rest_test_all/'.$rest->id); ?>" href="#tab_1" data-bs-toggle="tab">API <?= cclang('all'); ?> <span class="method">GET</span></a></li>
+                            <li><a class="btn-call-page-test" data-url="<?= base_url('administrator/rest/get_rest_test_add/'.$rest->id); ?>" href="#tab_1" data-bs-toggle="tab">API <?= cclang('add'); ?> <span class="method">POST</span></a></li>
+                            <li><a class="btn-call-page-test" data-url="<?= base_url('administrator/rest/get_rest_test_update/'.$rest->id); ?>" href="#tab_1" data-bs-toggle="tab">API <?= cclang('update'); ?> <span class="method">POST</span></a></li>
+                            <li><a class="btn-call-page-test" data-url="<?= base_url('administrator/rest/get_rest_test_detail/'.$rest->id); ?>" href="#tab_1" data-bs-toggle="tab">API <?= cclang('detail'); ?> <span class="method">GET</span></a></li>
+                            <li><a class="btn-call-page-test" data-url="<?= base_url('administrator/rest/get_rest_test_delete/'.$rest->id); ?>" href="#tab_1" data-bs-toggle="tab">API <?= cclang('delete'); ?> <span class="method">POST</span></a></li>
+                            <li class="active"><a href="#tab_6" data-bs-toggle="tab"><?= cclang('detail'); ?> Rest</a></li>
                             
                             <li class="pull-right"><a href="<?= site_url('administrator/doc/api#api-'.$rest->subject); ?>" class="text-muted"><i class="fa fa-book text-red"></i> <span class=""> <?= cclang('api_documentation'); ?></span></a></li>
                           </ul>

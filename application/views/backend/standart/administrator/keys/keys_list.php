@@ -57,7 +57,7 @@ jQuery(document).ready(domo);
                      </div>
                      <!-- /.widget-user-image -->
                      <h3 class="widget-user-username">API Keys</h3>
-                     <h5 class="widget-user-desc"<?= cclang('list_all', 'API Keys'); ?><i class="label bg-yellow"><?= $keys_counts; ?>  items</i></h5>
+                     <h5 class="widget-user-desc"><?= cclang('list_all', 'API Keys'); ?> <i class="label bg-yellow"><?= $keys_counts; ?> items</i></h5>
                   </div>
 
                   <form name="form_keys" id="form_keys" action="<?= base_url('administrator/keys/index'); ?>">
@@ -82,13 +82,13 @@ jQuery(document).ready(domo);
                            <td width="5">
                               <input type="checkbox" class="flat-red check" name="id[]" value="<?= $keys->id; ?>">
                            </td>
-                           <td><?= _ent($keys->key); ?></td> 
-                           <td><?= _ent($keys->is_private_key) ? 'yes' : 'no'; ?></td> 
-                           <td><?= _ent($keys->ip_addresses); ?></td> 
-                           <td><?= _ent($keys->date_created); ?></td> 
+                           <td><code class="api-key-value"><?= _ent($keys->key); ?></code></td>
+                           <td><?= $keys->is_private_key ? '<span class="label label-warning">Ya</span>' : '<span class="label label-default">Tidak</span>'; ?></td>
+                           <td><?= $keys->ip_addresses ? _ent($keys->ip_addresses) : '<span class="text-muted">Semua IP</span>'; ?></td>
+                           <td><?= _ent($keys->date_created); ?></td>
                            <td width="200">
                               <?php is_allowed('keys_view', function() use ($keys){?>
-                              <a href="<?= site_url('administrator/keys/view/' . $keys->id); ?>" class="label-default"><i class="fa fa-newspaper-o"></i> <?= cclang('view_button'); ?>
+                              <a href="<?= site_url('administrator/keys/view/' . $keys->id); ?>" class="label-default"><i class="fa fa-newspaper-o"></i> <?= cclang('view_button'); ?></a>
                               <?php }) ?>
                               <?php is_allowed('keys_update', function() use ($keys){?>
                               <a href="<?= site_url('administrator/keys/edit/' . $keys->id); ?>" class="label-default"><i class="fa fa-edit "></i> <?= cclang('update_button'); ?></a>

@@ -46,7 +46,7 @@
       <h2>Notaris</h2>
       <p>Kepatuhan Pengumpulan Laporan Notaris berdasarkan Tanggal Pengumpulan</p>
     </div>
-    <ul class="breadcrumb"><li><a class="homeLink" href="<?php echo base_url().'home/index'?>"><i class="icofont-home"></i> Beranda /</a></li>
+    <ul class="breadcrumb"><li><a class="homeLink" href="<?= site_url('home'); ?>"><i class="icofont-home"></i> Beranda /</a></li>
       <li class="active">Daftar Notaris </li>
     </ul>
 

@@ -3,6 +3,19 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 
 class Daftar extends CI_Controller {
 
+	public function region($slug = null)
+	{
+		$this->load->model('Model_home');
+		$data['notaris'] = $this->Model_home->get_notaris_by_region($slug);
+		$data['area'] = $this->Model_home->get_wilayah();
+
+		$this->load->view('include/head');
+		$this->load->view('include/header');
+		$this->load->view('daftar', $data);
+		$this->load->view('include/footer');
+		$this->load->view('include/js');
+	}
+
 	/**
 	 * Index Page for this controller.
 	 *
@@ -26,7 +39,7 @@ class Daftar extends CI_Controller {
 		$this->load->model('Model_home');
 		$data['notaris'] = $this->Model_home->get_db();
         $data['area'] = $this->Model_home->get_wilayah();
-		$this->load->view('daftar');
+		$this->load->view('daftar', $data);
 		$this->load->view('include/footer');
 		$this->load->view('include/js');
 	}

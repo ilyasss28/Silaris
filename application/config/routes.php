@@ -49,24 +49,45 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 | Examples:	my-controller/index	-> my_controller/index
 |		my-controller/my-method	-> my_controller/my_method
 */
-$route_path = APPPATH . 'routes/';
-require_once $route_path . 'routes_landing.php';
+/* Core routing --------------------------------------------------------- */
+$route['default_controller'] = 'home/index';
+$route['404_override'] = 'not_found/index';
+$route['translate_uri_dashes'] = TRUE;
 
-$route['default_controller'] = 'home';
-$route['404_override'] = 'not_found';
-$route['translate_uri_dashes'] = FALSE;
-$route['landing'] = 'landing/index';
+/* Public pages -------------------------------------------------------- */
+$route['home'] = 'home/index';
+$route['landing'] = 'home/index';
+$route['panduan'] = 'panduan/index';
+$route['kepatuhan'] = 'kepatuhan/index';
+
+/* Canonical report recap route. Keep the URL lowercase and independent
+   from the legacy mixed-case controller/file name. */
+$route['rekap-laporan'] = 'Rekap_Laporan/index';
+$route['rekap-laporan/(.+)'] = 'Rekap_Laporan/$1';
+
+/* Public notary directory. Only known region slugs are accepted. */
+$region_slugs = 'kendari|baubau|wakatobi|muna|mubar|konut|konsel|konkep|konawe|kolut|koltim|kolaka|buton|butur|buteng|busel|bombana';
+$route['daftar'] = 'daftar/index';
+$route['daftar/(' . $region_slugs . ')'] = 'daftar/region/$1';
+$route['notaris/(:num)'] = 'detail/detail/$1';
+
+/* Backward-compatible notary detail URLs. */
+$route['detail/(:num)'] = 'detail/detail/$1';
+$route['detail/detail/(:num)'] = 'detail/detail/$1';
+
+/* Authentication ------------------------------------------------------ */
 $route['login'] = 'administrator/auth/login';
+$route['logout'] = 'administrator/auth/logout';
+$route['administrator'] = 'administrator/dashboard/index';
+$route['administrator/login'] = 'administrator/auth/login';
+$route['administrator/logout'] = 'administrator/auth/logout';
 $route['administrator/register'] = 'administrator/auth/register';
 $route['administrator/forgot-password'] = 'administrator/auth/forgot_password';
+$route['administrator/forgot_password'] = 'administrator/auth/forgot_password';
 
-//$route['page/(:any)'] = 'page/detail/$1';
-//$route['blog/index'] = 'blog/index';
-//$route['blog/(:any)'] = 'blog/detail/$1';
-//$route['administrator/web-page'] = 'administrator/page/admin';
-
-//-------------------------------------------------------------------------
-
-
+/* Authenticated account shortcuts ------------------------------------ */
 $route['profile'] = 'administrator/user/profile';
-$route['profile/(:any)'] = 'administrator/user/profile/$1';
+$route['profile/edit'] = 'administrator/user/edit_profile';
+$route['administrator/profile'] = 'administrator/user/profile';
+$route['administrator/profile/edit'] = 'administrator/user/edit_profile';
+$route['administrator/profile/save'] = 'administrator/user/edit_profile_save';

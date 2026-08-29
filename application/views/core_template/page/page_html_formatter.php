@@ -9,7 +9,7 @@
 	}
 	?>
   	<link rel="stylesheet" href="<?= BASE_ASSET; ?>/admin-lte/plugins/iCheck/all.css">
-    <link rel="stylesheet" href="<?= BASE_ASSET; ?>/admin-lte/bootstrap/css/bootstrap.min.css">
+    <link rel="stylesheet" href="<?= BASE_ASSET; ?>/bootstrap5/css/bootstrap.min.css">
     <link rel="stylesheet" href="<?= BASE_ASSET; ?>/admin-lte/plugins/iCheck/flat/blue.css">
     <link rel="stylesheet" href="<?= BASE_ASSET; ?>/admin-lte/plugins/datepicker/datepicker3.css">
     <link rel="stylesheet" href="<?= BASE_ASSET; ?>/admin-lte/plugins/daterangepicker/daterangepicker.css">
@@ -24,7 +24,9 @@
     <link rel="stylesheet" type="text/css" href="<?= BASE_ASSET; ?>datetimepicker/jquery.datetimepicker.css"/>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.5.0/css/font-awesome.min.css">
 
-  	<script src="<?= BASE_ASSET; ?>/admin-lte/plugins/jQuery/jquery-2.2.3.min.js"></script>
+	<script src="<?= BASE_ASSET; ?>/jquery4/jquery.min.js"></script>
+	<script src="<?= BASE_ASSET; ?>/jquery4/jquery-compat-shim.js"></script>
+	<script src="<?= BASE_ASSET; ?>/bootstrap5/js/bootstrap.bundle.min.js"></script>
   	<script src="<?= BASE_ASSET; ?>/fancy-box/source/jquery.fancybox.js?v=2.1.5"></script>
 	<script src="<?= BASE_ASSET; ?>jquery-ui/jquery-ui.js"></script>
   	<script src="<?= BASE_ASSET; ?>/toastr/toastr.js"></script>
@@ -75,7 +77,7 @@ foreach ($script_bottom as $script) {
 }
 ?>
 
-<script src="http://localhost:80/ci-lte-generator/asset/js/custom.js"></script>
+<script src="<?= BASE_ASSET; ?>/js/custom.js"></script>
 </body>
 </html>
 
@@ -87,7 +89,7 @@ foreach ($css_top as $css) {
 }
 ?>
   	<link rel="stylesheet" href="<?= BASE_ASSET; ?>/admin-lte/plugins/iCheck/all.css">
-    <link rel="stylesheet" href="<?= BASE_ASSET; ?>/admin-lte/bootstrap/css/bootstrap.min.css">
+    <link rel="stylesheet" href="<?= BASE_ASSET; ?>/bootstrap5/css/bootstrap.min.css">
     <link rel="stylesheet" href="<?= BASE_ASSET; ?>/admin-lte/plugins/iCheck/flat/blue.css">
     <link rel="stylesheet" href="<?= BASE_ASSET; ?>/admin-lte/plugins/datepicker/datepicker3.css">
     <link rel="stylesheet" href="<?= BASE_ASSET; ?>/admin-lte/plugins/daterangepicker/daterangepicker.css">
@@ -102,7 +104,9 @@ foreach ($css_top as $css) {
     <link rel="stylesheet" type="text/css" href="<?= BASE_ASSET; ?>datetimepicker/jquery.datetimepicker.css"/>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.5.0/css/font-awesome.min.css">
 
-  	<script src="<?= BASE_ASSET; ?>/admin-lte/plugins/jQuery/jquery-2.2.3.min.js"></script>
+	<script src="<?= BASE_ASSET; ?>/jquery4/jquery.min.js"></script>
+	<script src="<?= BASE_ASSET; ?>/jquery4/jquery-compat-shim.js"></script>
+	<script src="<?= BASE_ASSET; ?>/bootstrap5/js/bootstrap.bundle.min.js"></script>
   	<script src="<?= BASE_ASSET; ?>/fancy-box/source/jquery.fancybox.js?v=2.1.5"></script>
 	<script src="<?= BASE_ASSET; ?>jquery-ui/jquery-ui.js"></script>
   	<script src="<?= BASE_ASSET; ?>/toastr/toastr.js"></script>

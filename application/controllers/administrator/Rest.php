@@ -55,6 +55,7 @@ class Rest extends Admin
 	{
 		$this->is_allowed('rest_add');
 		$this->template->title('Rest New');
+		$this->load->helper('directory');
 
 		$directories = directory_map(APPPATH . '/controllers/api/');
 		$directories = array_map(function($val) {
@@ -87,6 +88,13 @@ class Rest extends Admin
 		$this->form_validation->set_rules('table_name', 'Table', 'trim|required|callback_valid_table_avaiable');
 		$this->form_validation->set_rules('subject', 'Subject', 'trim|required|alpha_numeric_spaces');
 		$this->form_validation->set_rules('primary_key', 'Primary Key of Table', 'trim|required');
+
+		if (!is_array($this->input->post('rest')) || !$this->input->post('rest')) {
+			return $this->response([
+				'success' => false,
+				'message' => 'Konfigurasi field REST belum tersedia. Pilih tabel dan tunggu sampai seluruh field selesai dimuat.'
+			]);
+		}
 
 		echo $this->save_rest();
 	}
@@ -134,11 +142,19 @@ class Rest extends Admin
 	public function save_rest()
 	{
 		if ($this->form_validation->run()) {
+			$rest_fields = $this->input->post('rest');
+			if (!is_array($rest_fields) || !$rest_fields) {
+				return json_encode([
+					'success' => false,
+					'message' => 'Konfigurasi field REST tidak valid. Muat ulang struktur tabel sebelum menyimpan.'
+				]);
+			}
+
 			$this->load->library('parser');
 			$this->load->helper('file');
 			$this->load->helper('directory');
 			$this->load->library('crud_builder', [
-				'crud' => $_POST['rest']
+				'crud' => $rest_fields
 				]);
 
 			$this->data = [
@@ -168,6 +184,16 @@ class Rest extends Admin
 
 			$controller_path = FCPATH . '/application/controllers/api/';
 			$model_path = FCPATH . '/application/models/';
+			$apidoc_path = FCPATH . '/apidoc/module/';
+
+			foreach ([$controller_path, $model_path, $apidoc_path] as $target_path) {
+				if (!is_dir($target_path) || !is_writable($target_path)) {
+					return json_encode([
+						'success' => false,
+						'message' => 'Folder generator REST tidak tersedia atau tidak dapat ditulis: ' . $target_path
+					]);
+				}
+			}
 
 			$validate = $this->crud_builder->validateAll();
 
@@ -182,15 +208,23 @@ class Rest extends Admin
 			$template_rest_path = 'core_template/rest/';
 
 			$builder_list = $this->parser->parse($template_rest_path.'builder_controller', $this->data, true);
-			write_file($controller_path.ucwords($table_name).'.php', $builder_list);
+			if (!write_file($controller_path.ucwords($table_name).'.php', $builder_list)) {
+				return json_encode(['success' => false, 'message' => 'Controller REST gagal dibuat. Periksa hak akses folder application/controllers/api.']);
+			}
 
 			$builder_list = $this->parser->parse('core_template/rest/builder_model', $this->data, true);
-			write_file($model_path.'Model_api_'.$table_name.'.php', $builder_list);
-			
-			$api_doc = $this->parser->parse('core_template/apidoc/api_data', $this->data, true);
-			write_file(FCPATH.'apidoc/module/'.$table_name.'.json', $api_doc);
+			if (!write_file($model_path.'Model_api_'.$table_name.'.php', $builder_list)) {
+				return json_encode(['success' => false, 'message' => 'Model REST gagal dibuat. Periksa hak akses folder application/models.']);
+			}
 
-			$this->generate_apidoc();
+			$api_doc = $this->parser->parse('core_template/apidoc/api_data', $this->data, true);
+			if (!write_file($apidoc_path.$table_name.'.json', $api_doc)) {
+				return json_encode(['success' => false, 'message' => 'Dokumentasi REST gagal dibuat. Periksa hak akses folder apidoc/module.']);
+			}
+
+			if (!$this->generate_apidoc()) {
+				return json_encode(['success' => false, 'message' => 'Indeks dokumentasi REST gagal diperbarui.']);
+			}
 
 			$this->aauth->create_perm('api_'.$table_name.'_all');
 			$this->aauth->create_perm('api_'.$table_name.'_detail');
@@ -215,7 +249,7 @@ class Rest extends Admin
 			$this->db->delete('rest_field', ['rest_id' => $id_rest]);
 			$this->db->delete('rest_field_validation', ['rest_id' => $id_rest]);
 
-			foreach ($this->input->post('rest') as $val) {
+			foreach ($rest_fields as $val) {
 				$field_name = array_keys($val)[0];
 				$input_type = isset($val[$field_name]['input_type']) ? $val[$field_name]['input_type'] : '';
 				$show_in_column = isset($val[$field_name]['show_in_column']) ? $val[$field_name]['show_in_column'] : '';
@@ -290,20 +324,23 @@ class Rest extends Admin
 	{
 		$this->load->helper('file');
 		$this->load->helper('directory');
+		$this->load->library('parser');
 
-		$contents = '';
+		$documents = [];
 		$dir_map = directory_map(FCPATH.'apidoc/module/');
-		$i=0;
-		foreach ($dir_map as $module) {
-			$i++;
-			if (is_file(FCPATH.'apidoc/module/'.$module)) {
-				$contents .= read_file(BASE_URL.'apidoc/module/'.$module).($i<count($dir_map) ? ',' : '');
+		foreach ((array) $dir_map as $module) {
+			$module_path = FCPATH.'apidoc/module/'.$module;
+			if (is_file($module_path)) {
+				$document = trim((string) read_file($module_path));
+				if ($document !== '') {
+					$documents[] = $document;
+				}
 			}
 		}
 
-		$this->data['api_doc'] = $contents;
+		$this->data['api_doc'] = implode(',', $documents);
 		$api_doc_js = $this->parser->parse('core_template/apidoc/api_data_js', $this->data, true);
-		write_file(FCPATH.'apidoc/api_data.js', $api_doc_js);
+		return (bool) write_file(FCPATH.'apidoc/api_data.js', $api_doc_js);
 
 	}
 
@@ -434,6 +471,23 @@ class Rest extends Admin
 	*/
 	public function get_field_data($table)
 	{
+		if (!$this->is_allowed('rest_add', false)) {
+			return $this->response([
+				'success' => false,
+				'message' => cclang('sorry_you_do_not_have_permission_to_access')
+			]);
+		}
+
+		$table = trim((string) $table);
+		$available_tables = $this->db->list_tables();
+
+		if ($table === '' || !in_array($table, $available_tables, true) || in_array($table, get_table_not_allowed_for_builder(), true)) {
+			return $this->response([
+				'success' => false,
+				'message' => 'Tabel tidak tersedia atau tidak dapat digunakan oleh REST Builder.'
+			]);
+		}
+
 		$this->data['html'] = $this->load->view('backend/standart/administrator/rest/rest_field_data.php', ['table' => $table], true);
 		$this->data['subject'] = ucwords(clean_snake_case($table));
 		$this->data['success'] = true;

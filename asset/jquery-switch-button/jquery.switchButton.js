@@ -256,7 +256,9 @@
             if (this.options.checked) {
                 // Update the underlying checkbox state
                 this.element.prop("checked", true);
-                this.element.change();
+                if (!isInitializing) {
+                    this.element.trigger("change");
+                }
 
                 var dLeft = this.options.width - this.options.button_width;
                 newLeft = "+=" + dLeft;
@@ -274,12 +276,14 @@
                 }
                 this.button_bg.addClass("checked");
                 //execute on state callback if its supplied
-                if(typeof this.options.on_callback === 'function') this.options.on_callback.call(this);
+                if(!isInitializing && typeof this.options.on_callback === 'function') this.options.on_callback.call(this);
             }
             else {
                 // Update the underlying checkbox state
                 this.element.prop("checked", false);
-                this.element.change();
+                if (!isInitializing) {
+                    this.element.trigger("change");
+                }
                 newLeft = "-1px";
 
                 // Update labels states
@@ -295,7 +299,7 @@
                 }
                 this.button_bg.removeClass("checked");
                 //execute off state callback if its supplied
-                if(typeof this.options.off_callback === 'function') this.options.off_callback.call(this);
+                if(!isInitializing && typeof this.options.off_callback === 'function') this.options.off_callback.call(this);
             }
             // Animate the switch
             this.button.animate({ left: newLeft }, 250, "easeInOutCubic");

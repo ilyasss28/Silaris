@@ -28,8 +28,8 @@
 
   --radius-sm: 8px;
   --radius: 14px;
-  --shadow: 0 10px 30px rgba(15, 27, 45, .08);
-  --shadow-lg: 0 24px 60px rgba(15, 27, 45, .16);
+  --shadow: 0 2px 8px rgba(15, 27, 45, .04);
+  --shadow-lg: 0 8px 24px rgba(15, 27, 45, .08);
 
   --control-h: 38px;
 }
@@ -58,43 +58,117 @@ a:focus {
 
 #header {
   background: rgba(255,255,255,.97) !important;
-  backdrop-filter: saturate(180%) blur(10px);
-  box-shadow: var(--shadow);
+  backdrop-filter: saturate(180%) blur(14px);
+  -webkit-backdrop-filter: saturate(180%) blur(14px);
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05) !important;
   top: 0 !important;
   height: 76px;
   display: flex;
   align-items: center;
+  z-index: 10000;
+  transition: background .35s cubic-bezier(.4,0,.2,1),
+              box-shadow .35s cubic-bezier(.4,0,.2,1),
+              height .35s cubic-bezier(.4,0,.2,1);
 }
-#header .logo { margin: 0; }
-#header .logo a { gap: 12px; }
-#header .logo img { height: 40px; width: auto; }
+
+/* Scroll state — adds depth & slightly compact */
+#header.header-scrolled {
+  background: rgba(255,255,255,.98) !important;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05) !important;
+  height: 68px;
+}
+
+#header .logo { margin: 0; min-width: 0; }
+#header .logo a { gap: 12px; min-width: 0; }
+#header .logo img {
+  height: 40px;
+  width: auto;
+  flex-shrink: 0;
+  transition: height .35s cubic-bezier(.4,0,.2,1);
+}
+#header.header-scrolled .logo img { height: 36px; }
+
 #header .logo .logo-text {
   display: flex;
   flex-direction: column;
   line-height: 1.25;
+  min-width: 0;
 }
 #header .logo .logo-title {
   font-weight: 800;
   font-size: 18px;
   letter-spacing: .02em;
   color: var(--ink-900);
+  white-space: nowrap;
+  transition: font-size .35s cubic-bezier(.4,0,.2,1);
 }
+#header.header-scrolled .logo .logo-title { font-size: 16.5px; }
+
 #header .logo .logo-subtitle {
   font-weight: 600;
   font-size: 11.5px;
   color: var(--ink-500);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
-/* #header is fixed/out-of-flow on every guest page (home, daftar,
-   kepatuhan, detail all wrap their content in <main id="main">), so
-   give that shared wrapper a consistent top offset instead of each
-   page's first section guessing its own. */
+/* Very narrow phones: the tagline is the first thing to give up
+   room to the hamburger button so nothing gets clipped/overflows. */
+@media (max-width: 768px) {
+  #header .logo .logo-subtitle { display: none; }
+}
+
+/* #header is fixed/out-of-flow on every guest page, so give the
+   shared #main wrapper a consistent top offset */
 #main {
   margin-top: 76px;
 }
 
-.nav-menu ul { display: flex; gap: 4px; }
-.nav-menu a {
+/* ---- Desktop nav list ---- */
+
+.navbar {
+  display: flex;
+  align-items: center;
+}
+
+.navbar .nav-list {
+  display: flex;
+  gap: 4px;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  align-items: center;
+}
+
+/* Beranda/Panduan/Kepatuhan centered in the navbar, Login pinned to the
+   far right corner — desktop only, the mobile drawer stacks everything
+   including Login in normal document flow. */
+@media (min-width: 992px) {
+  #header .logo {
+    margin-right: 0 !important;
+  }
+
+  .navbar {
+    flex: 1 1 auto;
+    position: relative;
+  }
+
+  .navbar .nav-list {
+    flex: 1 1 auto;
+    justify-content: center;
+    padding-right: 100px;
+  }
+
+  .navbar .nav-list li:last-child {
+    position: absolute;
+    right: 0;
+    top: 50%;
+    transform: translateY(-50%);
+  }
+}
+
+.navbar .nav-list a {
   display: inline-flex;
   align-items: center;
   height: var(--control-h);
@@ -103,46 +177,245 @@ a:focus {
   font-size: 14.5px;
   padding: 0 16px !important;
   border-radius: 999px;
-  transition: background .15s ease, color .15s ease;
-}
-.nav-menu a:hover,
-.nav-menu li.active > a,
-#header .nav-menu a:hover,
-#header .nav-menu li.active > a {
-  background: var(--brand);
-  color: #fff !important;
-}
-.nav-menu a.btn-login {
-  background: var(--accent);
-  color: var(--ink-900) !important;
-}
-/* every other nav item turns blue-with-white-text on hover - match
-   that here too instead of darkening the yellow (white text on a
-   darkened yellow is a real contrast problem, not just inconsistent).
-   #header-prefixed duplicates above/below give these an ID-level
-   specificity floor so they can never lose to body.css's plain-class
-   .nav-menu a:hover / .active rules, regardless of source order. */
-.nav-menu a.btn-login:hover,
-#header .nav-menu a.btn-login:hover {
-  background: var(--brand);
-  color: #fff !important;
+  position: relative;
+  transition: background .2s cubic-bezier(.4,0,.2,1),
+              color .2s cubic-bezier(.4,0,.2,1),
+              transform .2s cubic-bezier(.4,0,.2,1);
 }
 
-.mobile-nav-toggle { color: var(--brand) !important; }
-.mobile-nav { background: var(--brand) !important; }
-/* style.css sets .mobile-nav a { color: #222222 }, which is
-   unreadable against the navy panel above - keep it white at rest,
-   and white on hover/active too since the highlight itself is blue
-   (a lighter shade of the panel's own navy), matching the desktop
-   .nav-menu's white-on-blue hover treatment. */
-.mobile-nav a {
-  color: #fff !important;
+/* Keyboard focus (tab navigation) — never rely on hover alone */
+.navbar .nav-list a:focus-visible {
+  outline: 2px solid var(--brand);
+  outline-offset: 2px;
 }
-.mobile-nav a:hover,
-.mobile-nav .active > a,
-.mobile-nav li:hover > a {
+
+/* Underline indicator on hover/active, desktop pill nav only — the mobile
+   drawer keeps its own tap-friendly background highlight (see below).
+   The login button is a distinct CTA, not a nav link, so it opts out. */
+@media (min-width: 992px) {
+  .navbar .nav-list a::after {
+    content: '';
+    position: absolute;
+    left: 16px;
+    right: 16px;
+    bottom: 6px;
+    height: 2px;
+    border-radius: 999px;
+    background: currentColor;
+    transform: scaleX(0);
+    transform-origin: center;
+    transition: transform .25s cubic-bezier(.4,0,.2,1);
+  }
+
+  .navbar .nav-list a.btn-login::after {
+    display: none;
+  }
+
+  .navbar .nav-list a:hover,
+  .navbar .nav-list li.active > a,
+  #header .navbar .nav-list a:hover,
+  #header .navbar .nav-list li.active > a {
+    background: transparent;
+    color: var(--brand) !important;
+  }
+
+  .navbar .nav-list a:hover::after,
+  .navbar .nav-list li.active > a::after,
+  #header .navbar .nav-list a:hover::after,
+  #header .navbar .nav-list li.active > a::after {
+    transform: scaleX(1);
+  }
+}
+
+/* Active item has a subtle scale bump */
+.navbar .nav-list a:active {
+  transform: scale(.96);
+}
+
+/* Login button */
+.navbar .nav-list a.btn-login {
+  background: var(--accent);
+  color: var(--ink-900) !important;
+  font-weight: 700;
+  margin-left: 4px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05) !important;
+  transition: background .2s cubic-bezier(.4,0,.2,1),
+              color .2s cubic-bezier(.4,0,.2,1),
+              box-shadow .2s cubic-bezier(.4,0,.2,1),
+              transform .2s cubic-bezier(.4,0,.2,1);
+}
+.navbar .nav-list a.btn-login:hover,
+#header .navbar .nav-list a.btn-login:hover {
+  background: var(--brand);
   color: #fff !important;
-  background: var(--brand-light);
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05) !important;
+}
+
+/* ---- Hamburger button (mobile) ---- */
+
+.mobile-nav-toggle {
+  display: none;      /* hidden on desktop */
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 5px;
+  width: 42px;
+  height: 42px;
+  flex-shrink: 0;
+  padding: 0;
+  border: none;
+  border-radius: var(--radius-sm);
+  background: transparent;
+  cursor: pointer;
+  z-index: 10001;
+  position: absolute;
+  top: 50%;
+  right: 15px;
+  transform: translateY(-50%);
+}
+.mobile-nav-toggle:focus-visible {
+  outline: 2px solid var(--brand);
+  outline-offset: 2px;
+}
+.hamburger-line {
+  display: block;
+  width: 24px;
+  height: 2.5px;
+  background: var(--ink-900);
+  border-radius: 999px;
+  transition: transform .3s cubic-bezier(.4,0,.2,1),
+              opacity .3s cubic-bezier(.4,0,.2,1),
+              background .3s cubic-bezier(.4,0,.2,1);
+  transform-origin: center;
+}
+
+/* Hamburger → X morph */
+body.mobile-nav-active .hamburger-line:nth-child(1) {
+  transform: translateY(7.5px) rotate(45deg);
+  background: #fff;
+}
+body.mobile-nav-active .hamburger-line:nth-child(2) {
+  opacity: 0;
+  transform: scaleX(0);
+}
+body.mobile-nav-active .hamburger-line:nth-child(3) {
+  transform: translateY(-7.5px) rotate(-45deg);
+  background: #fff;
+}
+
+/* ---- Mobile overlay backdrop ---- */
+
+.mobile-nav-overlay {
+  position: fixed;
+  inset: 0;
+  /* No backdrop-filter here: blurring this fixed layer bleeds through
+     and softens the drawer stacked above it in some Chromium builds,
+     even though the drawer has a higher z-index. A flat dim is safer. */
+  background: rgba(5,6,62,.55);
+  z-index: 9998;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity .35s cubic-bezier(.4,0,.2,1),
+              visibility .35s cubic-bezier(.4,0,.2,1);
+}
+body.mobile-nav-active .mobile-nav-overlay {
+  opacity: 1;
+  visibility: visible;
+}
+
+/* ---- Responsive: mobile breakpoint ---- */
+
+@media (max-width: 991px) {
+  .mobile-nav-toggle {
+    display: flex;
+  }
+
+  .navbar .nav-list {
+    /* Slide-in drawer from the right */
+    position: fixed;
+    top: 0;
+    right: 0;
+    width: 280px;
+    max-width: 85vw;
+    height: 100vh;
+    height: 100dvh;
+    background: var(--brand);
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0;
+    padding: 90px 24px 40px;
+    z-index: 9999;
+    overflow-y: auto;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05) !important;
+
+    /* slide-in animation */
+    transform: translateX(100%);
+    opacity: 0;
+    visibility: hidden;
+    transition: transform .4s cubic-bezier(.4,0,.2,1),
+                opacity .35s cubic-bezier(.4,0,.2,1),
+                visibility .35s cubic-bezier(.4,0,.2,1);
+  }
+
+  body.mobile-nav-active .navbar .nav-list {
+    transform: translateX(0);
+    opacity: 1;
+    visibility: visible;
+  }
+
+  /* Stagger each nav item */
+  .navbar .nav-list li {
+    opacity: 0;
+    transform: translateX(30px);
+    transition: opacity .3s ease, transform .3s ease;
+  }
+  body.mobile-nav-active .navbar .nav-list li {
+    opacity: 1;
+    transform: translateX(0);
+  }
+  body.mobile-nav-active .navbar .nav-list li:nth-child(1) { transition-delay: .08s; }
+  body.mobile-nav-active .navbar .nav-list li:nth-child(2) { transition-delay: .14s; }
+  body.mobile-nav-active .navbar .nav-list li:nth-child(3) { transition-delay: .20s; }
+  body.mobile-nav-active .navbar .nav-list li:nth-child(4) { transition-delay: .26s; }
+
+  /* Mobile nav links */
+  .navbar .nav-list a {
+    color: rgba(255,255,255,.85) !important;
+    font-size: 16px;
+    font-weight: 600;
+    height: 50px;
+    padding: 0 16px !important;
+    border-radius: var(--radius-sm);
+    width: 100%;
+    justify-content: flex-start;
+  }
+
+  .navbar .nav-list a:hover,
+  .navbar .nav-list li.active > a {
+    background: rgba(255,255,255,.12);
+    color: #fff !important;
+  }
+
+  /* Login button on mobile */
+  .navbar .nav-list a.btn-login {
+    background: var(--accent);
+    color: var(--ink-900) !important;
+    margin-left: 0;
+    margin-top: 12px;
+    justify-content: center;
+    font-weight: 800;
+    border-radius: var(--radius-sm);
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05) !important;
+  }
+  .navbar .nav-list a.btn-login:hover {
+    background: var(--accent-dark);
+    color: var(--ink-900) !important;
+  }
+
+  /* Prevent body scroll when mobile nav is open */
+  body.mobile-nav-active {
+    overflow: hidden;
+  }
 }
 
 /* ---------- hero / search ---------- */
@@ -150,15 +423,36 @@ a:focus {
 .guest-hero {
   padding: 84px 0 76px;
   background:
-    radial-gradient(circle at 12% 12%, rgba(254,205,8,.14), transparent 42%),
-    radial-gradient(circle at 88% 90%, rgba(47,76,120,.35), transparent 45%),
-    linear-gradient(160deg, var(--ink-900) 0%, var(--brand-dark) 55%, var(--brand) 100%);
+    linear-gradient(180deg, rgba(5,6,62,.85), rgba(5,6,62,.92)),
+    url('../img/background.jpg') center / cover no-repeat;
   position: relative;
   overflow: hidden;
+}
+.guest-hero::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(180deg, rgba(5,6,62,.85), rgba(5,6,62,.92)),
+    url('../img/background%201.jpg') center / cover no-repeat;
+  opacity: 0;
+  z-index: 0;
+  animation: heroCrossfade 8s ease-in-out infinite alternate;
+}
+@keyframes heroCrossfade {
+  0%, 35% { opacity: 0; }
+  65%, 100% { opacity: 1; }
+}
+.guest-hero.hero-showcase {
+  padding-bottom: 0;
+  padding-top: 0;
+  height: 70vh;
+  min-height: 600px;
 }
 .guest-hero > .container {
   position: relative;
   z-index: 1;
+  height: 100%;
 }
 
 /* soft circular "orb" ornaments bleeding off the hero edges */
@@ -199,6 +493,8 @@ a:focus {
 .hero-badge {
   display: inline-flex;
   align-items: center;
+  align-self: flex-start;
+  width: fit-content;
   height: var(--control-h);
   background: rgba(255,255,255,.08);
   border: 1px solid rgba(255,255,255,.16);
@@ -220,17 +516,20 @@ a:focus {
 }
 
 .hero-title {
-  font-size: 42px;
+  font-size: clamp(32px, 3.8vw, 54px);
   font-weight: 800;
   line-height: 1.15;
   letter-spacing: -.01em;
   color: #fff;
   margin: 0 0 14px 0;
   text-transform: uppercase;
+  transition: text-shadow 0.3s ease;
 }
-.hero-title em {
+.hero-title:hover {
+  text-shadow: none;
+}
+.hero-title .highlight {
   color: var(--accent);
-  font-style: italic;
 }
 .guest-hero p.lead {
   color: rgba(255,255,255,.72);
@@ -239,41 +538,107 @@ a:focus {
   margin: 0 auto;
 }
 
-.search-card {
-  margin-top: 30px;
-  background: var(--card);
-  border-radius: var(--radius);
-  box-shadow: var(--shadow-lg);
-  padding: 10px;
+/* ---------- homepage hero: copy + illustration, side by side ---------- */
+
+.hero-grid {
+  align-items: stretch;
+  height: 100%;
+}
+
+.hero-copy {
   display: flex;
-  gap: 8px;
-  flex-wrap: wrap;
+  flex-direction: column;
+  justify-content: center;
 }
-.search-card input[type="text"] {
-  flex: 1 1 240px;
-  height: 48px;
-  box-sizing: border-box;
-  border: none;
-  padding: 0 18px;
-  font-size: 15px;
-  border-radius: var(--radius-sm);
-  background: transparent;
-  color: var(--ink-900);
+
+.hero-copy .hero-title {
+  margin-bottom: 16px;
 }
-.search-card input[type="text"]:focus { outline: none; background: var(--surface); }
-.search-card input[type="submit"] {
-  height: 48px;
-  box-sizing: border-box;
-  border: none;
-  background: var(--accent);
-  color: var(--ink-900);
-  font-weight: 700;
-  padding: 0 26px;
-  border-radius: var(--radius-sm);
-  cursor: pointer;
-  transition: background .15s ease;
+
+.guest-hero .hero-copy p.lead {
+  font-size: 16px;
+  line-height: 1.6;
+  margin: 0;
+  max-width: 500px;
 }
-.search-card input[type="submit"]:hover { background: var(--accent-dark); color: var(--ink-900); }
+
+.hero-media {
+  position: relative;
+  display: flex;
+  justify-content: center;
+  align-items: flex-end;
+}
+
+/* Soft glow anchoring the illustration, echoing the section's hero-orbs */
+.hero-media-glow {
+  display: none;
+}
+
+.hero-photo {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  max-width: 560px;
+  height: auto;
+  max-height: 100%;
+  object-fit: contain;
+  object-position: bottom center;
+  display: block;
+  margin-bottom: -1px;
+  transform: scale(1.05);
+  transform-origin: bottom center;
+  filter: drop-shadow(0 24px 36px rgba(0,0,0,.4));
+}
+
+/* Animations */
+.fade-in-up {
+  opacity: 0;
+  animation: fadeInUp 0.8s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@media (max-width: 991px) {
+  .guest-hero.hero-showcase,
+  .guest-hero.page-hero {
+    height: auto;
+    padding-top: 40px;
+  }
+  .hero-grid {
+    height: auto;
+  }
+  .hero-badge {
+    align-self: center;
+  }
+  .hero-copy {
+    text-align: center;
+    align-items: center;
+    padding-bottom: 20px;
+  }
+  .hero-copy .hero-title {
+    font-size: 42px;
+  }
+  .guest-hero .hero-copy p.lead {
+    margin: 0 auto;
+    font-size: 16px;
+  }
+  .hero-media {
+    margin-top: 0;
+  }
+  .hero-photo {
+    max-width: 400px;
+    max-height: 50vh;
+  }
+}
 
 /* ---------- hero quick stats ---------- */
 
@@ -311,7 +676,6 @@ a:focus {
   text-transform: uppercase;
   padding: 0 16px;
   border-radius: 999px;
-  box-shadow: var(--shadow);
   margin-bottom: 18px;
 }
 .eyebrow i { color: var(--accent); }
@@ -353,7 +717,7 @@ a:focus {
   background: var(--card);
   border: 1px solid var(--border);
   border-radius: var(--radius);
-  box-shadow: var(--shadow);
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05) !important;
   padding: 18px;
 }
 .step-num {
@@ -400,12 +764,12 @@ a:focus {
   border-radius: var(--radius);
   padding: 22px 24px;
   height: 100%;
-  box-shadow: var(--shadow);
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05) !important;
   transition: transform .15s ease, box-shadow .15s ease, border-top-color .15s ease;
 }
 .icon-box2:hover {
   transform: translateY(-4px);
-  box-shadow: var(--shadow-lg);
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05) !important;
   border-top-color: var(--accent);
 }
 .icon-box2 h3 { font-size: 17px; margin: 0 0 10px 0; }
@@ -418,7 +782,16 @@ a:focus {
 
 /* ---------- sub-page hero (kepatuhan, panduan) ---------- */
 
-.page-hero { padding-bottom: 56px; }
+.page-hero {
+  padding-bottom: 0;
+  padding-top: 0;
+  height: 70vh;
+  min-height: 600px;
+}
+.page-hero > .container > .row {
+  height: 100%;
+  align-items: center;
+}
 
 /* ---------- breadcrumb ---------- */
 
@@ -429,7 +802,6 @@ a:focus {
   display: inline-flex;
   padding: 8px 18px;
   margin: 0 0 28px;
-  box-shadow: var(--shadow);
   font-size: 13.5px;
 }
 .breadcrumb .homeLink { color: var(--ink-500) !important; font-weight: 600; }
@@ -438,6 +810,7 @@ a:focus {
 
 .section-title.text-start { text-align: left; padding-bottom: 22px; }
 .section-title.text-start h2::before { display: none; }
+.section-title.text-start h2::after { left: 0; transform: none; }
 
 /* ---------- compliance page ---------- */
 
@@ -475,7 +848,7 @@ a:focus {
 .compliance-table-wrap {
   border: 1px solid var(--border);
   border-radius: var(--radius);
-  box-shadow: var(--shadow);
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05) !important;
   overflow: hidden;
 }
 .compliance-table { margin: 0; width: 100%; }
@@ -483,18 +856,27 @@ a:focus {
   background: var(--surface);
   color: var(--ink-900);
   font-weight: 700;
-  font-size: 11.5px;
+  font-size: 14px;
   text-transform: uppercase;
-  letter-spacing: .04em;
+  letter-spacing: .02em;
   border-bottom: 2px solid var(--border);
   padding: 14px 16px;
   white-space: nowrap;
 }
 .compliance-table tbody td {
+  font-size: 14px;
   padding: 14px 16px;
   vertical-align: middle;
   border-top: 1px solid var(--border);
   color: var(--ink-700);
+}
+.compliance-table thead th:first-child,
+.compliance-table tbody td:first-child {
+  padding-left: 28px;
+}
+.compliance-table thead th:last-child,
+.compliance-table tbody td:last-child {
+  padding-right: 28px;
 }
 .compliance-table tbody tr:hover { background: var(--brand-tint); }
 .compliance-name { font-weight: 700; color: var(--ink-900); }
@@ -534,7 +916,7 @@ a:focus {
   font-weight: 700;
   font-size: 14.5px;
   border-radius: 999px;
-  box-shadow: var(--shadow-lg);
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05) !important;
   transition: background .15s ease, color .15s ease;
 }
 .btn-download-pdf:hover { background: var(--accent-dark); color: var(--ink-900) !important; }
@@ -547,13 +929,13 @@ a:focus {
   background: var(--card);
   border: 1px solid var(--border);
   border-radius: var(--radius);
-  box-shadow: var(--shadow);
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05) !important;
   padding: 24px 22px;
   height: 100%;
   position: relative;
   transition: transform .15s ease, box-shadow .15s ease;
 }
-.panduan-card:hover { transform: translateY(-4px); box-shadow: var(--shadow-lg); }
+.panduan-card:hover { transform: translateY(-4px); box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05) !important; }
 .panduan-num {
   width: 34px;
   height: 34px;
@@ -588,7 +970,7 @@ a:focus {
   color: var(--brand);
   box-shadow: none;
 }
-.panduan-faq .accordion-button:focus { box-shadow: 0 0 0 3px var(--brand-tint); }
+.panduan-faq .accordion-button:focus { box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05) !important; }
 .panduan-faq .accordion-body { color: var(--ink-500); font-size: 14px; line-height: 1.8; padding: 4px 20px 20px; }
 .panduan-faq .accordion-body a { color: var(--brand); font-weight: 600; }
 
@@ -631,7 +1013,7 @@ a:focus {
 .map-wrap {
   border-radius: var(--radius);
   overflow: hidden;
-  box-shadow: var(--shadow);
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05) !important;
   border: 1px solid var(--border);
 }
 .map-wrap iframe { display: block; width: 100%; border: 0; }
@@ -757,4 +1139,70 @@ a:focus {
 @media (max-width: 991px) {
   .hero-title { font-size: 32px; }
   .guest-hero { padding: 60px 0 60px; }
+}
+/* Notary directory: compact, sticky region navigation. The list gets its
+   own scrollbar only when it is taller than the available viewport. */
+.services .notary-region-column {
+  position: relative;
+  /* Keep this column as tall as the notary grid. A sticky child needs a
+     taller containing block in order to travel while the page scrolls. */
+  align-self: stretch;
+}
+
+.services .notary-region-box {
+  position: sticky;
+  top: 92px;
+  align-self: flex-start;
+  height: fit-content !important;
+  min-height: 0 !important;
+  max-height: calc(100vh - 112px);
+  overflow: hidden;
+}
+
+.services .notary-region-sidebar {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  max-height: calc(100vh - 175px);
+}
+
+.services .notary-region-sidebar .widget_title {
+  flex: 0 0 auto;
+}
+
+.services .notary-region-sidebar .cat-list {
+  min-height: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  scrollbar-width: thin;
+  scrollbar-color: #c9c9dc transparent;
+}
+
+.services .notary-region-sidebar .cat-list::-webkit-scrollbar {
+  width: 6px;
+}
+
+.services .notary-region-sidebar .cat-list::-webkit-scrollbar-thumb {
+  border-radius: 999px;
+  background: #c9c9dc;
+}
+
+@media (max-width: 991.98px) {
+  .services .notary-region-column {
+    margin-top: 28px;
+  }
+
+  .services .notary-region-box {
+    position: static;
+    max-height: none;
+    overflow: visible;
+  }
+
+  .services .notary-region-sidebar {
+    max-height: none;
+  }
+
+  .services .notary-region-sidebar .cat-list {
+    overflow: visible;
+  }
 }

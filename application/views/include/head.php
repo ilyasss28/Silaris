@@ -19,6 +19,7 @@
   <link href="<?php echo base_url('assets')?>/assets-guest/vendor/icofont/icofont.min.css" rel="stylesheet">
   <link href="<?php echo base_url('assets')?>/assets-guest/vendor/boxicons/css/boxicons.min.css" rel="stylesheet">
   <link href="<?php echo base_url('assets')?>/assets-guest/vendor/animate.css/animate.min.css" rel="stylesheet">
+  <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
   <link href="<?php echo base_url('assets')?>/assets-guest/vendor/owl.carousel/assets/owl.carousel.min.css" rel="stylesheet">
 
   <!-- Template Main CSS Files -->

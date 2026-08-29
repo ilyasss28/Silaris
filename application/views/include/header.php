@@ -12,14 +12,26 @@
         </a>
       </h1>
       <?php $current_page = strtolower($this->router->fetch_class()); ?>
-      <nav class="nav-menu d-none d-lg-block">
-        <ul>
+
+      <!-- Desktop Navigation -->
+      <nav id="navbar" class="navbar" aria-label="Navigasi utama">
+        <ul class="nav-list" id="navList">
           <li class="<?= $current_page === 'home' ? 'active' : ''; ?>"><a href="<?php echo site_url('home'); ?>">Beranda</a></li>
-          <li class="<?= $current_page === 'panduan' ? 'active' : ''; ?>"><a href="<?php echo base_url('panduan'); ?>">Panduan</a></li>
-          <li class="<?= $current_page === 'kepatuhan' ? 'active' : ''; ?>"><a href="<?php echo base_url('kepatuhan/index'); ?>">Kepatuhan Notaris</a></li>
-          <li><a href="<?php echo base_url('login'); ?>" class="btn-login">Login</a></li>
+          <li class="<?= $current_page === 'panduan' ? 'active' : ''; ?>"><a href="<?php echo site_url('panduan'); ?>">Panduan</a></li>
+          <li class="<?= $current_page === 'kepatuhan' ? 'active' : ''; ?>"><a href="<?php echo site_url('kepatuhan'); ?>">Kepatuhan Notaris</a></li>
+          <li><a href="<?php echo site_url('login'); ?>" class="btn-login">Login</a></li>
         </ul>
+
+        <!-- Mobile Toggle Button -->
+        <button class="mobile-nav-toggle" aria-label="Buka menu navigasi" aria-controls="navList" aria-expanded="false">
+          <span class="hamburger-line"></span>
+          <span class="hamburger-line"></span>
+          <span class="hamburger-line"></span>
+        </button>
       </nav>
     </div>
   </header>
   <!-- End Header -->
+
+  <!-- Mobile Nav Overlay -->
+  <div class="mobile-nav-overlay" id="mobileNavOverlay"></div>

@@ -122,9 +122,9 @@
 
 <div class="row">
    <div class="col-md-12">
-      <div class="col-xs-3 padding-left-0"><b>Response</b></div>
-      <div class="col-xs-4"><b>Status : </b><span class="status text-blue"></span></div>
-      <div class="col-xs-5 padding-right-0">
+      <div class="col-3 padding-left-0"><b>Response</b></div>
+      <div class="col-4"><b>Status : </b><span class="status text-blue"></span></div>
+      <div class="col-5 padding-right-0">
          <input type="submit" value="Send" class="btn btn-lg btn-primary btn-flat pull-right">
          <span class="loading loading-hide pull-right padding-10"><img src="<?= BASE_ASSET; ?>/img/loading-spin-primary.svg"> <i>Loading, Submitting Data</i></span>
       </div>

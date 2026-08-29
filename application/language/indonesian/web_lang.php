@@ -219,3 +219,17 @@ $lang['btn_deactivation'] = 'Nonaktif';
 $lang['has_been_inactived'] = '$1 berhasil di nonaktifkan';
 $lang['has_been_actived'] = '$1 berhasil di aktifkan';
 
+/* Label tabel dan builder */
+$lang['title'] = 'Judul';
+$lang['subject'] = 'Subjek';
+$lang['table_name'] = 'Nama Tabel';
+$lang['action'] = 'Aksi';
+$lang['bulk'] = 'Aksi Massal';
+$lang['description'] = 'Deskripsi';
+$lang['type'] = 'Tipe';
+$lang['link'] = 'Tautan';
+$lang['template'] = 'Templat';
+$lang['created_at'] = 'Dibuat Pada';
+$lang['value'] = 'Nilai';
+$lang['label'] = 'Label';
+

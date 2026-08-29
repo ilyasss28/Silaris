@@ -24,9 +24,9 @@
           <h5>Layanan</h5>
           <ul>
             <li><a href="<?php echo site_url('home'); ?>">Beranda</a></li>
-            <li><a href="<?php echo base_url('panduan'); ?>">Panduan</a></li>
-            <li><a href="<?php echo base_url('kepatuhan/index'); ?>">Kepatuhan Notaris</a></li>
-            <li><a href="<?php echo base_url('login'); ?>">Login</a></li>
+            <li><a href="<?php echo site_url('panduan'); ?>">Panduan</a></li>
+            <li><a href="<?php echo site_url('kepatuhan'); ?>">Kepatuhan Notaris</a></li>
+            <li><a href="<?php echo site_url('login'); ?>">Login</a></li>
           </ul>
         </div>
 
@@ -35,11 +35,11 @@
           <ul class="footer-contact">
             <li>
               <i class="icofont-whatsapp"></i>
-              <span>+62-813-5555-4600</span>
+              <span>081140044555</span>
             </li>
             <li>
               <i class="icofont-envelope"></i>
-              <span>sultra@kemenkum.go.id</span>
+              <span>kanwilsultra@kemenkum.go.id</span>
             </li>
             <li>
               <i class="icofont-clock-time"></i>

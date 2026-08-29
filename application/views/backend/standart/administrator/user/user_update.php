@@ -1,6 +1,194 @@
 <!-- Fine Uploader Gallery CSS file
    ====================================================================== -->
 <link href="<?= BASE_ASSET; ?>/fine-upload/fine-uploader-gallery.min.css" rel="stylesheet">
+<style>
+   .admin-silaris .user-edit-page { padding: 0 !important; }
+   .admin-silaris .user-edit-shell {
+      max-width: 1120px;
+      margin: 0 auto;
+      overflow: hidden;
+      border: 1px solid var(--border);
+      border-top: 3px solid var(--accent);
+      border-radius: var(--radius);
+      background: var(--card);
+      box-shadow: 0 12px 34px rgba(15, 27, 45, .08);
+   }
+   .admin-silaris .user-edit-shell > .box-body { padding: 0 !important; }
+   .admin-silaris .user-edit-shell .box-widget { margin: 0; border: 0; box-shadow: none; }
+   .admin-silaris .user-edit-header {
+      display: flex;
+      align-items: center;
+      gap: 18px;
+      min-height: 126px;
+      padding: 26px 30px;
+      border-bottom: 1px solid var(--border);
+      background: linear-gradient(135deg, #fff 0%, #fffdf4 100%);
+   }
+   .admin-silaris .user-edit-header .widget-user-image { position: static; margin: 0; }
+   .admin-silaris .user-edit-header .widget-user-image img {
+      width: 70px;
+      height: 70px;
+      padding: 3px;
+      border: 2px solid var(--accent);
+      border-radius: 18px;
+      background: #fff;
+      object-fit: cover;
+      box-shadow: 0 7px 18px rgba(15, 27, 45, .12);
+   }
+   .admin-silaris .user-edit-heading { flex: 1; min-width: 0; }
+   .admin-silaris .user-edit-eyebrow {
+      display: block;
+      margin-bottom: 5px;
+      color: #8a6b00;
+      font-size: 11px;
+      font-weight: 800;
+      letter-spacing: .09em;
+      text-transform: uppercase;
+   }
+   .admin-silaris .user-edit-header .widget-user-username {
+      margin: 0 0 5px !important;
+      color: var(--ink-900);
+      font-size: 24px;
+      font-weight: 800;
+      letter-spacing: -.03em;
+   }
+   .admin-silaris .user-edit-header .widget-user-desc {
+      margin: 0 !important;
+      color: var(--ink-500);
+      font-size: 13px;
+      font-weight: 500;
+   }
+   .admin-silaris .user-edit-back {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      min-height: 38px;
+      padding: 0 14px;
+      border: 1px solid var(--border);
+      border-radius: 9px;
+      background: #fff;
+      color: var(--ink-700);
+      font-size: 12px;
+      font-weight: 700;
+      text-decoration: none;
+   }
+   .admin-silaris .user-edit-back:hover { border-color: var(--accent-dark); background: var(--accent-tint); }
+   .admin-silaris .user-edit-form { padding: 28px 30px 0; }
+   .admin-silaris .user-edit-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 20px 22px;
+   }
+   .admin-silaris .user-edit-form .form-group {
+      display: block !important;
+      margin: 0 !important;
+      padding: 0 !important;
+      border: 0 !important;
+   }
+   .admin-silaris .user-edit-form .form-group.user-edit-wide { grid-column: 1 / -1; }
+   .admin-silaris .user-edit-form .control-label {
+      display: block;
+      width: auto !important;
+      margin: 0 0 8px;
+      padding: 0 !important;
+      float: none !important;
+      color: var(--ink-800);
+      font-size: 12px;
+      font-weight: 750;
+      text-align: left !important;
+   }
+   .admin-silaris .user-edit-form .form-group > [class*="col-"] {
+      width: 100% !important;
+      padding: 0 !important;
+      float: none !important;
+   }
+   .admin-silaris .user-edit-form .form-control,
+   .admin-silaris .user-edit-form .chosen-container,
+   .admin-silaris .user-edit-form .input-password { width: 100% !important; max-width: none !important; }
+   .admin-silaris .user-edit-form .form-control,
+   .admin-silaris .user-edit-form .chosen-container-single .chosen-single,
+   .admin-silaris .user-edit-form .chosen-container-multi .chosen-choices {
+      min-height: 44px;
+      border: 1px solid #d8dee8 !important;
+      border-radius: 9px !important;
+      background: #fbfcfe !important;
+      box-shadow: none !important;
+   }
+   .admin-silaris .user-edit-form .form-control { padding: 10px 13px; }
+   .admin-silaris .user-edit-form .form-control:focus {
+      border-color: #d5aa00 !important;
+      background: #fff !important;
+      box-shadow: 0 0 0 3px rgba(254, 205, 8, .18) !important;
+   }
+   .admin-silaris .user-edit-form .chosen-container-single .chosen-single { padding: 9px 12px; }
+   .admin-silaris .user-edit-form .chosen-container-single .chosen-single div { top: 9px; }
+   .admin-silaris .user-edit-form .chosen-container-multi .chosen-choices { padding: 5px 8px; }
+   .admin-silaris .user-edit-form .help-block {
+      display: block;
+      margin: 7px 0 0;
+      color: var(--ink-500);
+      font-size: 11px;
+      line-height: 1.5;
+   }
+   .admin-silaris .user-edit-form .required { color: var(--danger); }
+   .admin-silaris .user-avatar-field {
+      padding: 18px !important;
+      border: 1px dashed #cbd3df !important;
+      border-radius: 11px !important;
+      background: #f8f9fc;
+   }
+   .admin-silaris .user-avatar-field > .control-label { margin-bottom: 12px; }
+   .admin-silaris .user-avatar-field .qq-uploader { min-height: 180px; border-radius: 9px; background: #fff; }
+   .admin-silaris .user-edit-form .input-password { display: flex; }
+   .admin-silaris .user-edit-form .input-password .form-control { border-radius: 9px 0 0 9px !important; }
+   .admin-silaris .user-edit-form .show-password {
+      height: 44px;
+      min-width: 46px;
+      border: 1px solid #d8dee8;
+      border-left: 0;
+      border-radius: 0 9px 9px 0;
+      background: #f8f9fc;
+      color: var(--ink-500);
+   }
+   .admin-silaris .user-edit-message { grid-column: 1 / -1; }
+   .admin-silaris .user-edit-actions {
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      gap: 9px;
+      margin: 28px -30px 0;
+      padding: 18px 30px;
+      border-top: 1px solid var(--border);
+      background: #f8f9fc;
+   }
+   .admin-silaris .user-edit-actions .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      min-height: 40px;
+      padding: 0 16px;
+      border-radius: 9px !important;
+      font-size: 12px;
+      font-weight: 750;
+   }
+   .admin-silaris .user-edit-actions .btn-primary { background: var(--brand) !important; border-color: var(--brand) !important; color: #fff; }
+   .admin-silaris .user-edit-actions .btn-info { background: var(--accent) !important; border-color: var(--accent) !important; color: var(--ink-900) !important; }
+   .admin-silaris .user-edit-actions .loading { margin-right: auto; color: var(--ink-500); font-size: 12px; }
+   .admin-silaris .user-edit-actions .loading img { width: 18px; }
+   @media (max-width: 767.98px) {
+      .admin-silaris .user-edit-page { padding: 0 !important; }
+      .admin-silaris .user-edit-header { align-items: flex-start; padding: 20px; }
+      .admin-silaris .user-edit-header .widget-user-image img { width: 58px; height: 58px; }
+      .admin-silaris .user-edit-header .widget-user-username { font-size: 20px; }
+      .admin-silaris .user-edit-back { display: none; }
+      .admin-silaris .user-edit-form { padding: 22px 20px 0; }
+      .admin-silaris .user-edit-grid { grid-template-columns: minmax(0, 1fr); gap: 18px; }
+      .admin-silaris .user-edit-form .form-group.user-edit-wide { grid-column: auto; }
+      .admin-silaris .user-edit-actions { margin: 24px -20px 0; padding: 15px 20px; flex-wrap: wrap; }
+      .admin-silaris .user-edit-actions .loading { width: 100%; order: 4; }
+      .admin-silaris .user-edit-actions .btn { flex: 1 1 auto; justify-content: center; }
+   }
+</style>
 <!-- Fine Uploader jQuery JS file
    ====================================================================== -->
 <script src="<?= BASE_ASSET; ?>/fine-upload/jquery.fine-uploader.js"></script>
@@ -33,37 +221,40 @@
 <?php $this->load->view('core_template/fine_upload'); ?>
 
 <!-- Main content -->
-<section class="content">
+<section class="content user-edit-page">
    <div class="row" >
       <div class="col-md-12">
-         <div class="box box-warning">
+         <div class="box box-warning user-edit-shell">
             <div class="box-body ">
                <!-- Widget: user widget style 1 -->
                <div class="box box-widget widget-user-2">
                   <!-- Add the bg color to the header using any of the bg-* classes -->
-                  <div class="widget-user-header ">
+                  <div class="widget-user-header user-edit-header">
                      <div class="widget-user-image">
-                        <img class="img-circle" src="<?= BASE_ASSET; ?>/img/add2.png" alt="User Avatar">
+                        <img src="<?= BASE_URL . 'uploads/user/' . (!empty($user->avatar) ? $user->avatar : 'default.png'); ?>" alt="Avatar <?= _ent($user->full_name); ?>">
                      </div>
-                     <!-- /.widget-user-image -->
-                     <h3 class="widget-user-username"><?= cclang('user') ?></h3>
-                     <h5 class="widget-user-desc"><?= cclang('update', cclang('user')); ?></h5>
-                     <hr>
+                     <div class="user-edit-heading">
+                        <span class="user-edit-eyebrow">Manajemen Pengguna</span>
+                        <h3 class="widget-user-username">Edit <?= _ent($user->full_name); ?></h3>
+                        <h5 class="widget-user-desc">Perbarui informasi akun, hak akses, avatar, dan kata sandi pengguna.</h5>
+                     </div>
+                     <a class="user-edit-back" href="<?= base_url('administrator/user'); ?>"><i class="fa fa-arrow-left"></i> Daftar pengguna</a>
                   </div>
                   <?= form_open(base_url('administrator/user/edit_save/'.$this->uri->segment(4)), [
                     'name'    => 'form_user', 
-                    'class'   => 'form-horizontal', 
+                    'class'   => 'form-horizontal user-edit-form',
                     'id'      => 'form_user', 
                     'enctype' => 'multipart/form-data', 
                     'method'  => 'POST'
                   ]); ?>
 
+                   <div class="user-edit-grid">
                    <div class="form-group ">
                         <label for="username" class="col-sm-2 control-label"><?= cclang('username'); ?> <i class="required">*</i></label>
 
                         <div class="col-sm-8">
                           <input type="text" class="form-control" name="username" id="username" placeholder="Username" value="<?= set_value('username', $user->username); ?>">
-                          <small class="info help-block">The username of user.</small>
+                          <small class="info help-block">Nama unik yang digunakan untuk masuk ke sistem.</small>
                         </div>
                     </div>
 
@@ -72,7 +263,7 @@
 
                         <div class="col-sm-8">
                           <input type="text" class="form-control" name="email" id="email" placeholder="Email" value="<?= set_value('email', $user->email); ?>">
-                          <small class="info help-block">The email of user.</small>
+                          <small class="info help-block">Alamat email aktif pengguna.</small>
                         </div>
                     </div>
 
@@ -81,7 +272,7 @@
 
                         <div class="col-sm-8">
                           <input type="text" class="form-control" name="full_name" id="full_name" placeholder="Full Name" value="<?= set_value('full_name', $user->full_name); ?>">
-                          <small class="info help-block">The full name of user.</small>
+                          <small class="info help-block">Nama lengkap yang tampil pada aplikasi.</small>
                         </div>
                     </div>
                     <div class="form-group ">
@@ -98,8 +289,7 @@
                                     <option <?=  $row->kd_wilayah ==  $user->kd_wilayah ? 'selected' : ''; ?> value="<?= $row->kd_wilayah ?>"><?= $row->nama; ?></option>
                                     <?php endforeach; ?>  
                                 </select>
-                                <small class="info help-block">
-                                <b>Input Kd Skpd</b> Max Length : 7.</small>
+                                <small class="info help-block">Pilih satuan kerja pengguna.</small>
                             </div>
                         </div>
                     <div class="form-group ">
@@ -112,12 +302,12 @@
                             <?php endforeach; ?>  
                            </select>
                             <small class="info help-block">
-                             Select one or more groups.
+                             Pilih satu atau beberapa grup hak akses.
                           </small>
                         </div>
                     </div>
 
-                    <div class="form-group ">
+                    <div class="form-group user-edit-wide user-avatar-field">
                         <label for="username" class="col-sm-2 control-label"><?= cclang('avatar'); ?> </label>
 
                         <div class="col-sm-8">
@@ -125,12 +315,12 @@
                             <input name="user_avatar_uuid" id="user_avatar_uuid" type="hidden" value="<?= set_value('user_avatar_uuid'); ?>">
                             <input name="user_avatar_name" id="user_avatar_name" type="hidden" value="<?= set_value('user_avatar_name', $user->avatar); ?>">
                             <small class="info help-block">
-                              Format file must PNG, JPEG.
+                              Format PNG, JPG, JPEG, atau GIF dengan ukuran maksimal 5 MB.
                             </small>
                         </div>
                     </div>
                     <?php is_allowed('user_update_password', function(){?>
-                    <div class="form-group ">
+                    <div class="form-group user-edit-wide">
                         <label for="password" class="col-sm-2 control-label"><?= cclang('password'); ?> </label>
 
                         <div class="col-sm-6">
@@ -141,20 +331,19 @@
                             </span>
                           </div>
                            <small class="info help-block">
-                            <?= cclang('do_not_be_fill_if_you_do_not_want_to_change_the_password'); ?>, <br>The password character must 6 or more.
+                            Kosongkan jika tidak ingin mengganti kata sandi. Gunakan minimal 6 karakter.
                           </small>
                         </div>
                     </div>
                     <?php }) ?>
                     
-                    <div class="message">
-                      
+                    <div class="message user-edit-message"></div>
                     </div>
-                     <div class="row-fluid col-md-7">
-                        <button class="btn btn-flat btn-primary btn_save btn_action" id="btn_save" data-stype='stay' title="save (Ctrl+s)"><i class="fa fa-save" ></i> <?= cclang('save_button'); ?></button>
-                     <a class="btn btn-flat btn-info btn_save btn_action btn_save_back" id="btn_save" data-stype='back' title="<?= cclang('save_and_go_the_list_button'); ?> (Ctrl+d)"><i class="ion ion-ios-list-outline" ></i> <?= cclang('save_and_go_the_list_button'); ?></a>
-                     <a class="btn btn-flat btn-default btn_action" id="btn_cancel" title="<?= cclang('cancel_button'); ?> (Ctrl+x)"><i class="fa fa-undo" ></i> <?= cclang('cancel_button'); ?></a>
+                     <div class="user-edit-actions">
                      <span class="loading loading-hide"><img src="<?= BASE_ASSET; ?>/img/loading-spin-primary.svg"> <i><?= cclang('loading_saving_data'); ?></i></span>
+                        <button class="btn btn-flat btn-primary btn_save btn_action" id="btn_save" data-stype='stay' title="save (Ctrl+s)"><i class="fa fa-save" ></i> <?= cclang('save_button'); ?></button>
+                     <a class="btn btn-flat btn-info btn_save btn_action btn_save_back" id="btn_save_back" data-stype='back' title="<?= cclang('save_and_go_the_list_button'); ?> (Ctrl+d)"><i class="ion ion-ios-list-outline" ></i> <?= cclang('save_and_go_the_list_button'); ?></a>
+                     <a class="btn btn-flat btn-default btn_action" id="btn_cancel" title="<?= cclang('cancel_button'); ?> (Ctrl+x)"><i class="fa fa-undo" ></i> <?= cclang('cancel_button'); ?></a>
                      </div>
                   <?= form_close(); ?>
                </div>
@@ -277,16 +466,22 @@
          },
          multiple: false,
          validation: {
-             allowedExtensions: ['jpeg', 'jpg', 'gif', 'png']
+             allowedExtensions: ['jpeg', 'jpg', 'gif', 'png'],
+             sizeLimit: 5 * 1024 * 1024
          },
          showMessage: function(msg) {
              toastr['error'](msg);
          },
          callbacks: {
-             onComplete: function(id, name) {
+             onComplete: function(id, name, responseJSON) {
+                 if (!responseJSON.success) {
+                     $('#user_avatar_uuid').val('');
+                     $('#user_avatar_name').val('');
+                     return;
+                 }
                  var uuid = $('#user_avatar_galery').fineUploader('getUuid', id);
                  $('#user_avatar_uuid').val(uuid);
-                 $('#user_avatar_name').val(name);
+                 $('#user_avatar_name').val(responseJSON.uploadName || name);
              },
              onSubmit: function(id, name) {
                  var uuid = $('#user_avatar_uuid').val();

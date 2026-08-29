@@ -9,7 +9,7 @@
 
   // Smooth scroll for the navigation menu and links with .scrollto classes
   var scrolltoOffset = $('#header').outerHeight() - 1;
-  $(document).on('click', '.nav-menu a, .mobile-nav a, .scrollto', function(e) {
+  $(document).on('click', '.nav-list a, .scrollto', function(e) {
     if (location.pathname.replace(/^\//, '') == this.pathname.replace(/^\//, '') && location.hostname == this.hostname) {
       var target = $(this.hash);
       if (target.length) {
@@ -25,20 +25,20 @@
           scrollTop: scrollto
         }, 1500, 'easeInOutExpo');
 
-        if ($(this).parents('.nav-menu, .mobile-nav').length) {
-          $('.nav-menu .active, .mobile-nav .active').removeClass('active');
+        if ($(this).parents('.nav-list').length) {
+          $('.nav-list .active').removeClass('active');
           $(this).closest('li').addClass('active');
         }
 
         if ($('body').hasClass('mobile-nav-active')) {
           $('body').removeClass('mobile-nav-active');
-          $('.mobile-nav-toggle i').toggleClass('icofont-navigation-menu icofont-close');
-          $('.mobile-nav-overly').fadeOut();
+          $('.mobile-nav-toggle').attr('aria-expanded', 'false');
         }
         return false;
       }
     }
   });
+
 
   // Activate smooth scroll on page load with hash links in the url
   $(document).ready(function() {
@@ -54,39 +54,47 @@
   });
 
   // Mobile Navigation
-  if ($('.nav-menu').length) {
-    var $mobile_nav = $('.nav-menu').clone().prop({
-      class: 'mobile-nav d-lg-none'
-    });
-    $('body').append($mobile_nav);
-    $('body').prepend('<button type="button" class="mobile-nav-toggle d-lg-none"><i class="icofont-navigation-menu"></i></button>');
-    $('body').append('<div class="mobile-nav-overly"></div>');
-
-    $(document).on('click', '.mobile-nav-toggle', function(e) {
-      $('body').toggleClass('mobile-nav-active');
-      $('.mobile-nav-toggle i').toggleClass('icofont-navigation-menu icofont-close');
-      $('.mobile-nav-overly').toggle();
-    });
-
-    $(document).on('click', '.mobile-nav .drop-down > a', function(e) {
-      e.preventDefault();
-      $(this).next().slideToggle(300);
-      $(this).parent().toggleClass('active');
-    });
-
-    $(document).click(function(e) {
-      var container = $(".mobile-nav, .mobile-nav-toggle");
-      if (!container.is(e.target) && container.has(e.target).length === 0) {
-        if ($('body').hasClass('mobile-nav-active')) {
-          $('body').removeClass('mobile-nav-active');
-          $('.mobile-nav-toggle i').toggleClass('icofont-navigation-menu icofont-close');
-          $('.mobile-nav-overly').fadeOut();
-        }
-      }
-    });
-  } else if ($(".mobile-nav, .mobile-nav-toggle").length) {
-    $(".mobile-nav, .mobile-nav-toggle").hide();
+  function setMobileNavOpen(isOpen) {
+    $('body').toggleClass('mobile-nav-active', isOpen);
+    $('.mobile-nav-toggle')
+      .attr('aria-expanded', isOpen)
+      .attr('aria-label', isOpen ? 'Tutup menu navigasi' : 'Buka menu navigasi');
   }
+
+  $(document).on('click', '.mobile-nav-toggle', function(e) {
+    e.stopPropagation();
+    setMobileNavOpen(!$('body').hasClass('mobile-nav-active'));
+  });
+
+  // Close mobile nav when clicking on overlay
+  $(document).on('click', '#mobileNavOverlay', function() {
+    setMobileNavOpen(false);
+  });
+
+  // Close mobile nav when clicking outside
+  $(document).on('click', function(e) {
+    if ($('body').hasClass('mobile-nav-active')) {
+      var $target = $(e.target);
+      if (!$target.closest('.nav-list, .mobile-nav-toggle').length) {
+        setMobileNavOpen(false);
+      }
+    }
+  });
+
+  // Close mobile nav when a nav link is clicked
+  $(document).on('click', '.nav-list a', function() {
+    if ($('body').hasClass('mobile-nav-active')) {
+      setMobileNavOpen(false);
+    }
+  });
+
+  // Close mobile nav on Escape key, returning focus to the toggle button
+  $(document).on('keydown', function(e) {
+    if (e.key === 'Escape' && $('body').hasClass('mobile-nav-active')) {
+      setMobileNavOpen(false);
+      $('.mobile-nav-toggle').trigger('focus');
+    }
+  });
 
   // Note: this used to also toggle .active on .nav-menu/.mobile-nav items
   // based on scroll position, matching in-page #anchor sections. SILARIS's

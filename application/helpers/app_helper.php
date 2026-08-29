@@ -78,9 +78,76 @@ if(!function_exists('clean_snake_case')) {
 	}
 }
 
+if (!function_exists('format_person_name')) {
+	/**
+	 * Normalise a person's name to title case without changing the stored value.
+	 * This also makes spacing around academic-title separators consistent.
+	 */
+	function format_person_name($name = '') {
+		$name = trim(preg_replace('/\s+/u', ' ', (string) $name));
+
+		if ($name === '') {
+			return '';
+		}
+
+		$name = preg_replace('/\s*,\s*/u', ', ', $name);
+
+		if (function_exists('mb_convert_case') && function_exists('mb_strtolower')) {
+			$formatted_name = mb_convert_case(
+				mb_strtolower($name, 'UTF-8'),
+				MB_CASE_TITLE,
+				'UTF-8'
+			);
+		} else {
+			$formatted_name = ucwords(strtolower($name));
+		}
+
+		$academic_titles = array(
+			'amd' => 'A.Md.',
+			'sag' => 'S.Ag.',
+			'se' => 'S.E.',
+			'sh' => 'S.H.',
+			'shi' => 'S.H.I.',
+			'skom' => 'S.Kom.',
+			'spd' => 'S.Pd.',
+			'ssos' => 'S.Sos.',
+			'st' => 'S.T.',
+			'mag' => 'M.Ag.',
+			'mh' => 'M.H.',
+			'mkom' => 'M.Kom.',
+			'mkn' => 'M.Kn.',
+			'mm' => 'M.M.',
+			'mpd' => 'M.Pd.',
+			'msi' => 'M.Si.',
+			'mt' => 'M.T.',
+			'phd' => 'Ph.D.',
+		);
+		$name_parts = array_map('trim', explode(',', $formatted_name));
+
+		foreach ($name_parts as $index => $name_part) {
+			if ($index === 0) {
+				continue;
+			}
+
+			$title_key = strtolower(preg_replace('/[^a-z]/i', '', $name_part));
+			if (isset($academic_titles[$title_key])) {
+				$name_parts[$index] = $academic_titles[$title_key];
+			}
+		}
+
+		return implode(', ', $name_parts);
+	}
+}
+
 if(!function_exists('get_group_user')) {
+	/**
+	 * @param int|string $id_user
+	 * @return array|bool
+	 */
 	function get_group_user($id_user = '') {
-		return get_user_groups($id_user);
+		
+		$ci =& get_instance();
+		return $ci->aauth->get_user_groups($id_user);
 	}
 }
 
@@ -101,6 +168,10 @@ if(!function_exists('get_user_data')) {
 }
 
 if(!function_exists('is_allowed')) {
+	/**
+	 * @param string $permission
+	 * @param Closure $func
+	 */
 	function is_allowed($permission, Closure $func) {
 		$ci =& get_instance();
 		$reflection = new ReflectionFunction($func);
@@ -120,6 +191,10 @@ if(!function_exists('is_allowed')) {
 }
 
 if(!function_exists('message_flash')) {
+	/**
+	 * @param string $message
+	 * @param string $type
+	 */
 	function message_flash($message, $type) {
 		$ci =& get_instance();
 		$ci->session->set_flashdata('f_message', $message);
@@ -128,6 +203,12 @@ if(!function_exists('message_flash')) {
 }
 
 if(!function_exists('display_menu_module')) {
+	/**
+	 * @param int $parent
+	 * @param int $level
+	 * @param string $menu_type
+	 * @param bool $ignore_active
+	 */
 	function display_menu_module($parent, $level, $menu_type, $ignore_active = false) {
 		$ci =& get_instance();
 		$ci->load->database();
@@ -194,6 +275,10 @@ if(!function_exists('display_menu_module')) {
 }
 
 if(!function_exists('display_menu_admin')) {
+	/**
+	 * @param int $parent
+	 * @param int $level
+	 */
 	function display_menu_admin($parent, $level) {
 		$ci =& get_instance();
 		$ci->load->database();
@@ -222,7 +307,17 @@ if(!function_exists('display_menu_admin')) {
 		   		} else {
 		   			$active = '';
 		   		}
-		   		$link = filter_var($row->link, FILTER_VALIDATE_URL) ? $row->link : base_url($row->link);
+		   		$raw_link = trim((string) $row->link);
+		   		if ($raw_link === '' OR $raw_link === '#') {
+		   			// Placeholder link for a collapsible parent menu. Keep it as a
+		   			// literal "#" so AdminLTE's treeview handler suppresses the
+		   			// browser navigation instead of jumping to <base_url>/# .
+		   			$link = '#';
+		   		} elseif (filter_var($raw_link, FILTER_VALIDATE_URL)) {
+		   			$link = $raw_link;
+		   		} else {
+		   			$link = base_url($raw_link);
+		   		}
 		   		if ($row->type == 'label') {
 		   			if ($ci->aauth->is_allowed($perms)) {
 		        		$ret .= '<li class="nav-header">'._ent($row->label).'</li>';
@@ -386,6 +481,9 @@ if(!function_exists('_ent')) {
 }
 
 if(!function_exists('dd')) {
+	/**
+	 * @param mixed $array
+	 */
 	function dd($array) {
 		echo '<pre>';
 		print_r($array);
@@ -395,6 +493,10 @@ if(!function_exists('dd')) {
 
 
 if(!function_exists('get_captcha')) {
+	/**
+	 * @param string|null $string
+	 * @return array{word: string, time: float, image: string}
+	 */
 	function get_captcha($string = null) {
 		$ci =& get_instance();
 		$ci->load->helper('captcha');
@@ -420,6 +522,7 @@ if(!function_exists('get_captcha')) {
 		        )
 		);
 
+		/** @var array{time: float|string, word: string, image: string} $cap */
 		$cap = create_captcha($vals);
 		$expiration = time() - 7200; // Two hour limit
 		$ci->db->where('captcha_time < ', $expiration)
@@ -526,6 +629,7 @@ if(!function_exists('get_installed_extension')) {
 		$ci =& get_instance();
 		$ci->load->library('cc_extension');
 		$extensions = $ci->cc_extension->getExtensions();
+		/** @var array $extensions */
 		$actived = [];
 		foreach ($extensions as $extension) {
 			if (is_dir($extension->item->path)) {
@@ -732,6 +836,10 @@ if(!function_exists('get_menu')) {
 
 
 if(!function_exists('create_tree')) {
+	/**
+	 * @param array $list
+	 * @param array $parent
+	 */
 	function create_tree(&$list, $parent) {
 
 	    $tree = array();
@@ -853,6 +961,11 @@ if (!function_exists('getallheaders'))
 
 if (!function_exists('cclang'))
 {
+    /**
+     * @param string $langkey
+     * @param array $params
+     * @return string
+     */
     function cclang($langkey = null, $params = [])
     {
     	if (!is_array($params)) {

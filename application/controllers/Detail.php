@@ -5,11 +5,7 @@ class Detail extends CI_Controller {
 
 	public function __construct() {
 		parent::__construct();
-
-	$this->load->view('include/head');
-	$this->load->view('include/header');
-	// $this->load->view('include/slider');
-	$this->load->model('Model_home');
+		$this->load->model('Model_home');
 
 	}
 
@@ -28,27 +24,26 @@ class Detail extends CI_Controller {
 	 * map to /index.php/welcome/<method_name>
 	 * @see https://codeigniter.com/userguide3/general/urls.html
 	 */
-	public function index($id_notaris)
+	public function index($id_notaris = null)
 	{
-		$this->load->view('include/head');
-		$this->load->view('include/header');
-		// $this->load->view('include/slider');
-		$this->load->model('Model_home');
-		$data['notaris'] = $this->Model_home->get_db();
-		$this->load->view('detail', $data);
+		if ($id_notaris === null) {
+			show_404();
+		}
 
-		// var_dump($data);
-		// exit ;
-
-		$this->load->view('include/footer');
-		$this->load->view('include/js');
+		return $this->detail($id_notaris);
 	}
 
-	public function detail ()
+	public function detail($id_notaris = null)
 	{
-		$id_notaris = $this->uri->segment(3);
+		if ($id_notaris === null || !ctype_digit((string) $id_notaris)) {
+			show_404();
+		}
+
 		$data['area'] = $this->Model_home->get_wilayah();
 		$detail = $this->Model_home->get_where('data_notaris', array('id_notaris'=>$id_notaris));
+		if ($detail->num_rows() === 0) {
+			show_404();
+		}
 
 
 		foreach ($detail->result() as $key) {
@@ -62,6 +57,8 @@ class Detail extends CI_Controller {
 			$data['alamat_kantor']=$key->alamat_kantor;
 			$data['lat']=$key->lat;
 		}
+		$this->load->view('include/head');
+		$this->load->view('include/header');
 		$this->load->view('detail', $data);
 		$this->load->view('include/footer');
 		$this->load->view('include/js');
