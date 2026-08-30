@@ -73,7 +73,7 @@
                             </label>
                             <div class="col-sm-6">
                             <div class="input-group date col-sm-8">
-                              <input type="text" class="form-control pull-right datepicker" name="tanggal_laporan"  placeholder="Tanggal Laporan" id="tanggal_laporan" value="<?= set_value('rekap_laporan_bulanan_tanggal_laporan_name', $rekap_laporan_bulanan->tanggal_laporan); ?>">
+<input type="date" class="form-control pull-right native-date-input" name="tanggal_laporan" id="tanggal_laporan" value="<?= set_value('rekap_laporan_bulanan_tanggal_laporan_name', $rekap_laporan_bulanan->tanggal_laporan); ?>">
                             </div>
                             <small class="info help-block">
                             </small>
@@ -100,7 +100,7 @@
                             <i class="fa fa-save" ></i> <?= cclang('save_button'); ?>
                             </button>
                             <a class="btn btn-flat btn-info btn_save btn_action btn_save_back" id="btn_save" data-stype='back' title="<?= cclang('save_and_go_the_list_button'); ?> (Ctrl+d)">
-                            <i class="ion ion-ios-list-outline" ></i> <?= cclang('save_and_go_the_list_button'); ?>
+                            <i class="fa fa-list"></i> <?= cclang('save_and_go_the_list_button'); ?>
                             </a>
                             <a class="btn btn-flat btn-default btn_action" id="btn_cancel" title="<?= cclang('cancel_button'); ?> (Ctrl+x)">
                             <i class="fa fa-undo" ></i> <?= cclang('cancel_button'); ?>

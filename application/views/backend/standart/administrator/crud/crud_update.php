@@ -1,6 +1,5 @@
 <link rel="stylesheet" type="text/css" href="<?= BASE_ASSET; ?>css/crud.css">
 <script src="<?= BASE_ASSET; ?>/js/jquery.hotkeys.js"></script>
-<script src="<?= BASE_ASSET; ?>/float-thead/jquery.floatThead.min.js"></script>
 <section class="content crud-builder-page crud-builder-page--edit">
    <div class="crud-builder-shell">
       <header class="crud-builder-header">
@@ -41,22 +40,32 @@
 
          <div class="crud-builder-section crud-builder-fields">
             <div class="crud-builder-section-title"><span class="crud-builder-step">3</span><div><h2>Konfigurasi field</h2><p>Geser urutan field dan atur label, visibilitas, tipe input, relasi, serta validasinya.</p></div></div>
-            <div class="crud-builder-field-note"><i class="fa fa-arrows-v"></i> Gunakan ikon garis pada kolom pertama untuk mengubah urutan field.</div>
+            <div class="crud-builder-field-note"><i class="fa fa-arrows-v"></i><span><strong>Atur field modul</strong> Geser ikon pada kolom Urut, ubah label field, lalu tentukan halaman tempat field ditampilkan.</span></div>
             <div class="wrapper-crud">
                    <table class="table table-bordered table-striped" id="diagnosis_list">
+                     <colgroup>
+                        <col class="crud-col-sort">
+                        <col class="crud-col-field">
+                        <col class="crud-col-visibility">
+                        <col class="crud-col-visibility">
+                        <col class="crud-col-visibility">
+                        <col class="crud-col-visibility">
+                        <col class="crud-col-input">
+                        <col class="crud-col-validation">
+                     </colgroup>
                      <thead>
                         <tr>
-                           <th width="20" rowspan="2" valign="midle" style="vertical-align: middle; text-align: center;">No</th>
-                           <th width="120" rowspan="2" valign="midle" style="vertical-align: middle; text-align: center;"><?= cclang('field'); ?></th>
-                           <th width="80" colspan="4" style="text-align: center;"><?= cclang('show_in'); ?></th>
-                           <th width="100" rowspan="2" valign="midle" style="vertical-align: middle; text-align: center;"><?= cclang('input_type'); ?></th>
-                           <th width="200" rowspan="2" valign="midle" style="vertical-align: middle; text-align: center;"><?= cclang('validation'); ?></th>
+                           <th rowspan="2" class="crud-heading-sort">Urut</th>
+                           <th rowspan="2">Nama Field</th>
+                           <th colspan="4" class="crud-heading-visibility">Ditampilkan pada</th>
+                           <th rowspan="2">Jenis Masukan</th>
+                           <th rowspan="2">Aturan Validasi</th>
                         </tr>
                         <tr>
-                           <th width="60" class="module-page-list column" style="vertical-align: middle; text-align: center;"><?= cclang('column'); ?></th>
-                           <th width="60" class="module-page-add add_form" style="vertical-align: middle; text-align: center;"><?= cclang('add_form'); ?></th>
-                           <th width="60" class="module-page-update update_form" style="vertical-align: middle; text-align: center;"><?= cclang('update_form'); ?></th>
-                           <th width="60" class="detail_page" style="vertical-align: middle; text-align: center;"><?= cclang('detail_page'); ?></th>
+                           <th class="module-page-list column" title="Tampilkan pada tabel daftar">Daftar</th>
+                           <th class="module-page-add add_form" title="Tampilkan pada form tambah">Tambah</th>
+                           <th class="module-page-update update_form" title="Tampilkan pada form edit">Edit</th>
+                           <th class="detail_page" title="Tampilkan pada halaman detail">Detail</th>
                         </tr>
                      </thead>
                      <tbody>
@@ -68,30 +77,34 @@
                               <input type="hidden" class="crud-id" value="<?= $i; ?>">
                               <input type="hidden" class="crud-name" value="<?= _ent($row->field_name); ?>">
                            </td>
-                           <td>
-                           <div style="margin-bottom: -10px;">
-                           <?= isset($row->new_field) ? '<span class="label label-danger pull-right" style="margin-bottom:-20px; margin-left:-5px; position:relative"><i class="fa  fa-info-circle"></i> new field</span>' : ''; ?>
+                           <td class="crud-field-cell">
+                              <div class="crud-field-toolbar">
+                                 <?php if ($row->field_name === $crud->primary_key): ?>
+                                 <span class="crud-primary-field" title="Primary key wajib dipertahankan"><i class="fa fa-key"></i> Primary key</span>
+                                 <?php elseif (isset($row->new_field)): ?>
+                                 <span class="crud-new-field"><i class="fa fa-info-circle"></i> Field baru</span>
+                                 <?php else: ?>
+                                 <span class="crud-field-label">Label tampilan</span>
+                                 <?php endif; ?>
 
-                              <?php if ($row->field_name !== $crud->primary_key): ?>
-                              <button type="button" class="fa fa-trash text-danger btn-remove-field" title="Keluarkan field dari konfigurasi" aria-label="Keluarkan field <?= _ent($row->field_name); ?>"></button>
-                              <?php else: ?>
-                              <span class="crud-primary-field" title="Primary key wajib dipertahankan"><i class="fa fa-key"></i> Primary</span>
-                              <?php endif; ?>
-                           </div>
+                                 <?php if ($row->field_name !== $crud->primary_key): ?>
+                                 <button type="button" class="fa fa-trash text-danger btn-remove-field" title="Keluarkan field dari konfigurasi" aria-label="Keluarkan field <?= _ent($row->field_name); ?>"></button>
+                                 <?php endif; ?>
+                              </div>
                               <input type="text" class="crud-input-initial" name="crud[<?=$i; ?>][<?=$row->field_name; ?>][label]" placeholder="<?= _ent($row->field_name); ?>" value="<?= _ent($row->field_label); ?>">
-
+                              <small class="crud-database-field"><i class="fa fa-database"></i><code><?= _ent($row->field_name); ?></code></small>
                            </td>
                            <td class="column">
-                              <input class="flat-red check" type="checkbox" <?= $row->show_column == 'yes' ? 'checked' : ''; ?> name="crud[<?=$i; ?>][<?=$row->field_name; ?>][show_in_column]" value="yes">
+                              <input class="flat-red check" type="checkbox" <?= $row->show_column == 'yes' ? 'checked' : ''; ?> name="crud[<?=$i; ?>][<?=$row->field_name; ?>][show_in_column]" value="yes" aria-label="Tampilkan <?= _ent($row->field_name); ?> pada daftar">
                            </td>
                            <td class="add_form">
-                              <input class="flat-red check" type="checkbox" <?= $row->show_add_form == 'yes' ? 'checked' : ''; ?> name="crud[<?=$i; ?>][<?=$row->field_name; ?>][show_in_add_form]" value="yes">
+                              <input class="flat-red check" type="checkbox" <?= $row->show_add_form == 'yes' ? 'checked' : ''; ?> name="crud[<?=$i; ?>][<?=$row->field_name; ?>][show_in_add_form]" value="yes" aria-label="Tampilkan <?= _ent($row->field_name); ?> pada form tambah">
                            </td>
                            <td class="update_form">
-                              <input class="flat-red check" type="checkbox" <?= $row->show_update_form == 'yes' ? 'checked' : ''; ?> name="crud[<?=$i; ?>][<?=$row->field_name; ?>][show_in_update_form]" value="yes">
+                              <input class="flat-red check" type="checkbox" <?= $row->show_update_form == 'yes' ? 'checked' : ''; ?> name="crud[<?=$i; ?>][<?=$row->field_name; ?>][show_in_update_form]" value="yes" aria-label="Tampilkan <?= _ent($row->field_name); ?> pada form edit">
                            </td>
                            <td class="detail_page">
-                              <input class="flat-red check" type="checkbox" <?= $row->show_detail_page == 'yes' ? 'checked' : ''; ?> name="crud[<?=$i; ?>][<?=$row->field_name; ?>][show_in_detail_page]" value="yes">
+                              <input class="flat-red check" type="checkbox" <?= $row->show_detail_page == 'yes' ? 'checked' : ''; ?> name="crud[<?=$i; ?>][<?=$row->field_name; ?>][show_in_detail_page]" value="yes" aria-label="Tampilkan <?= _ent($row->field_name); ?> pada halaman detail">
                            </td>
                            <td>
                               <div class="col-md-12">
@@ -217,7 +230,7 @@
                            <td>
                               <div class="col-md-12">
                                  <div class="form-group ">
-                                    <select class="form-control chosen chosen-select validation" name="crud[<?=$i; ?>][<?=$row->field_name; ?>][validation]" data-placeholder="+ <?= cclang('add_rules') ?>">
+                                    <select class="form-control chosen chosen-select validation" name="crud[<?=$i; ?>][<?=$row->field_name; ?>][validation]" data-placeholder="+ Tambah aturan validasi">
                                         <option value="" class="input file number text datetime select"></option>
                                         <?php 
                                         foreach (db_get_all_data('crud_input_validation') as $input): 
@@ -300,21 +313,34 @@ $(document).ready(function() {
         updateValidation($(this));
     });
 
-    //Make diagnosis table sortable
-    if ($.fn.sortable) $(document).find("#diagnosis_list tbody").sortable({
+    // Keep every column at its original width while a field is reordered.
+    // The former floating-header clone caused the header and body to separate
+    // after a long vertical scroll, so the real table header remains in-flow.
+    var fixHelperModified = function(e, tr) {
+        var $originals = tr.children();
+        var $helper = tr.clone();
+        $helper.children().each(function(index) {
+            $(this).width($originals.eq(index).outerWidth());
+        });
+        return $helper;
+    };
+
+    var $fieldRows = $('#diagnosis_list tbody');
+    if ($.fn.sortable) $fieldRows.sortable({
+        items: '> tr',
+        axis: 'y',
+        handle: 'td.dragable',
         helper: fixHelperModified,
-        handle: 'td:first',
-        start: function() {
-            $(this).addClass('target-area');
+        forcePlaceholderSize: true,
+        tolerance: 'pointer',
+        start: function(event, ui) {
+            $fieldRows.addClass('target-area');
+            ui.placeholder.height(ui.item.outerHeight());
         },
-        stop: function(event, ui) {
+        stop: function() {
+            $fieldRows.removeClass('target-area');
             renumber_table('#diagnosis_list');
         }
-    });
-
-    /* Keep the field header visible while configuring long tables. */
-    if ($.fn.floatThead) $(document).find('table#diagnosis_list').floatThead({
-        useAbsolutePositioning: true,
     });
 
    $('.btn_save').click(function() {
@@ -383,16 +409,6 @@ $(document).ready(function() {
 
         return false;
     }); /*end btn save*/
-
-    //Helper function to keep table row from collapsing when being sorted
-    var fixHelperModified = function(e, tr) {
-        var $originals = tr.children();
-        var $helper = tr.clone();
-        $helper.children().each(function(index) {
-            $(this).width($originals.eq(index).width())
-        });
-        return $helper;
-    };
 
     //Renumber table rows
     function renumber_table(tableID) {

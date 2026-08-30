@@ -22,7 +22,7 @@
     <link rel="stylesheet" href="<?= BASE_ASSET; ?>/chosen/chosen.css">
     <link rel="stylesheet" href="<?= BASE_ASSET; ?>/css/custom.css">
     <link rel="stylesheet" type="text/css" href="<?= BASE_ASSET; ?>datetimepicker/jquery.datetimepicker.css"/>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.5.0/css/font-awesome.min.css">
+    <link rel="stylesheet" href="<?= BASE_ASSET; ?>vendor/font-awesome/css/font-awesome.min.css">
 
 	<script src="<?= BASE_ASSET; ?>/jquery4/jquery.min.js"></script>
 	<script src="<?= BASE_ASSET; ?>/jquery4/jquery-compat-shim.js"></script>
@@ -102,7 +102,7 @@ foreach ($css_top as $css) {
     <link rel="stylesheet" href="<?= BASE_ASSET; ?>/chosen/chosen.css">
     <link rel="stylesheet" href="<?= BASE_ASSET; ?>/css/custom.css">
     <link rel="stylesheet" type="text/css" href="<?= BASE_ASSET; ?>datetimepicker/jquery.datetimepicker.css"/>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.5.0/css/font-awesome.min.css">
+    <link rel="stylesheet" href="<?= BASE_ASSET; ?>vendor/font-awesome/css/font-awesome.min.css">
 
 	<script src="<?= BASE_ASSET; ?>/jquery4/jquery.min.js"></script>
 	<script src="<?= BASE_ASSET; ?>/jquery4/jquery-compat-shim.js"></script>

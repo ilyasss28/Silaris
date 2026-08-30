@@ -163,7 +163,7 @@ $relation = $this->crud_builder->getFieldRelation($input);
     <?php } ?></label>
     <div class="col-sm-6">
     <div class="input-group date col-sm-8">
-      <input type="text" class="form-control pull-right datepicker" name="<?= $input; ?>"  placeholder="<?= ucwords(clean_snake_case($option['placeholder'])); ?>" id="<?= $input; ?>" <?= $this->crud_builder->parseAttributes((isset($option['custom_attributes']) ? $option['custom_attributes'] : [])); ?>>
+<input type="date" class="form-control pull-right native-date-input" name="<?= $input; ?>" id="<?= $input; ?>" <?= $this->crud_builder->parseAttributes((isset($option['custom_attributes']) ? $option['custom_attributes'] : [])); ?>>
     </div>
     <small class="info help-block">
     <?= (isset($option['auto_generated_helpblock']) AND $option['auto_generated_helpblock'] == 'yes') ? $this->crud_builder->parseValidationFile($input) : $option['help_block']; ?></small>

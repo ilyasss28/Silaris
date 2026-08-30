@@ -37,7 +37,7 @@
       </section>
 
       <section class="crud-detail-card">
-        <div class="crud-detail-card__heading"><span><i class="fa fa-window-restore"></i></span><div><h2>Halaman Aktif</h2><p>Fitur yang tersedia pada modul hasil generator.</p></div></div>
+        <div class="crud-detail-card__heading"><span><i class="fa fa-clone"></i></span><div><h2>Halaman Aktif</h2><p>Fitur yang tersedia pada modul hasil generator.</p></div></div>
         <div class="crud-feature-list">
           <div class="<?= $crud->page_create === 'yes' ? 'is-enabled' : 'is-disabled'; ?>"><i class="fa <?= $crud->page_create === 'yes' ? 'fa-check' : 'fa-minus'; ?>"></i><span><strong>Tambah Data</strong><small>Form pembuatan data baru</small></span></div>
           <div class="<?= $crud->page_read === 'yes' ? 'is-enabled' : 'is-disabled'; ?>"><i class="fa <?= $crud->page_read === 'yes' ? 'fa-check' : 'fa-minus'; ?>"></i><span><strong>Detail Data</strong><small>Halaman baca informasi lengkap</small></span></div>

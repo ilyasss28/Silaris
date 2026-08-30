@@ -4,7 +4,6 @@ if (!document.body || !document.body.classList.contains('admin-silaris')) {
 }
 </script>
 <script src="<?= BASE_ASSET; ?>js/jquery.hotkeys.js"></script>
-<script src="<?= BASE_ASSET; ?>float-thead/jquery.floatThead.min.js"></script>
 
 <section class="content crud-builder-page">
   <div class="crud-builder-shell">
@@ -86,7 +85,6 @@ $(function () {
     if ($.fn.sortable) $('#diagnosis_list tbody').sortable({handle: 'td:first', helper: function (e, row) { var cells=row.children(), clone=row.clone(); clone.children().each(function(i){ $(this).width(cells.eq(i).width()); }); return clone; }, stop: renumber});
     if ($.fn.iCheck) $('#diagnosis_list input.check').iCheck({checkboxClass: 'icheckbox_minimal-red', radioClass: 'iradio_minimal-red'});
     $('#diagnosis_list .input_type').each(function () { updateValidation($(this)); });
-    if ($.fn.floatThead) $('#diagnosis_list').floatThead({useAbsolutePositioning: true});
     $('#diagnosis_list .validation').each(function () {
       var row=$(this).closest('tr'), id=row.find('.crud-id').val(), name=row.find('.crud-name').val(), type=row.find('.crud-data-type').val(), pk=row.find('.crud-primarykey').val(), max=parseInt(row.find('.crud-max-length').val(),10)||0;
       if (pk != 1) { addValidation($(this),id,name,'required','no'); if(max>0) addValidation($(this),id,name,'max_length','yes',max); }

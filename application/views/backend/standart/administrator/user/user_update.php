@@ -19,10 +19,10 @@
       display: flex;
       align-items: center;
       gap: 18px;
-      min-height: 126px;
-      padding: 26px 30px;
+      min-height: 112px;
+      padding: 21px 24px;
       border-bottom: 1px solid var(--border);
-      background: linear-gradient(135deg, #fff 0%, #fffdf4 100%);
+      background: #fff;
    }
    .admin-silaris .user-edit-header .widget-user-image { position: static; margin: 0; }
    .admin-silaris .user-edit-header .widget-user-image img {
@@ -342,7 +342,7 @@
                      <div class="user-edit-actions">
                      <span class="loading loading-hide"><img src="<?= BASE_ASSET; ?>/img/loading-spin-primary.svg"> <i><?= cclang('loading_saving_data'); ?></i></span>
                         <button class="btn btn-flat btn-primary btn_save btn_action" id="btn_save" data-stype='stay' title="save (Ctrl+s)"><i class="fa fa-save" ></i> <?= cclang('save_button'); ?></button>
-                     <a class="btn btn-flat btn-info btn_save btn_action btn_save_back" id="btn_save_back" data-stype='back' title="<?= cclang('save_and_go_the_list_button'); ?> (Ctrl+d)"><i class="ion ion-ios-list-outline" ></i> <?= cclang('save_and_go_the_list_button'); ?></a>
+                     <a class="btn btn-flat btn-info btn_save btn_action btn_save_back" id="btn_save_back" data-stype='back' title="<?= cclang('save_and_go_the_list_button'); ?> (Ctrl+d)"><i class="fa fa-list"></i> <?= cclang('save_and_go_the_list_button'); ?></a>
                      <a class="btn btn-flat btn-default btn_action" id="btn_cancel" title="<?= cclang('cancel_button'); ?> (Ctrl+x)"><i class="fa fa-undo" ></i> <?= cclang('cancel_button'); ?></a>
                      </div>
                   <?= form_close(); ?>

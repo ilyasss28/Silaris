@@ -222,7 +222,7 @@
                             <?php } ?></label>
                             <div class="col-sm-6">
                             <div class="input-group date col-sm-8">
-                              <input type="text" class="form-control pull-right datepicker" name="<?= $input; ?>"  placeholder="<?= ucwords(clean_snake_case($input)); ?>" id="<?= $input; ?>">
+<input type="date" class="form-control pull-right native-date-input" name="<?= $input; ?>" id="<?= $input; ?>">
                             </div>
                             <small class="info help-block">
                             <?= $this->crud_builder->parseValidationFile($input, '<b>', '</b>', $option['input_label']); ?></small>
@@ -431,7 +431,7 @@
                             <i class="fa fa-save" ></i> Save
                             </button>
                             <a class="btn btn-flat btn-info btn_save btn_action btn_save_back" id="btn_save" data-stype='back' title="save and back to the list (Ctrl+d)">
-                            <i class="ion ion-ios-list-outline" ></i> Save and Go to The List
+                            <i class="fa fa-list"></i> Save and Go to The List
                             </a>
                             <a class="btn btn-flat btn-default btn_action" id="btn_cancel" title="cancel (Ctrl+x)">
                             <i class="fa fa-undo" ></i> Cancel

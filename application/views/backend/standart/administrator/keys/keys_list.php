@@ -164,7 +164,6 @@ jQuery(document).ready(domo);
 <!-- /.content -->
 
 <!-- Page script -->
-<script type="text/javascript" src="<?= BASE_ASSET; ?>/jquery-clipboard"></script>
 <script>
   $(document).ready(function() {
     $('.remove-data').click(function() {

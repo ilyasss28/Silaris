@@ -548,7 +548,9 @@ class Cc_App
 	public function addTabSetting($config = [])
 	{
 		$config = extendsObject($config);
-		$this->tabSetting[($config['id'])] = '<li class="'.($this->ci->input->get('tab') == 'tab_'.$config['id'] ? 'active' : '').'"><a href="#tab_'.url_title($config['id']).'" class="tab_group " data-toggle="tab"><i class="'.$config['icon'].' text-green"></i> '.' '.$config['label'].'</a></li>';
+		$tabId = 'tab_'.url_title($config['id']);
+		$isActive = $this->ci->input->get('tab') === $tabId;
+		$this->tabSetting[($config['id'])] = '<li class="'.($isActive ? 'active' : '').'" role="presentation"><a href="#'.$tabId.'" id="settings-tab-'.url_title($config['id']).'" class="tab_group '.($isActive ? 'active' : '').'" data-bs-toggle="tab" role="tab" aria-controls="'.$tabId.'" aria-selected="'.($isActive ? 'true' : 'false').'"><i class="'.$config['icon'].' text-green"></i> '.$config['label'].'</a></li>';
 
 		$this->tabParentName = $config['id']; 
 
@@ -574,8 +576,9 @@ class Cc_App
 		$html = '';
 
 		foreach ($this->tabContent as $tabName => $content) {
-                          debug('tab_'.$tabName);
-			$html .= '<div class="tab-pane '.($this->ci->input->get('tab') == 'tab_'.$tabName ? 'active' : '').' " id="tab_'.$tabName.'">
+			$tabId = 'tab_'.url_title($tabName);
+			$isActive = $this->ci->input->get('tab') === $tabId;
+			$html .= '<div class="tab-pane '.($isActive ? 'active show' : '').'" id="'.$tabId.'" role="tabpanel" aria-labelledby="settings-tab-'.url_title($tabName).'">
 				<div class="row">
 					'.$content.'
 				</div>

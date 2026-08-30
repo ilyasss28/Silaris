@@ -1,5 +1,5 @@
   function resetForm() {
-      $('form input[type = text], form input[type = email], form input[type = number], form input[type = password], form textarea').val('');
+      $('form input[type = text], form input[type = date], form input[type = email], form input[type = number], form input[type = password], form textarea').val('');
       $('form textarea').text('');
       $('.data_file').val('');
       $('input.flat-red').each(function(index, element) {
@@ -47,6 +47,53 @@
   function goUrl(url) {
     document.location = BASE_URL + url;
   }
+
+  window.initializeNativeDateInputs = function(root) {
+      var context = root || document;
+      var inputs = $(context).find('input.datepicker, input[type="date"]');
+
+      if (context instanceof Element && $(context).is('input.datepicker, input[type="date"]')) {
+          inputs = inputs.add(context);
+      }
+
+      inputs.each(function() {
+          var input = $(this);
+          var element = this;
+          var value = String(input.val() || input.attr('value') || '').trim();
+          var isoDate = value.match(/^(\d{4}-\d{2}-\d{2})/);
+
+          if (isoDate) input.val(isoDate[1]);
+          input.attr('type', 'date')
+              .removeClass('datepicker')
+              .addClass('native-date-input')
+              .attr('autocomplete', 'off');
+
+          if (!element.dataset.nativeDatePickerReady) {
+              element.dataset.nativeDatePickerReady = 'true';
+
+              element.addEventListener('click', function() {
+                  if (typeof element.showPicker !== 'function' || element.disabled || element.readOnly) return;
+
+                  try {
+                      element.showPicker();
+                  } catch (error) {
+                      // Browser tetap menyediakan ikon kalender native ketika
+                      // showPicker tidak diizinkan atau belum didukung.
+                  }
+              });
+
+              element.addEventListener('keydown', function(event) {
+                  if (event.key !== 'Enter' && !(event.altKey && event.key === 'ArrowDown')) return;
+                  if (typeof element.showPicker !== 'function' || element.disabled || element.readOnly) return;
+
+                  event.preventDefault();
+                  try {
+                      element.showPicker();
+                  } catch (error) {}
+              });
+          }
+      });
+  };
 
   $(document).ready(function() {
 
@@ -153,19 +200,7 @@
           });
       });
 
-      $('.datepicker').datetimepicker({
-          timepicker: false,
-          formatDate: 'Y.m.d',
-
-      });
-
-      $('.datepicker').inputmask({
-          mask: "y-1-2",
-          placeholder: "yyyy-mm-dd",
-          leapday: "-02-29",
-          separator: "-",
-          alias: "yyyy/mm/dd"
-      });
+      window.initializeNativeDateInputs(document);
 
       $('.datetimepicker').inputmask({
           mask: "y-1-2 h:s",

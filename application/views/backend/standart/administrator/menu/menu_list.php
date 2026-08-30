@@ -63,7 +63,7 @@
       min-height: 76px;
       padding: 17px 20px !important;
       border-bottom: 1px solid var(--border) !important;
-      background: linear-gradient(135deg, #fff 0%, #fffdf4 100%);
+      background: #fff;
    }
    .admin-silaris .menu-builder-card .box-header::before {
       display: grid;

@@ -21,7 +21,7 @@ $display_date = function ($value) {
   <div class="profile-shell">
     <header class="profile-page-header">
       <div class="profile-page-header__copy">
-        <span class="profile-page-header__icon"><i class="fa <?= $is_own_profile ? 'fa-user-circle' : 'fa-address-card'; ?>"></i></span>
+        <span class="profile-page-header__icon"><i class="fa <?= $is_own_profile ? 'fa-user' : 'fa-user-secret'; ?>"></i></span>
         <div>
           <span class="profile-page-header__eyebrow"><?= $is_own_profile ? 'AKUN SAYA' : 'MANAJEMEN NOTARIS'; ?></span>
           <h1><?= $profile_title; ?></h1>
@@ -59,12 +59,25 @@ $display_date = function ($value) {
             <span><i class="fa fa-map-marker"></i> Wilayah <?= _ent($user->kd_wilayah); ?></span>
           <?php endif; ?>
         </div>
+
+        <div class="profile-identity-groups">
+          <div class="profile-identity-groups__title"><i class="fa fa-users"></i><span>Kelompok Akses</span></div>
+          <div class="profile-group-list">
+            <?php if (!empty($groups)): ?>
+              <?php foreach ($groups as $group): ?>
+                <span><i class="fa fa-check-circle"></i> <?= _ent($group->name); ?></span>
+              <?php endforeach; ?>
+            <?php else: ?>
+              <p class="profile-empty">Belum memiliki kelompok akses.</p>
+            <?php endif; ?>
+          </div>
+        </div>
       </aside>
 
       <div class="profile-content">
         <section class="profile-panel">
           <div class="profile-panel__heading">
-            <span class="profile-panel__icon"><i class="fa fa-id-card-o"></i></span>
+            <span class="profile-panel__icon"><i class="fa fa-info-circle"></i></span>
             <div><h2>Informasi Akun</h2><p>Identitas utama yang digunakan pada sistem.</p></div>
           </div>
           <dl class="profile-detail-grid">
@@ -75,36 +88,18 @@ $display_date = function ($value) {
           </dl>
         </section>
 
-        <div class="profile-panel-row">
-          <section class="profile-panel">
-            <div class="profile-panel__heading">
-              <span class="profile-panel__icon"><i class="fa fa-users"></i></span>
-              <div><h2>Kelompok Akses</h2><p>Peran yang terhubung dengan akun ini.</p></div>
-            </div>
-            <div class="profile-group-list">
-              <?php if (!empty($groups)): ?>
-                <?php foreach ($groups as $group): ?>
-                  <span><i class="fa fa-check-circle"></i> <?= _ent($group->name); ?></span>
-                <?php endforeach; ?>
-              <?php else: ?>
-                <p class="profile-empty">Belum memiliki kelompok akses.</p>
-              <?php endif; ?>
-            </div>
-          </section>
-
-          <section class="profile-panel">
-            <div class="profile-panel__heading">
-              <span class="profile-panel__icon"><i class="fa fa-shield"></i></span>
-              <div><h2>Aktivitas Akun</h2><p>Riwayat akses terakhir pada sistem.</p></div>
-            </div>
-            <dl class="profile-activity-list">
-              <div><dt><i class="fa fa-sign-in"></i> Login terakhir</dt><dd><?= _ent($display_date($user->last_login)); ?></dd></div>
-              <div><dt><i class="fa fa-history"></i> Aktivitas terakhir</dt><dd><?= _ent($display_date($user->last_activity)); ?></dd></div>
-              <div><dt><i class="fa fa-calendar"></i> Akun dibuat</dt><dd><?= _ent($display_date($user->date_created)); ?></dd></div>
-              <div><dt><i class="fa fa-globe"></i> Alamat IP</dt><dd><?= !empty($user->ip_address) ? _ent($user->ip_address) : '-'; ?></dd></div>
-            </dl>
-          </section>
-        </div>
+        <section class="profile-panel profile-panel--activity">
+          <div class="profile-panel__heading">
+            <span class="profile-panel__icon"><i class="fa fa-shield"></i></span>
+            <div><h2>Aktivitas Akun</h2><p>Riwayat akses dan informasi keamanan akun.</p></div>
+          </div>
+          <dl class="profile-activity-list">
+            <div><dt><i class="fa fa-sign-in"></i> Login terakhir</dt><dd><?= _ent($display_date($user->last_login)); ?></dd></div>
+            <div><dt><i class="fa fa-history"></i> Aktivitas terakhir</dt><dd><?= _ent($display_date($user->last_activity)); ?></dd></div>
+            <div><dt><i class="fa fa-calendar"></i> Akun dibuat</dt><dd><?= _ent($display_date($user->date_created)); ?></dd></div>
+            <div><dt><i class="fa fa-globe"></i> Alamat IP</dt><dd><?= !empty($user->ip_address) ? _ent($user->ip_address) : '-'; ?></dd></div>
+          </dl>
+        </section>
       </div>
     </div>
   </div>

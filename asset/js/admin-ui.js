@@ -5,6 +5,62 @@
     return element ? element.textContent.replace(/\s+/g, ' ').trim() : '';
   }
 
+  function normalizeFunctionalButton(button) {
+    if (!button || button.dataset.adminButtonReady) return;
+    if (button.matches('.table-action, .btn-box-tool, .btn-mode, .dt-button, .dt-paging-button, .qq-upload-button, .rest-tool-param-toggle, .rest-tool-send, .rest-tool-format') ||
+        button.closest('.pagination, .dt-paging, .note-toolbar, .cke, .medium-editor-toolbar, .rest-tool-method, .rest-tool-view-switch')) return;
+
+    var icon = button.querySelector('i');
+    var signature = [
+      textOf(button),
+      button.id || '',
+      button.className || '',
+      button.getAttribute('title') || '',
+      button.getAttribute('href') || '',
+      icon ? icon.className : ''
+    ].join(' ').toLowerCase();
+    var type = 'neutral';
+
+    if (button.classList.contains('btn_save_back') || /simpan.{0,12}(kembali|daftar)|save.{0,12}(back|list)/.test(signature)) {
+      type = 'save-secondary';
+    } else if (button.classList.contains('btn_save') || /\bsimpan\b|\bsave\b|fa-save/.test(signature)) {
+      type = 'save';
+    } else if (button.classList.contains('btn_add_new') || button.classList.contains('btn-add') || /\btambah\b|\badd\b|\bcreate\b|fa-plus/.test(signature)) {
+      type = 'create';
+    } else if (button.classList.contains('btn_edit') || /\bedit\b|\bubah\b|\bupdate\b|fa-pencil|fa-edit/.test(signature)) {
+      type = 'edit';
+    } else if (button.classList.contains('remove-data') || /\bhapus\b|\bdelete\b|\bremove\b|fa-trash|fa-close/.test(signature)) {
+      type = 'delete';
+    } else if (/\blihat\b|\bview\b|\bdetail\b|fa-eye|fa-newspaper/.test(signature)) {
+      type = 'view';
+    } else if (/\bexcel\b|\bpdf\b|\bekspor\b|\bexport\b|\bcetak\b|\bprint\b|\bsalin\b|\bcopy\b|\bkolom\b|\bcolumn\b|\btool\b|\balat\b|kunci api|dokumentasi|fa-file/.test(signature)) {
+      type = 'utility';
+    } else if (/\bfilter\b|\bterapkan\b|\bkirim\b|\bsend\b|\bproses\b|\buji\b|\btest\b|\brefresh\b|\brequest\b|\binstall\b|\bmuat ulang\b|fa-search|fa-refresh|fa-paper-plane/.test(signature)) {
+      type = 'action';
+    } else if (/\bbatal\b|\bkembali\b|\bback\b|\breset\b|\bundo\b|\bkembalikan\b|fa-undo|fa-arrow-left/.test(signature)) {
+      type = 'neutral';
+    } else if (button.classList.contains('btn-danger')) {
+      type = 'delete';
+    } else if (button.classList.contains('btn-primary')) {
+      type = 'action';
+    } else if (button.classList.contains('btn-success')) {
+      type = 'create';
+    } else if (button.classList.contains('btn-info')) {
+      type = 'view';
+    } else if (button.classList.contains('btn-warning')) {
+      type = 'edit';
+    }
+
+    button.dataset.adminButtonReady = 'true';
+    button.classList.add('admin-button', 'admin-button--' + type);
+  }
+
+  function normalizeButtons(root) {
+    if (!root || root.nodeType !== 1) return;
+    if (root.matches && root.matches('.btn')) normalizeFunctionalButton(root);
+    root.querySelectorAll('.btn').forEach(normalizeFunctionalButton);
+  }
+
   function normalizeTableAction(action) {
     if (action.dataset.actionReady) return;
 
@@ -236,12 +292,17 @@
       nav.setAttribute('aria-label', 'Tindakan halaman');
     });
 
+    normalizeButtons(content);
+
     var editorRoute = /\/(add|edit|update)(\/|$)/i.test(window.location.pathname) ||
       /\/(edit_profile|setting)(\/|$)/i.test(window.location.pathname);
     if (content.classList.contains('admin-page--form') && editorRoute) enhanceFormPage(content);
   }
 
   function enhance() {
+    if (typeof window.initializeNativeDateInputs === 'function') {
+      window.initializeNativeDateInputs(document.querySelector('.app-main'));
+    }
     classifyPage(document.querySelector('.app-main'));
   }
 
@@ -250,6 +311,16 @@
   } else {
     enhance();
   }
+
+  var dynamicButtonObserver = new MutationObserver(function (mutations) {
+    mutations.forEach(function (mutation) {
+      mutation.addedNodes.forEach(function (node) {
+        normalizeButtons(node);
+      });
+    });
+  });
+  var appMain = document.querySelector('.app-main');
+  if (appMain) dynamicButtonObserver.observe(appMain, { childList: true, subtree: true });
 
   document.addEventListener('silaris:page-loaded', enhance);
 })();

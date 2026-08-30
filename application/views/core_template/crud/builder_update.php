@@ -228,7 +228,7 @@ if (count($fine_upload) > 0 OR count($fine_upload_multiple) > 0 ): ?>
                             <?php } ?></label>
                             <div class="col-sm-6">
                             <div class="input-group date col-sm-8">
-                              <input type="text" class="form-control pull-right datepicker" name="<?= $input; ?>"  placeholder="<?= ucwords(clean_snake_case($option['label'])); ?>" id="<?= $input; ?>" value="{php_open_tag_echo} set_value('{table_name}_<?= $input; ?>_name', ${table_name}-><?= $input; ?>); {php_close_tag}">
+<input type="date" class="form-control pull-right native-date-input" name="<?= $input; ?>" id="<?= $input; ?>" value="{php_open_tag_echo} set_value('{table_name}_<?= $input; ?>_name', ${table_name}-><?= $input; ?>); {php_close_tag}">
                             </div>
                             <small class="info help-block">
                             <?= $this->crud_builder->parseValidationFile($input); ?></small>
@@ -436,7 +436,7 @@ if (count($fine_upload) > 0 OR count($fine_upload_multiple) > 0 ): ?>
                             <i class="fa fa-save" ></i> {php_open_tag_echo} cclang('save_button'); {php_close_tag}
                             </button>
                             <a class="btn btn-flat btn-info btn_save btn_action btn_save_back" id="btn_save" data-stype='back' title="{php_open_tag_echo} cclang('save_and_go_the_list_button'); {php_close_tag} (Ctrl+d)">
-                            <i class="ion ion-ios-list-outline" ></i> {php_open_tag_echo} cclang('save_and_go_the_list_button'); {php_close_tag}
+                            <i class="fa fa-list"></i> {php_open_tag_echo} cclang('save_and_go_the_list_button'); {php_close_tag}
                             </a>
                             <a class="btn btn-flat btn-default btn_action" id="btn_cancel" title="{php_open_tag_echo} cclang('cancel_button'); {php_close_tag} (Ctrl+x)">
                             <i class="fa fa-undo" ></i> {php_open_tag_echo} cclang('cancel_button'); {php_close_tag}

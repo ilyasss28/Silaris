@@ -1,30 +1,5 @@
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-select@1.14.0-beta3/dist/css/bootstrap-select.min.css">
+<link rel="stylesheet" href="<?= BASE_ASSET; ?>flag-icon/css/flag-icon.css" media="all">
 
-<!-- Latest compiled and minified JavaScript -->
-<script src="https://cdn.jsdelivr.net/npm/bootstrap-select@1.14.0-beta3/dist/js/bootstrap-select.min.js"></script>
-  <link rel="stylesheet" href="<?= BASE_ASSET; ?>flag-icon/css/flag-icon.css" rel="stylesheet" media="all" />
-
-
-<style type="text/css">
-  .tab-pane {
-    padding: 10px 0;
-  }
-  .legend-title {
-    margin-bottom: 30px;
-  }
-   .legend-title .title {
-    background: #fff;
-    font-size: 18px;
-    position: relative;
-    padding: 0 10px;
-    bottom: -13px;
-    color: #646464;
-    text-decoration: underline;
-   }
-   .legend-title b {
-    color: #6CA45B
-   }
-</style>
 <script src="<?= BASE_ASSET; ?>/js/jquery.hotkeys.js"></script>
 
 <script type="text/javascript">
@@ -54,37 +29,39 @@ jQuery(document).ready(domo);
 </script>
 
 <!-- Main content -->
-<section class="content">
+<section class="content settings-page">
    <div class="row" >
       
       <div class="col-md-12">
-         <div class="box box-warning">
-            <div class="box-body ">
+         <div class="box box-warning settings-shell">
+            <div class="box-body">
                <!-- Widget: user widget style 1 -->
-               <div class="box box-widget widget-user-2">
-                  <!-- Add the bg color to the header using any of the bg-* classes -->
-                  <div class="widget-user-header ">
-                     <div class="row pull-right">
-                        
-                     </div>
-                     <div class="widget-user-image">
-                        <img class="img-circle" src="<?= BASE_ASSET; ?>/img/list.png" alt="User Avatar">
-                     </div>
-                     <!-- /.widget-user-image -->
-                     <h3 class="widget-user-username">Setting</h3>
-                     <h5 class="widget-user-desc"><?= cclang('web_setting'); ?></h5>
+               <div class="settings-hero">
+                  <div class="settings-hero__icon" aria-hidden="true"><i class="fa fa-sliders"></i></div>
+                  <div class="settings-hero__copy">
+                     <span class="settings-hero__eyebrow">Pusat konfigurasi</span>
+                     <h1>Pengaturan Sistem</h1>
+                     <p>Kelola identitas situs, keamanan, integrasi, dan konfigurasi aplikasi dari satu tempat.</p>
                   </div>
-                </div>
+                  <div class="settings-hero__status"><i class="fa fa-shield"></i> Area administrator</div>
+               </div>
 
                     <div class="row-fluid">
                       <!-- Custom Tabs -->
-                      <div class="nav-tabs-custom">
-                        <ul class="nav nav-tabs">
-                          <li class="<?= empty($this->input->get('tab')) ? 'active' : '' ?>"><a href="#tab_general" class="tab_group" data-bs-toggle="tab"><i class="fa fa-compass text-green"></i> <?= cclang('site_general'); ?></a></li>
+                      <div class="nav-tabs-custom settings-workspace">
+                        <div class="settings-nav-label">Kategori pengaturan</div>
+                        <?php
+                          $requested_tab = (string) $this->input->get('tab');
+                          $general_tab_active = $requested_tab === '' || $requested_tab === 'tab_general';
+                          $oauth_tab_active = $requested_tab === 'tab_oauth';
+                          $system_tab_active = $requested_tab === 'tab_system';
+                        ?>
+                        <ul class="nav nav-tabs settings-tabs" role="tablist">
+                          <li class="<?= $general_tab_active ? 'active' : '' ?>" role="presentation"><a href="#tab_general" id="settings-tab-general" class="tab_group <?= $general_tab_active ? 'active' : '' ?>" data-bs-toggle="tab" role="tab" aria-controls="tab_general" aria-selected="<?= $general_tab_active ? 'true' : 'false' ?>"><i class="fa fa-globe"></i> <?= cclang('site_general'); ?></a></li>
 
-                          <li class=""><a href="#tab_oauth" class="tab_group" data-bs-toggle="tab"><i class="fa fa-chrome text-green"></i> Oauth</a></li>
+                          <li class="<?= $oauth_tab_active ? 'active' : '' ?>" role="presentation"><a href="#tab_oauth" id="settings-tab-oauth" class="tab_group <?= $oauth_tab_active ? 'active' : '' ?>" data-bs-toggle="tab" role="tab" aria-controls="tab_oauth" aria-selected="<?= $oauth_tab_active ? 'true' : 'false' ?>"><i class="fa fa-key"></i> OAuth</a></li>
 
-                          <li class=""><a href="#tab_system" class="tab_group" data-bs-toggle="tab"><i class="fa fa-tv text-green"></i> <?= cclang('system'); ?></a></li>
+                          <li class="<?= $system_tab_active ? 'active' : '' ?>" role="presentation"><a href="#tab_system" id="settings-tab-system" class="tab_group <?= $system_tab_active ? 'active' : '' ?>" data-bs-toggle="tab" role="tab" aria-controls="tab_system" aria-selected="<?= $system_tab_active ? 'true' : 'false' ?>"><i class="fa fa-cogs"></i> <?= cclang('system'); ?></a></li>
                        
                           <?= cicool()->renderTabSetting() ?>
                        
@@ -101,22 +78,26 @@ jQuery(document).ready(domo);
                           <?= cicool()->renderTabContent() ?>
 
 
-                          <div class="tab-pane <?= empty($this->input->get('tab')) ? 'active' : '' ?>" id="tab_general">
+                          <div class="tab-pane <?= $general_tab_active ? 'active show' : '' ?> settings-pane" id="tab_general" role="tabpanel" aria-labelledby="settings-tab-general">
+                            <div class="settings-pane__heading">
+                              <div class="settings-pane__heading-icon"><i class="fa fa-globe"></i></div>
+                              <div><h2>Informasi Situs</h2><p>Atur identitas utama dan preferensi dasar yang digunakan aplikasi.</p></div>
+                            </div>
                             <div class="row">
                               <div class="col-md-6">
-                                <div class="col-sm-12">
+                                <div class="col-sm-12 settings-field settings-field--site-name">
                                     <label><?= cclang('site_name'); ?> <span class="required">*</span></label>
                                     <input type="text" class="form-control" name="site_name" id="site_name" value="<?= get_option('site_name'); ?>">
-                                    <small class="info help-block">The site name.</small>
+                                    <small class="info help-block">Nama yang ditampilkan sebagai identitas aplikasi.</small>
                                 </div>
 
-                                <div class="col-sm-12">
+                                <div class="col-sm-12 settings-field settings-field--description">
                                     <label><?= cclang('site_description'); ?></label>
                                     <textarea type="text" class="form-control" name="site_description" id="site_description" ><?= get_option('site_description'); ?></textarea>
                                     <small class="info help-block"><?= cclang('site_description_help_block'); ?></small>
                                 </div>
 
-                                <div class="col-sm-12">
+                                <div class="col-sm-12 settings-field settings-field--landing-page">
                                       <label><?= cclang('default_landing_page'); ?> <span class="required">*</span></label>
                                       <div class="row">
                                         <div class="col-md-6 ">
@@ -136,16 +117,39 @@ jQuery(document).ready(domo);
 
                               
 
-                                <div class="col-sm-12">
+                                <div class="col-sm-12 settings-field settings-field--language">
                                       <label><?= cclang('select_language'); ?> <span class="required">*</span></label>
                                       <div class="row">
                                         <div class="col-md-6 ">
                                           
-                                          <select class="selectpicker" data-width="100%" name="language">
-                                            <?php foreach (get_langs() as $lang): ?>
-                                                <option <?= $this->config->item('language') == $lang['folder_name'] ? 'selected' : ''; ?>  value="<?= $lang['folder_name']; ?>" data-content='<span class="flag-icon <?= $lang['icon_name']; ?>"></span> <?= $lang['name']; ?>'><?= $lang['name']; ?></option>
-                                            <?php endforeach; ?>
+                                          <?php
+                                            $available_languages = get_langs();
+                                            $selected_language = $this->config->item('language');
+                                            $selected_language_name = '';
+                                            $selected_language_icon = '';
+                                            foreach ($available_languages as $lang) {
+                                              if ($selected_language_name === '') {
+                                                $selected_language_name = $lang['name'];
+                                                $selected_language_icon = $lang['icon_name'];
+                                              }
+                                              if ($selected_language == $lang['folder_name']) {
+                                                $selected_language_name = $lang['name'];
+                                                $selected_language_icon = $lang['icon_name'];
+                                                break;
+                                              }
+                                            }
+                                          ?>
+                                          <div class="language-select-control">
+                                            <div class="language-select-value" aria-hidden="true">
+                                              <span class="language-select-flag flag-icon <?= _ent($selected_language_icon); ?>"></span>
+                                              <span class="language-select-text"><?= _ent($selected_language_name); ?></span>
+                                            </div>
+                                            <select class="language-select-native" name="language" aria-label="<?= cclang('select_language'); ?>">
+                                              <?php foreach ($available_languages as $lang): ?>
+                                                <option <?= $selected_language == $lang['folder_name'] ? 'selected' : ''; ?> value="<?= _ent($lang['folder_name']); ?>" data-icon="<?= _ent($lang['icon_name']); ?>"><?= _ent($lang['name']); ?></option>
+                                              <?php endforeach; ?>
                                             </select>
+                                          </div>
                                         </div>
                                       </div>
                                       <small class="info help-block">
@@ -155,25 +159,25 @@ jQuery(document).ready(domo);
 
 
 
-                                <div class="col-sm-12">
+                                <div class="col-sm-12 settings-field settings-field--keywords">
                                     <label><?= cclang('keyword'); ?></label>
                                     <textarea type="text" class="form-control" name="keywords" id="keywords" ><?= get_option('keywords'); ?></textarea>
-                                    <small class="info help-block">The site meta keywords.</small>
+                                     <small class="info help-block">Kata kunci untuk membantu mesin pencari mengenali situs.</small>
                                 </div>
 
-                                <div class="col-sm-12">
+                                <div class="col-sm-12 settings-field settings-field--author">
                                     <label><?= cclang('author'); ?></label>
                                     <input type="text" class="form-control" name="author" id="author" value="<?= get_option('author'); ?>">
-                                    <small class="info help-block">The author name.</small>
+                                     <small class="info help-block">Nama instansi atau pengelola aplikasi.</small>
                                 </div>
 
-                                <div class="col-sm-12">
+                                <div class="col-sm-12 settings-field settings-field--email">
                                     <label><?= cclang('email'); ?> <span class="required">*</span></label>
                                     <input type="text" class="form-control" name="email" id="email"value="<?= get_option('email'); ?>">
-                                    <small class="info help-block">The email of user author.</small>
+                                     <small class="info help-block">Alamat email resmi untuk informasi dan pemberitahuan situs.</small>
                                 </div>
 
-                                  <div class="col-sm-12">
+                                  <div class="col-sm-12 settings-field settings-field--timezone">
                                       <label>Timezone <span class="required">*</span></label>
                                       <div class="row">
                                         <div class="col-md-6 ">
@@ -208,18 +212,22 @@ jQuery(document).ready(domo);
                           </div>
                           <!-- /.tab-pane -->
 
-                          <div class="tab-pane " id="tab_system">
+                          <div class="tab-pane <?= $system_tab_active ? 'active show' : '' ?> settings-pane" id="tab_system" role="tabpanel" aria-labelledby="settings-tab-system">
+                            <div class="settings-pane__heading">
+                              <div class="settings-pane__heading-icon"><i class="fa fa-cogs"></i></div>
+                              <div><h2>Konfigurasi Sistem</h2><p>Pengaturan teknis untuk sesi, keamanan CSRF, dan perilaku aplikasi.</p></div>
+                            </div>
                             <div class="row">
                               <div class="col-md-12">
-                                 <div class="panel-group" id="accordion">
+                                  <div class="panel-group settings-accordion" id="system-accordion">
                                     <div class="panel panel-default">
                                       <div class="panel-heading">
                                         <h4 class="panel-title">
-                                          <a data-bs-toggle="collapse" data-bs-parent="#accordion" href="#collapse1">
+                                          <a data-bs-toggle="collapse" data-bs-parent="#system-accordion" href="#system-session">
                                           <b class="text-green"><?= cclang('session') ?></b> <?= cclang('configuration') ?></a>
                                         </h4>
                                       </div>
-                                      <div id="collapse1" class="panel-collapse collapse in">
+                                      <div id="system-session" class="panel-collapse collapse show in">
                                         <div class="panel-body">
 
                                         <!-- start content -->
@@ -264,13 +272,6 @@ jQuery(document).ready(domo);
                                               </small>
                                           </div>
 
-                                          <div class="col-sm-12">
-                                              <label><?= cclang('session_cookie_name'); ?> <span class="required">*</span></label>
-                                              <input type="text" class="form-control" name="sess_cookie_name" id="sess_cookie_name" value="<?= $this->config->item('sess_cookie_name'); ?>">
-                                              <small class="info help-block">
-                                                 The session cookie name.
-                                              </small>
-                                          </div>
                                         </div>
                                         <!-- end content -->
                                         </div>
@@ -280,11 +281,11 @@ jQuery(document).ready(domo);
                                     <div class="panel panel-default">
                                       <div class="panel-heading">
                                         <h4 class="panel-title">
-                                          <a data-bs-toggle="collapse" data-bs-parent="#accordion" href="#collapse2">
+                                          <a data-bs-toggle="collapse" data-bs-parent="#system-accordion" href="#system-csrf">
                                           <b class="text-green">CSRF</b> <?= cclang('configuration') ?></a>
                                         </h4>
                                       </div>
-                                      <div id="collapse2" class="panel-collapse collapse">
+                                      <div id="system-csrf" class="panel-collapse collapse">
                                         <div class="panel-body">
                                           <!-- start content -->
                                             <div class="row col-md-6">
@@ -328,11 +329,11 @@ jQuery(document).ready(domo);
                                     <div class="panel panel-default">
                                       <div class="panel-heading">
                                         <h4 class="panel-title">
-                                          <a data-bs-toggle="collapse" data-bs-parent="#accordion" href="#collapse3">
+                                          <a data-bs-toggle="collapse" data-bs-parent="#system-accordion" href="#system-other">
                                           <b class="text-green"><?= cclang('other') ?></b> <?= cclang('configuration') ?></a>
                                         </h4>
                                       </div>
-                                      <div id="collapse3" class="panel-collapse collapse">
+                                      <div id="system-other" class="panel-collapse collapse">
                                         <div class="panel-body">
                                           <div class="row col-md-6">
                                             <!-- start content -->
@@ -390,17 +391,21 @@ jQuery(document).ready(domo);
                           <!-- end tab pane -->
 
 
-                          <div class="tab-pane" id="tab_oauth">
+                          <div class="tab-pane <?= $oauth_tab_active ? 'active show' : '' ?> settings-pane" id="tab_oauth" role="tabpanel" aria-labelledby="settings-tab-oauth">
+                           <div class="settings-pane__heading">
+                             <div class="settings-pane__heading-icon"><i class="fa fa-key"></i></div>
+                             <div><h2>Integrasi OAuth</h2><p>Hubungkan aplikasi dengan penyedia login eksternal secara aman.</p></div>
+                           </div>
 
-                           <div class="panel-group" id="accordion">
+                           <div class="panel-group settings-accordion" id="oauth-accordion">
                                     <div class="panel panel-default">
                                       <div class="panel-heading">
                                         <h4 class="panel-title">
-                                          <a data-bs-toggle="collapse" data-bs-parent="#accordion" href="#collapse1">
+                                          <a data-bs-toggle="collapse" data-bs-parent="#oauth-accordion" href="#oauth-google">
                                           <b class="text-green">Google</b> </a>
                                         </h4>
                                       </div>
-                                      <div id="collapse1" class="panel-collapse collapse in">
+                                      <div id="oauth-google" class="panel-collapse collapse show in">
                                         <div class="panel-body">
 
                                           <div class="row">
@@ -410,15 +415,15 @@ jQuery(document).ready(domo);
                                               <div class="col-sm-12">
                                                   <label>ID</label>
                                                   <input type="text" class="form-control" name="google_id" id="google_id" value="<?= get_option('google_id'); ?>">
-                                                  <small class="info help-block">The id of google oauth
+                                                  <small class="info help-block">Client ID dari Google OAuth.
                                                   <br>
-                                                  You can get this on <?= anchor('https://console.cloud.google.com/apis/credentials'); ?>.</small>
+                                                  Nilai ini dapat dibuat melalui <?= anchor('https://console.cloud.google.com/apis/credentials', 'Google Cloud Console', ['target' => '_blank', 'rel' => 'noopener noreferrer']); ?>.</small>
                                               </div>
 
                                               <div class="col-sm-12">
                                                   <label>Secret</label>
                                                   <textarea type="text" class="form-control" name="google_secret" id="google_secret" ><?= get_option('google_secret'); ?></textarea>
-                                                  <small class="info help-block">The secret of google oauth.</small>
+                                                  <small class="info help-block">Client Secret dari Google OAuth. Simpan nilai ini dengan aman.</small>
                                               </div>
 
 
@@ -432,22 +437,25 @@ jQuery(document).ready(domo);
                           <!-- /.tab-pane -->
                         </div>
                         <!-- /.tab-content -->
-                      </div>
-                      <!-- nav-tabs-custom -->
-                    <div class="message no-message-padding">
+                    <div class="message no-message-padding settings-message">
                       
                     </div>
-                        <?php is_allowed('setting_update', function(){?>
-                        <button class="btn btn-flat btn-default btn_save btn_action" id="btn_save" data-stype='stay' title="save (Ctrl+s)"><i class="fa fa-save" ></i> <?= cclang('save_button'); ?></button>
-                        <?php }) ?>
-                         <span class="loading loading-hide"><img src="<?= BASE_ASSET; ?>/img/loading-spin-primary.svg"> <i><?= cclang('loading_data'); ?></i></span>
-
-                        <a class="btn btn-flat btn-default btn_undo" data-id="0" id="btn_undo" title="undo (Ctrl+x)" style="display: none;"><i class="fa fa-undo" ></i> Undo</a>
+                        <div class="settings-actionbar">
+                          <div class="settings-actionbar__hint"><i class="fa fa-info-circle"></i><span>Periksa kembali perubahan sebelum disimpan.</span></div>
+                          <div class="settings-actionbar__buttons">
+                            <a class="btn btn-flat btn-default btn_undo" data-id="0" id="btn_undo" title="Batalkan perubahan (Ctrl+x)" style="display: none;"><i class="fa fa-undo"></i> Batalkan Perubahan</a>
+                            <?php is_allowed('setting_update', function(){?>
+                            <button type="button" class="btn btn-flat btn-default btn_save btn_action" id="btn_save" data-stype='stay' title="Simpan pengaturan (Ctrl+s)"><i class="fa fa-save"></i> <?= cclang('save_button'); ?></button>
+                            <?php }) ?>
+                            <span class="loading loading-hide"><img src="<?= BASE_ASSET; ?>/img/loading-spin-primary.svg"> <i><?= cclang('loading_data'); ?></i></span>
+                          </div>
+                        </div>
                     <?= form_close(); ?>
+                      </div>
+                      <!-- nav-tabs-custom -->
                     </div>
-                    <!-- /.col -->
-               </div>
-            </div>
+                    <!-- /.row-fluid -->
+             </div>
             <!--/box body -->
          </div>
          <!--/box -->
@@ -460,21 +468,104 @@ jQuery(document).ready(domo);
 
 
 <!-- Page script -->
-<script > 
-      $(function(){
-          $('.selectpicker').selectpicker({
-             style: 'btn-block btn-flat',
-              size: 4   
-          });
-      });
-  </script>
-
 <script>
 
   $(document).ready(function() {
+     var formSetting = $('#form_setting');
+     var initialSettingState = formSetting.serialize();
+     var settingsTabLinks = $('.settings-tabs .tab_group');
+     var settingsTabPanes = $('#form_setting > .tab-content > .tab-pane');
+
+     function syncSettingsTab(tab, updateUrl) {
+         var targetSelector = tab.getAttribute('href');
+         var targetPane = targetSelector ? document.querySelector(targetSelector) : null;
+         if (!targetPane) return;
+
+         settingsTabLinks.each(function(index) {
+             var linkTarget = (this.getAttribute('href') || '').replace(/^#/, '');
+             this.classList.toggle('active', this === tab);
+             this.setAttribute('role', 'tab');
+             this.setAttribute('aria-selected', this === tab ? 'true' : 'false');
+             this.setAttribute('tabindex', this === tab ? '0' : '-1');
+             if (!this.id) this.id = 'settings-tab-' + (linkTarget || index);
+             if (linkTarget) this.setAttribute('aria-controls', linkTarget);
+             if (this.parentElement) {
+                 this.parentElement.setAttribute('role', 'presentation');
+                 this.parentElement.classList.toggle('active', this === tab);
+             }
+         });
+
+         settingsTabPanes.each(function() {
+             var isTarget = this === targetPane;
+             this.classList.toggle('active', isTarget);
+             this.classList.toggle('show', isTarget);
+             this.setAttribute('role', 'tabpanel');
+             this.setAttribute('aria-hidden', isTarget ? 'false' : 'true');
+             if (isTarget) this.setAttribute('aria-labelledby', tab.id);
+         });
+
+         if (updateUrl && window.history && window.history.replaceState) {
+             var currentUrl = new URL(window.location.href);
+             currentUrl.searchParams.set('tab', targetSelector.substring(1));
+             window.history.replaceState({}, document.title, currentUrl.toString());
+         }
+     }
+
+     settingsTabLinks.on('shown.bs.tab', function() {
+         syncSettingsTab(this, true);
+     });
+
+     settingsTabLinks.on('click', function(event) {
+         if (!window.bootstrap || !window.bootstrap.Tab) {
+             event.preventDefault();
+             syncSettingsTab(this, true);
+         }
+     });
+
+     settingsTabLinks.on('keydown', function(event) {
+         if (!['ArrowLeft', 'ArrowRight', 'Home', 'End'].includes(event.key)) return;
+         event.preventDefault();
+         var tabs = settingsTabLinks.toArray();
+         var currentIndex = tabs.indexOf(this);
+         var nextIndex = event.key === 'Home' ? 0 : event.key === 'End' ? tabs.length - 1 :
+             (currentIndex + (event.key === 'ArrowRight' ? 1 : -1) + tabs.length) % tabs.length;
+         tabs[nextIndex].focus();
+         if (window.bootstrap && window.bootstrap.Tab) {
+             window.bootstrap.Tab.getOrCreateInstance(tabs[nextIndex]).show();
+         } else {
+             syncSettingsTab(tabs[nextIndex], true);
+         }
+     });
+
+     var initialSettingsTab = settingsTabLinks.filter('.active').first()[0] ||
+         settingsTabLinks.filter(function() { return $(this).parent().hasClass('active'); }).first()[0] ||
+         settingsTabLinks.first()[0];
+     if (initialSettingsTab) syncSettingsTab(initialSettingsTab, false);
+
      $('input[type="checkbox"].flat-red, input[type="radio"].flat-red').iCheck({
          checkboxClass: 'icheckbox_minimal-red',
          radioClass: 'iradio_minimal-red'
+     });
+
+     formSetting.on('input change ifChanged', ':input', function() {
+         $('#btn_undo').toggle(formSetting.serialize() !== initialSettingState);
+     });
+
+     formSetting.on('change', '.language-select-native', function() {
+         var selectedOption = $(this).find('option:selected');
+         var languageControl = $(this).closest('.language-select-control');
+         languageControl.find('.language-select-text').text(selectedOption.text());
+         languageControl.find('.language-select-flag').attr('class', 'language-select-flag flag-icon ' + (selectedOption.data('icon') || ''));
+     });
+
+     $('#btn_undo').on('click', function(event) {
+         event.preventDefault();
+         if (formSetting.length && formSetting[0]) {
+             formSetting[0].reset();
+             formSetting.find('.chosen-select').trigger('chosen:updated');
+             formSetting.find('.language-select-native').trigger('change');
+             $(this).hide();
+         }
      });
 
      $('.btn_save').click(function() {
@@ -493,6 +584,7 @@ jQuery(document).ready(domo);
              })
              .done(function(res) {
                  if (res.success) {
+                     initialSettingState = formSetting.serialize();
                      $('.message').printMessage({
                          message: res.message
                      });
@@ -510,15 +602,12 @@ jQuery(document).ready(domo);
              })
              .fail(function() {
                  $('.message').printMessage({
-                     message: 'Error save data',
+                     message: 'Pengaturan gagal disimpan. Silakan coba kembali.',
                      type: 'warning'
                  });
              })
              .always(function() {
                  $('.loading').hide();
-                 $('html, body').animate({
-                     scrollTop: $(document).height()
-                 }, 1000);
              });
 
          return false;

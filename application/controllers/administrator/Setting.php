@@ -31,27 +31,27 @@ class Setting extends Admin
 
 		$this->data = [
 			'times' => [
-				['label' => '15 Minutes', 'value' => '900'],
-				['label' => '30 Minutes', 'value' => '1800'],
-				['label' => '1 Hours', 'value' => '3600'],
-				['label' => '2 Hours', 'value' => '7200'],
-				['label' => '4 Hours', 'value' => '14400'],
-				['label' => '6 Hours', 'value' => '21600'],
-				['label' => '8 Hours', 'value' => '28800'],
-				['label' => '12 Hours', 'value' => '43200'],
-				['label' => '1 Days', 'value' => '86400'],
-				['label' => '1 Week', 'value' => '604800'],
-				['label' => '1 Month', 'value' => '2592000'],
-				['label' => '6 Month', 'value' => '15552000'],
-				['label' => '1 Years', 'value' => '31104000'],
-				['label' => 'Always', 'value' => '0']
+				['label' => '15 Menit', 'value' => '900'],
+				['label' => '30 Menit', 'value' => '1800'],
+				['label' => '1 Jam', 'value' => '3600'],
+				['label' => '2 Jam', 'value' => '7200'],
+				['label' => '4 Jam', 'value' => '14400'],
+				['label' => '6 Jam', 'value' => '21600'],
+				['label' => '8 Jam', 'value' => '28800'],
+				['label' => '12 Jam', 'value' => '43200'],
+				['label' => '1 Hari', 'value' => '86400'],
+				['label' => '1 Minggu', 'value' => '604800'],
+				['label' => '1 Bulan', 'value' => '2592000'],
+				['label' => '6 Bulan', 'value' => '15552000'],
+				['label' => '1 Tahun', 'value' => '31104000'],
+				['label' => 'Tidak Pernah Kedaluwarsa', 'value' => '0']
 			],
 			'pages' => $this->model_page->find_all(),
 			'landing_page' => get_option('landing_page_id', 'default'),
 			'timezone_opt' => get_option('timezone')
 		];
 
-		$this->template->title('Setting List');
+		$this->template->title('Pengaturan Sistem');
 		$this->render('backend/standart/administrator/setting/setting_general', $this->data);
 	}
 
@@ -64,7 +64,7 @@ class Setting extends Admin
 		if (!$this->is_allowed('setting_update', false)) {
 			return $this->response([
 				'success' => false,
-				'message' => 'Sorry you do not have permission to setting'
+				'message' => 'Anda tidak memiliki izin untuk mengubah pengaturan.'
 				]);
 		}
 
@@ -74,7 +74,7 @@ class Setting extends Admin
 		$this->form_validation->set_rules('site_name', 'Site Name', 'trim|required');
 		$this->form_validation->set_rules('email', 'Email', 'trim|required|valid_email');
 		$this->form_validation->set_rules('encryption_key', 'Encryption Key', 'trim|required');
-		$this->form_validation->set_rules('sess_expiration', 'Encryption Key', 'trim|numeric');
+		$this->form_validation->set_rules('sess_expiration', 'Masa Berlaku Sesi', 'trim|numeric');
 		$this->form_validation->set_rules('sess_time_to_update', 'Session Time to Update', 'trim|numeric');
 		$this->form_validation->set_rules('global_xss_filtering', 'Global XSS Filtering', 'trim|required');
 		$this->form_validation->set_rules('csrf_token_name', 'CSRF Token Name', 'trim|required');
@@ -124,7 +124,7 @@ class Setting extends Admin
 			write_file(FCPATH . '/application/routes/routes_landing.php', $config_template);
 
 			$this->response['success'] = true;
-			$this->response['message'] = 'Your setting has been successfully updated. ';
+			$this->response['message'] = 'Pengaturan berhasil diperbarui.';
 		} else {
 			$this->response['success'] = false;
 			$this->response['message'] = validation_errors();
