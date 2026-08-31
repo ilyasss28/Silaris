@@ -6,7 +6,8 @@ class Model_user extends MY_Model {
 
 	private $primary_key 	= 'id';
 	private $table_name 	= 'aauth_users';
-	private $field_search 	= array('email', 'username', 'full_name');
+	private $field_search 	= array('id', 'email', 'username', 'full_name');
+	private $filterable_groups = array('User', 'Kanwil', 'MPD', 'Pimpinan');
 
 	public function __construct()
 	{
@@ -19,64 +20,64 @@ class Model_user extends MY_Model {
 		parent::__construct($config);
 	}
 
-	public function count_all($q = '', $field = '')
+	public function count_all($q = '', $field = '', $group = '')
 	{
-		$iterasi = 1;
-        $num = count($this->field_search);
-        $where = NULL;
-        $q = $this->scurity($q);
-		$field = $this->scurity($field);
+		$this->db->select('COUNT(DISTINCT aauth_users.id) AS total', false);
+		$this->apply_search_conditions($this->table_name, $this->field_search, $q, $field);
+		$this->apply_group_filter($group);
+		$query = $this->db->get($this->table_name)->row();
 
-        if (empty($field)) {
-	        foreach ($this->field_search as $field) {
-	            if ($iterasi == 1) {
-	                $where .= "(" . $field . " LIKE '%" . $q . "%' ";
-	            } else if ($iterasi == $num) {
-	                $where .= "OR " . $field . " LIKE '%" . $q . "%') ";
-	            } else {
-	                $where .= "OR " . $field . " LIKE '%" . $q . "%' ";
-	            }
-	            $iterasi++;
-	        }
-        } else {
-        	$where .= "(" . $field . " LIKE '%" . $q . "%' )";
-        }
-
-        $this->db->where($where);
-		$query = $this->db->get($this->table_name);
-
-		return $query->num_rows();
+		return $query ? (int) $query->total : 0;
 	}
 
-	public function get($q = '', $field = '', $limit = 0, $offset = 0)
+	public function get($q = '', $field = '', $limit = 0, $offset = 0, $group = '')
 	{
-		$iterasi = 1;
-        $num = count($this->field_search);
-        $where = NULL;
-        $q = $this->scurity($q);
-		$field = $this->scurity($field);
-
-        if (empty($field)) {
-	        foreach ($this->field_search as $field) {
-	            if ($iterasi == 1) {
-	                $where .= "(" . $field . " LIKE '%" . $q . "%' ";
-	            } else if ($iterasi == $num) {
-	                $where .= "OR " . $field . " LIKE '%" . $q . "%') ";
-	            } else {
-	                $where .= "OR " . $field . " LIKE '%" . $q . "%' ";
-	            }
-	            $iterasi++;
-	        }
-        } else {
-        	$where .= "(" . $field . " LIKE '%" . $q . "%' )";
-        }
-
-        $this->db->where($where);
+		$this->db->select('aauth_users.*');
+		$this->db->select("(
+			SELECT GROUP_CONCAT(DISTINCT user_groups.name
+				ORDER BY FIELD(user_groups.name, 'Admin', 'User', 'Kanwil', 'MPD', 'Pimpinan')
+				SEPARATOR ', ')
+			FROM aauth_user_to_group AS user_group_links
+			INNER JOIN aauth_groups AS user_groups ON user_groups.id = user_group_links.group_id
+			WHERE user_group_links.user_id = aauth_users.id
+			AND user_groups.name IN ('Admin', 'User', 'Kanwil', 'MPD', 'Pimpinan')
+		) AS group_names", false);
+		$this->apply_search_conditions($this->table_name, $this->field_search, $q, $field);
+		$this->apply_group_filter($group);
         $this->db->limit($limit, $offset);
-        $this->db->order_by($this->primary_key, "DESC");
+        $this->db->order_by($this->table_name . '.' . $this->primary_key, "DESC");
 		$query = $this->db->get($this->table_name);
 
 		return $query->result();
+	}
+
+	public function normalize_group_filter($group)
+	{
+		$group = trim((string) $group);
+
+		return in_array($group, $this->filterable_groups, true) ? $group : '';
+	}
+
+	public function get_filterable_groups()
+	{
+		return $this->filterable_groups;
+	}
+
+	private function apply_group_filter($group)
+	{
+		$group = $this->normalize_group_filter($group);
+		if ($group === '') {
+			return;
+		}
+
+		$escaped_group = $this->db->escape($group);
+		$this->db->where(
+			'EXISTS (SELECT 1 FROM aauth_user_to_group AS filter_links '
+			. 'INNER JOIN aauth_groups AS filter_groups ON filter_groups.id = filter_links.group_id '
+			. 'WHERE filter_links.user_id = aauth_users.id AND filter_groups.name = ' . $escaped_group . ')',
+			null,
+			false
+		);
 	}
 
 	public function get_group_user($user_id = false)

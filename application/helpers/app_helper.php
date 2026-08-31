@@ -151,6 +151,22 @@ if(!function_exists('get_group_user')) {
 	}
 }
 
+if (!function_exists('get_application_groups')) {
+	function get_application_groups() {
+		$ci =& get_instance();
+		$allowed_names = array('Admin', 'User', 'Kanwil', 'MPD', 'Pimpinan');
+		$ci->db->where_in('name', $allowed_names);
+		$groups = $ci->db->get('aauth_groups')->result();
+		$order = array_flip($allowed_names);
+
+		usort($groups, function ($left, $right) use ($order) {
+			return ($order[$left->name] ?? PHP_INT_MAX) <=> ($order[$right->name] ?? PHP_INT_MAX);
+		});
+
+		return $groups;
+	}
+}
+
 if(!function_exists('get_user_data')) {
 	function get_user_data($field_name = '') {
 		$ci =& get_instance();

@@ -57,23 +57,43 @@ jQuery(document).ready(domo);
                         <img class="img-circle" src="<?= BASE_ASSET; ?>/img/list.png" alt="User Avatar">
                      </div>
                      <!-- /.widget-user-image -->
-                     <h3 class="widget-user-username"><?= cclang('user'); ?></h3>
-                     <h5 class="widget-user-desc"><?= cclang('list_all', cclang('user')); ?> <i class="label bg-yellow"><?= $user_counts; ?>  <?= cclang('items'); ?></i></h5>
+                     <h3 class="widget-user-username">Pengguna</h3>
+                     <h5 class="widget-user-desc">Daftar Semua Pengguna <i class="label bg-yellow"><?= $user_counts; ?> <?= cclang('items'); ?></i></h5>
                   </div>
 
                   <form name="form_user" id="form_user" action="<?= base_url('administrator/user/index'); ?>">
-                  
-                  <div class="table-responsive"> 
+
+                  <div class="user-group-filterbar">
+                     <div class="user-group-filterbar__copy">
+                        <span class="user-group-filterbar__icon"><i class="fa fa-users"></i></span>
+                        <span><strong>Filter Group</strong><small>Tampilkan pengguna berdasarkan kelompok akses.</small></span>
+                     </div>
+                     <div class="user-group-filterbar__control">
+                        <label class="sr-only" for="user_group_filter">Pilih group pengguna</label>
+                        <select class="form-control" name="group" id="user_group_filter">
+                           <option value="">Semua Group</option>
+                           <?php foreach ($filterable_groups as $filter_group): ?>
+                           <option value="<?= _ent($filter_group); ?>" <?= $group_filter === $filter_group ? 'selected' : ''; ?>><?= _ent($filter_group); ?></option>
+                           <?php endforeach; ?>
+                        </select>
+                        <?php if ($group_filter !== ''): ?>
+                        <a href="<?= site_url('administrator/user'); ?>" class="user-group-filterbar__reset" title="Hapus filter group"><i class="fa fa-times"></i><span>Reset</span></a>
+                        <?php endif; ?>
+                     </div>
+                  </div>
+
+                  <div class="table-responsive">
                   <table id="admin-user-table" class="table table-bordered table-striped dataTable admin-user-table" data-table-kind="users">
                      <thead>
                         <tr class="">
                            <th>
                             <input type="checkbox" class="flat-red toltip" id="check_all" name="check_all" title="check all">
                            </th>
-                           <th><?= cclang('user') ?></th>
-                           <th><?= cclang('username') ?></th>
-                           <th><?= cclang('status') ?></th>
-                           <th><?= cclang('action') ?></th>
+                           <th>Nama Pengguna</th>
+                           <th>Username</th>
+                           <th>Group</th>
+                           <th>Status</th>
+                           <th>Aksi</th>
                         </tr>
                      </thead>
                      <tbody id="tbody_user">
@@ -97,6 +117,18 @@ jQuery(document).ready(domo);
                               </div>
                            </td>
                            <td><?= _ent($user->username); ?></td>
+                           <td>
+                              <div class="user-group-badges">
+                              <?php $user_groups = array_filter(array_map('trim', explode(',', (string) ($user->group_names ?? '')))); ?>
+                              <?php if ($user_groups): ?>
+                                 <?php foreach ($user_groups as $user_group): ?>
+                                 <span class="user-group-badge user-group-badge--<?= _ent(strtolower($user_group)); ?>"><?= _ent($user_group); ?></span>
+                                 <?php endforeach; ?>
+                              <?php else: ?>
+                                 <span class="user-group-badge user-group-badge--empty">Belum diatur</span>
+                              <?php endif; ?>
+                              </div>
+                           </td>
                            <td>
                               <div class="user-status-control <?= $user->banned ? 'is-inactive' : 'is-active'; ?>">
                                  <input type="checkbox" name="status" data-user-id="<?= (int) $user->id; ?>" class="switch-button" <?= $user->banned ? '' : 'checked'; ?> aria-label="Status <?= _ent($user->full_name); ?>">
@@ -183,6 +215,10 @@ jQuery(document).ready(domo);
 <!-- Page script -->
 <script>
   $(document).ready(function() {
+    $('#user_group_filter').on('change', function() {
+        this.form.submit();
+    });
+
     // Delegated handlers survive AJAX page changes, so remove the previous
     // instance before the switch plugin initializes the newly loaded rows.
     $(document).off('change.silarisUserStatus', 'input.switch-button');

@@ -142,7 +142,7 @@
                         <div class="col-sm-8">
                            <select  class="form-control chosen chosen-select" name="group[]" id="group" tabi-ndex="5" data-placeholder="Select Groups" multiple="">
                             <option value=""></option>
-                            <?php foreach (db_get_all_data('aauth_groups') as $row): ?>
+                            <?php foreach (get_application_groups() as $row): ?>
                             <option <?= array_search($row->id, $group_menu) !== false? 'selected="selected"' : ''; ?> value="<?= $row->id; ?>"  ><?= ucwords($row->name); ?></option>
                             <?php endforeach; ?>  
                             </select>

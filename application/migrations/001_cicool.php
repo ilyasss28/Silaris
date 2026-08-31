@@ -501,12 +501,20 @@ class Migration_cicool extends CI_Migration {
                         'definition' => 'Public Group'
                     ], 
                     [
-                        'name' => 'Default',
-                        'definition' => 'Default Access Group'
+                        'name' => 'User',
+                        'definition' => 'Pengguna atau Notaris'
                     ],
                     [
-                        'name' => 'Member',
-                        'definition' => 'Member Access Group'
+                        'name' => 'Kanwil',
+                        'definition' => 'Kantor Wilayah'
+                    ],
+                    [
+                        'name' => 'MPD',
+                        'definition' => 'Majelis Pengawas Daerah'
+                    ],
+                    [
+                        'name' => 'Pimpinan',
+                        'definition' => 'Pimpinan'
                     ],
                 ]);
 

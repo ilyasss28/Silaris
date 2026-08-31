@@ -73,7 +73,7 @@ class Group extends Admin
 				]);
 		}
 
-		$this->form_validation->set_rules('name', 'Name', 'trim|required|is_unique[aauth_groups.name]');
+		$this->form_validation->set_rules('name', 'Name', 'trim|required|callback_valid_application_group|is_unique[aauth_groups.name]');
 
 
 		if ($this->form_validation->run()) {
@@ -130,7 +130,10 @@ class Group extends Admin
 	{
 		$this->is_allowed('group_update');
 
-		$this->data['group'] = $this->model_group->find($id);
+		$this->data['group'] = $this->model_group->find_application_group($id);
+		if (!$this->data['group']) {
+			show_404();
+		}
 
 		$this->template->title('Group Update');
 		$this->render('backend/standart/administrator/group/group_update', $this->data);
@@ -150,7 +153,14 @@ class Group extends Admin
 				]);
 		}
 
-		$this->form_validation->set_rules('name', 'Name', 'trim|required');
+		if (!$this->model_group->find_application_group($id)) {
+			return $this->response([
+				'success' => false,
+				'message' => 'Grup pengguna tidak ditemukan.',
+			], 404);
+		}
+
+		$this->form_validation->set_rules('name', 'Name', 'trim|required|callback_valid_application_group');
 
 		if ($this->form_validation->run()) {
 			
@@ -194,6 +204,19 @@ class Group extends Admin
 		return $this->response($this->data);
 	}
 
+	public function valid_application_group($name)
+	{
+		if ($this->model_group->is_application_group_name($name)) {
+			return true;
+		}
+
+		$this->form_validation->set_message(
+			'valid_application_group',
+			'Nama grup hanya dapat berupa Admin, User, Kanwil, MPD, atau Pimpinan.'
+		);
+		return false;
+	}
+
 	/**
 	* delete groups
 	*
@@ -234,7 +257,10 @@ class Group extends Admin
 	{
 		$this->is_allowed('group_view');
 
-		$this->data['group'] = $this->model_group->find($id);
+		$this->data['group'] = $this->model_group->find_application_group($id);
+		if (!$this->data['group']) {
+			show_404();
+		}
 
 		$this->template->title('Group Detail');
 		$this->render('backend/standart/administrator/group/group_view', $this->data);
@@ -247,6 +273,10 @@ class Group extends Admin
 	*/
 	private function _remove($id)
 	{
+		if (!$this->model_group->find_application_group($id)) {
+			return false;
+		}
+
 		return $this->model_group->remove($id);
 	}
 
@@ -259,6 +289,7 @@ class Group extends Admin
 	{
 		$this->is_allowed('group_export');
 
+		$this->db->where_in('name', $this->model_group->get_application_group_names());
 		$this->model_group->export('aauth_groups', 'group');
 	}
 
@@ -271,6 +302,7 @@ class Group extends Admin
 	{
 		$this->is_allowed('group_export');
 
+		$this->db->where_in('name', $this->model_group->get_application_group_names());
 		$this->model_group->pdf('aauth_groups', 'group');
 	}
 }

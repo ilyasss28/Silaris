@@ -2,6 +2,45 @@
 /**
  * @var array $template
  */
+$sidebar_role_label = 'Notaris';
+
+if ($this->aauth->is_admin()) {
+  $sidebar_role_label = 'Admin';
+} else {
+  $current_user_groups = $this->aauth->get_user_groups();
+  $current_group_names = array();
+
+  foreach ($current_user_groups as $current_user_group) {
+    $group_name = trim((string) ($current_user_group->name ?? ''));
+    $normalized_group_name = strtolower($group_name);
+
+    if ($group_name !== '' && $normalized_group_name !== 'public') {
+      $current_group_names[$normalized_group_name] = $group_name;
+    }
+  }
+
+  $role_priority = array(
+    'pimpinan' => 'Pimpinan',
+    'kanwil' => 'Kanwil',
+    'mpd' => 'MPD',
+    'notaris' => 'Notaris',
+    'user' => 'Notaris',
+    'member' => 'Notaris',
+    'default' => 'Notaris',
+  );
+
+  foreach ($role_priority as $group_key => $role_label) {
+    if (isset($current_group_names[$group_key])) {
+      $sidebar_role_label = $role_label;
+      break;
+    }
+  }
+}
+
+$last_login_timestamp = strtotime((string) get_user_data('last_login'));
+$last_login_label = $last_login_timestamp
+  ? date('d/m/Y H:i', $last_login_timestamp)
+  : 'Belum tersedia';
 ?>
 <!DOCTYPE html>
 <html lang="id">
@@ -64,27 +103,30 @@
 
       <ul class="navbar-nav ms-auto">
         <li class="nav-item dropdown user-menu">
-          <a href="#" class="nav-link dropdown-toggle d-flex align-items-center" data-bs-toggle="dropdown">
+          <a href="#" class="nav-link dropdown-toggle d-flex align-items-center" data-bs-toggle="dropdown" aria-expanded="false" aria-label="Buka menu akun">
             <img src="<?= BASE_URL.'uploads/user/'.(!empty(get_user_data('avatar')) ? get_user_data('avatar') :'default.png'); ?>" class="user-image rounded-circle" alt="User Image">
             <span class="d-none d-md-inline ms-2"><?= _ent(format_person_name(clean_snake_case(get_user_data('full_name')))); ?></span>
           </a>
-          <ul class="dropdown-menu dropdown-menu-end">
+          <ul class="dropdown-menu dropdown-menu-end" aria-label="Menu akun">
             <li class="user-header">
-              <img src="<?= BASE_URL.'uploads/user/'.(!empty(get_user_data('avatar')) ? get_user_data('avatar') :'default.png'); ?>" class="rounded-circle" alt="User Image">
-
-              <p>
-                <?= _ent(format_person_name(clean_snake_case($this->aauth->get_user()->full_name))); ?>
-                <small>Login Terakhir, <?= date('Y-M-D', strtotime(get_user_data('last_login'))); ?></small>
-              </p>
+              <span class="user-header__avatar">
+                <img src="<?= BASE_URL.'uploads/user/'.(!empty(get_user_data('avatar')) ? get_user_data('avatar') :'default.png'); ?>" alt="Foto <?= _ent(get_user_data('full_name')); ?>">
+                <i aria-hidden="true"></i>
+              </span>
+              <span class="user-header__identity">
+                <strong><?= _ent(format_person_name(clean_snake_case($this->aauth->get_user()->full_name))); ?></strong>
+                <small><?= _ent($sidebar_role_label); ?></small>
+              </span>
+              <span class="user-header__meta">
+                <i class="fa fa-clock-o" aria-hidden="true"></i>
+                <span>Login terakhir</span>
+                <strong><?= _ent($last_login_label); ?></strong>
+              </span>
             </li>
 
             <li class="user-footer">
-              <div class="float-start">
-                <a href="<?= site_url('administrator/profile'); ?>" class="btn btn-default btn-flat"><?= cclang('profile'); ?></a>
-              </div>
-              <div class="float-end">
-                <a href="<?= site_url('administrator/logout'); ?>" class="btn btn-default btn-flat"><?= cclang('sign_out'); ?></a>
-              </div>
+              <a href="<?= site_url('administrator/profile'); ?>" class="user-menu-action user-menu-action--profile"><i class="fa fa-user-o" aria-hidden="true"></i><span>Profil Saya</span></a>
+              <a href="<?= site_url('administrator/logout'); ?>" class="user-menu-action user-menu-action--logout"><i class="fa fa-sign-out" aria-hidden="true"></i><span>Keluar</span></a>
             </li>
           </ul>
         </li>
@@ -102,7 +144,7 @@
           <strong><?= get_option('site_name'); ?></strong>
           <small>Kemenkum Sulawesi Tenggara</small>
         </span>
-        <span class="brand-mode">ADMIN</span>
+        <span class="brand-mode"><?= _ent(strtoupper($sidebar_role_label)); ?></span>
       </a>
     </div>
 
@@ -127,7 +169,7 @@
         <img src="<?= BASE_URL.'uploads/user/'.(!empty(get_user_data('avatar')) ? get_user_data('avatar') :'default.png'); ?>" alt="Foto <?= _ent(get_user_data('full_name')); ?>">
         <span class="sidebar-account__copy">
           <strong><?= _ent(format_person_name(clean_snake_case(get_user_data('full_name')))); ?></strong>
-          <small>Akun Administrator</small>
+          <small>Akun <?= _ent($sidebar_role_label); ?></small>
         </span>
       </a>
       <a href="<?= site_url('administrator/logout'); ?>" class="sidebar-account__logout" title="Keluar" aria-label="Keluar dari akun">

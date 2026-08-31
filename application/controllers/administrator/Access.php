@@ -31,7 +31,7 @@ class Access extends Admin
 	{
 		$this->is_allowed('access_list');
 
-		$this->data['groups'] = $this->model_group->find_all();
+		$this->data['groups'] = $this->model_group->get('', '', 100, 0);
 
 		$this->template->title('Access List');
 		$this->render('backend/standart/administrator/access/access_list', $this->data);
@@ -55,7 +55,7 @@ class Access extends Admin
 		$permissions = $this->input->post('id');
 		$permissions = is_array($permissions) ? array_values(array_unique(array_filter(array_map('intval', $permissions)))) : [];
 
-		if ($group_id < 1 || !$this->db->where('id', $group_id)->count_all_results('aauth_groups')) {
+		if ($group_id < 1 || !$this->model_group->find_application_group($group_id)) {
 			return $this->response([
 				'success' => false,
 				'message' => 'Grup pengguna tidak valid.',
@@ -114,7 +114,7 @@ class Access extends Admin
             exit;
         }
         $group_id = (int) $group_id;
-        if ($group_id < 1 || !$this->db->where('id', $group_id)->count_all_results('aauth_groups')) {
+        if ($group_id < 1 || !$this->model_group->find_application_group($group_id)) {
             $this->output->set_status_header(404);
             echo '<li class="access-empty"><p>Grup pengguna tidak ditemukan.</p></li>';
             return;

@@ -27,16 +27,26 @@ class Auth extends Admin
 		}
 		$data = [];
 		$this->config->load('site');
+		$data['login_groups'] = get_application_groups();
 
+		$this->form_validation->set_rules('group', 'Group/Role', 'trim|required|in_list[Admin,User,Kanwil,MPD,Pimpinan]');
 		$this->form_validation->set_rules('username', 'Username', 'trim|required');
 		$this->form_validation->set_rules('password', 'Password', 'trim|required');
 		$this->form_validation->set_rules('captcha', 'Captcha', 'trim|required|callback_valid_captcha');
 
 		if ($this->form_validation->run()) {
 			if ($this->aauth->login($this->input->post('username'), $this->input->post('password'), 0)) {
-				redirect('administrator/dashboard');
+				$selected_group = $this->input->post('group', true);
+				$user_id = (int) $this->session->userdata('id');
+
+				if ($this->aauth->is_member($selected_group, $user_id)) {
+					redirect('administrator/dashboard');
+				}
+
+				$this->aauth->logout();
+				$data['error'] = 'Group/Role yang dipilih tidak sesuai dengan akun Anda.';
 			} else {
-				$data['error'] = $this->aauth->print_errors(TRUE);
+				$data['error'] = 'Username, password, atau Group/Role tidak sesuai.';
 			}
 		} else {
 			$data['error'] = validation_errors();

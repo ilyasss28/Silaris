@@ -98,6 +98,8 @@
       url.pathname = action.pathname.replace(/\/+$/, '') + '/' + offset;
       url.searchParams.set('q', request.search && request.search.value ? request.search.value : '');
       url.searchParams.set('length', String(length));
+      var groupFilter = form.querySelector('[name="group"]');
+      if (groupFilter && groupFilter.value) url.searchParams.set('group', groupFilter.value);
 
       fetch(url.href, {
         credentials: 'same-origin',
@@ -645,12 +647,13 @@
     var columnDefinitions = [];
     if (disabledColumns.length) columnDefinitions.push({ orderable: false, targets: disabledColumns });
     if (hiddenColumns.length) columnDefinitions.push({ visible: false, searchable: false, targets: hiddenColumns });
-    if (table.dataset.tableKind === 'users' && columnCount >= 5) {
+    if (table.dataset.tableKind === 'users' && columnCount >= 6) {
       columnDefinitions.push(
-        { className: 'user-table__identity', width: '42%', targets: 1 },
-        { className: 'user-table__username', width: '23%', targets: 2 },
-        { className: 'user-table__status', width: '17%', targets: 3 },
-        { className: 'user-table__actions', width: '18%', targets: 4 }
+        { className: 'user-table__identity', width: '35%', targets: 1 },
+        { className: 'user-table__username', width: '19%', targets: 2 },
+        { className: 'user-table__group', width: '17%', targets: 3 },
+        { className: 'user-table__status', width: '15%', targets: 4 },
+        { className: 'user-table__actions', width: '14%', targets: 5 }
       );
     }
     var options = {

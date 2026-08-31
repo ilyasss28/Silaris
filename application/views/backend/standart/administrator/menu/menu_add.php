@@ -148,7 +148,7 @@ jQuery(document).ready(domo);
                         <div class="col-sm-8">
                            <select  class="form-control chosen chosen-select" name="group[]" id="group" tabi-ndex="5" data-placeholder="Select Groups" multiple="">
                             <option value=""></option>
-                            <?php foreach (db_get_all_data('aauth_groups') as $row): ?>
+                            <?php foreach (get_application_groups() as $row): ?>
                             <option value="<?= $row->id; ?>"><?= $row->name; ?></option>
                             <?php endforeach; ?>  
                            </select>

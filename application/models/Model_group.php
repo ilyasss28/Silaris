@@ -7,6 +7,7 @@ class Model_group extends MY_Model {
 	private $primary_key 	= 'id';
 	private $table_name 	= 'aauth_groups';
 	private $field_search 	= array('name', 'definition');
+	private $application_groups = array('Admin', 'User', 'Kanwil', 'MPD', 'Pimpinan');
 
 	public function __construct()
 	{
@@ -42,7 +43,8 @@ class Model_group extends MY_Model {
         	$where .= "(" . $field . " LIKE '%" . $q . "%' )";
         }
 
-        $this->db->where($where);
+		$this->db->where($where);
+		$this->db->where_in('name', $this->application_groups);
 		$query = $this->db->get($this->table_name);
 
 		return $query->num_rows();
@@ -71,12 +73,36 @@ class Model_group extends MY_Model {
         	$where .= "(" . $field . " LIKE '%" . $q . "%' )";
         }
 
-        $this->db->where($where);
+		$this->db->where($where);
+		$this->db->where_in('name', $this->application_groups);
         $this->db->limit($limit, $offset);
         $this->db->order_by($this->primary_key, "DESC");
 		$query = $this->db->get($this->table_name);
 
-		return $query->result();
+		$groups = $query->result();
+		$order = array_flip($this->application_groups);
+		usort($groups, function ($left, $right) use ($order) {
+			return ($order[$left->name] ?? PHP_INT_MAX) <=> ($order[$right->name] ?? PHP_INT_MAX);
+		});
+
+		return $groups;
+	}
+
+	public function get_application_group_names()
+	{
+		return $this->application_groups;
+	}
+
+	public function is_application_group_name($name)
+	{
+		return in_array(trim((string) $name), $this->application_groups, true);
+	}
+
+	public function find_application_group($id)
+	{
+		$group = parent::find((int) $id);
+
+		return $group && $this->is_application_group_name($group->name) ? $group : false;
 	}
 
 	public function get_permission_group($group_id = false)

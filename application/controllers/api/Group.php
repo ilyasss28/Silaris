@@ -92,9 +92,9 @@ class Group extends API
 
 		$id = $this->get('id');
 
-		$data['group'] = $this->model_group->find($id);
+		$data['group'] = $this->model_group->find_application_group($id);
 		
-		if (count($data['group'])) {
+		if ($data['group']) {
 			$this->response([
 				'status' 	=> true,
 				'message' 	=> 'Detail group',
@@ -136,7 +136,7 @@ class Group extends API
 	{
 		$this->is_allowed('api_group_add');
 
-		$this->form_validation->set_rules('name', 'Name', 'trim|required|is_unique[aauth_groups.name]|alpha_numeric_spaces');
+		$this->form_validation->set_rules('name', 'Name', 'trim|required|callback_valid_application_group|is_unique[aauth_groups.name]|alpha_numeric_spaces');
 		$this->form_validation->set_rules('definition', 'Definition', 'trim');
 
 		if ($this->form_validation->run()) {
@@ -197,11 +197,18 @@ class Group extends API
 	{
 		$this->is_allowed('api_group_update');
 
-		$this->form_validation->set_rules('name', 'Name', 'trim|required|alpha_numeric_spaces');
+		$this->form_validation->set_rules('name', 'Name', 'trim|required|callback_valid_application_group|alpha_numeric_spaces');
 		$this->form_validation->set_rules('definition', 'Definition', 'trim');
 		$this->form_validation->set_rules('id', 'Id', 'trim|required');
 
 		if ($this->form_validation->run()) {
+			if (!$this->model_group->find_application_group($this->post('id'))) {
+				$this->response([
+					'status' => false,
+					'message' => 'Group not found',
+				], API::HTTP_NOT_ACCEPTABLE);
+				return;
+			}
 
 			$save_data = [
 				'name' 			=> $this->post('name'),
@@ -258,8 +265,8 @@ class Group extends API
 	{
 		$this->is_allowed('api_group_delete');
 
-		if (!$this->model_group->find($this->post('id'))) {
-			$this->response([
+		if (!$this->model_group->find_application_group($this->post('id'))) {
+			return $this->response([
 				'status' 	=> false,
 				'message' 	=> 'Group not found'
 			], API::HTTP_NOT_ACCEPTABLE);
@@ -277,6 +284,19 @@ class Group extends API
 				'message' 	=> 'Group not delete'
 			], API::HTTP_NOT_ACCEPTABLE);
 		}
+	}
+
+	public function valid_application_group($name)
+	{
+		if ($this->model_group->is_application_group_name($name)) {
+			return true;
+		}
+
+		$this->form_validation->set_message(
+			'valid_application_group',
+			'Name must be one of Admin, User, Kanwil, MPD, or Pimpinan.'
+		);
+		return false;
 	}
 }
 

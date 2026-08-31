@@ -67,13 +67,16 @@ class User extends Admin
 
 		$filter = $this->input->get('q');
 		$field 	= $this->input->get('f');
+		$group = $this->model_user->normalize_group_filter($this->input->get('group', true));
 
-		$this->data['users'] = $this->model_user->get($filter, $field, $this->limit_page, $offset);
-		$this->data['user_counts'] = $this->model_user->count_all($filter, $field);
+		$this->data['users'] = $this->model_user->get($filter, $field, $this->limit_page, $offset, $group);
+		$this->data['user_counts'] = $this->model_user->count_all($filter, $field, $group);
+		$this->data['group_filter'] = $group;
+		$this->data['filterable_groups'] = $this->model_user->get_filterable_groups();
 
 		$config = [
 			'base_url'     => 'administrator/user/index/',
-			'total_rows'   => $this->model_user->count_all($filter, $field),
+			'total_rows'   => $this->data['user_counts'],
 			'per_page'     => $this->limit_page,
 			'uri_segment'  => 4,
 		];
