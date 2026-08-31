@@ -95,6 +95,15 @@ if ( ! function_exists('create_captcha'))
 			}
 		}
 
+		// GD drawing functions and mt_rand() require integer dimensions and
+		// coordinates. PHP 8.1+ reports lossy implicit float-to-int conversions
+		// as E_DEPRECATED, so normalize the numeric CAPTCHA options up front.
+		$img_width = max(1, (int) $img_width);
+		$img_height = max(1, (int) $img_height);
+		$word_length = max(1, (int) $word_length);
+		$font_size = max(1, (int) $font_size);
+		$expiration = max(0, (int) $expiration);
+
 		if ( ! extension_loaded('gd'))
 		{
 			log_message('error', 'create_captcha(): GD extension is not loaded.');
@@ -240,7 +249,7 @@ if ( ! function_exists('create_captcha'))
 		// -----------------------------------
 		$length	= strlen($word);
 		$angle	= ($length >= 6) ? mt_rand(-($length-6), ($length-6)) : 0;
-		$x_axis	= mt_rand(6, (360/$length)-16);
+		$x_axis	= mt_rand(6, max(6, (int) floor((360 / $length) - 16)));
 		$y_axis = ($angle >= 0) ? mt_rand($img_height, $img_width) : mt_rand(6, $img_height);
 
 		// Create image
@@ -284,7 +293,14 @@ if ( ! function_exists('create_captcha'))
 			$rad1 = $radius * (($i + 1) / $points);
 			$x1 = ($rad1 * cos($theta)) + $x_axis;
 			$y1 = ($rad1 * sin($theta)) + $y_axis;
-			imageline($im, $x, $y, $x1, $y1, $colors['grid']);
+			imageline(
+				$im,
+				(int) round($x),
+				(int) round($y),
+				(int) round($x1),
+				(int) round($y1),
+				$colors['grid']
+			);
 			$theta -= $thetac;
 		}
 
@@ -296,13 +312,13 @@ if ( ! function_exists('create_captcha'))
 		if ($use_font === FALSE)
 		{
 			($font_size > 5) && $font_size = 5;
-			$x = mt_rand(0, $img_width / ($length / 3));
+			$x = mt_rand(0, (int) floor($img_width / ($length / 3)));
 			$y = 0;
 		}
 		else
 		{
 			($font_size > 30) && $font_size = 30;
-			$x = mt_rand(0, $img_width / ($length / 1.5));
+			$x = mt_rand(0, (int) floor($img_width / ($length / 1.5)));
 			$y = $font_size + 2;
 		}
 
@@ -310,13 +326,13 @@ if ( ! function_exists('create_captcha'))
 		{
 			if ($use_font === FALSE)
 			{
-				$y = mt_rand(0 , $img_height / 2);
+				$y = mt_rand(0, (int) floor($img_height / 2));
 				imagestring($im, $font_size, $x, $y, $word[$i], $colors['text']);
 				$x += ($font_size * 2);
 			}
 			else
 			{
-				$y = mt_rand($img_height / 2, $img_height - 3);
+				$y = mt_rand((int) ceil($img_height / 2), max((int) ceil($img_height / 2), $img_height - 3));
 				imagettftext($im, $font_size, $angle, $x, $y, $colors['text'], $font_path, $word[$i]);
 				$x += $font_size;
 			}
