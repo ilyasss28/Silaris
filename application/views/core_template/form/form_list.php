@@ -106,7 +106,7 @@ jQuery(document).ready(domo);
                            <?php endforeach; 
                            ?><td width="200">
                               {php_open_tag} is_allowed('<?= $table_name; ?>_view', function() use ($<?= $table_name; ?>){{php_close_tag}
-                              <a href="{php_open_tag_echo} site_url('administrator/<?= $table_name; ?>/view/' . ${table_name}->{primary_key}); {php_close_tag}" class="label-default"><i class="fa fa-newspaper-o"></i> {php_open_tag_echo} cclang('view_button'); {php_close_tag}
+                              <a href="{php_open_tag_echo} site_url('administrator/<?= $table_name; ?>/view/' . ${table_name}->{primary_key}); {php_close_tag}" class="label-default"><i class="fa fa-newspaper-o"></i> {php_open_tag_echo} cclang('view_button'); {php_close_tag}</a>
                               {php_open_tag} }) {php_close_tag}
                               {php_open_tag} is_allowed('<?= $table_name; ?>_update', function() use ($<?= $table_name; ?>){{php_close_tag}
                               <a href="{php_open_tag_echo} site_url('administrator/<?= $table_name; ?>/edit/' . ${table_name}->{primary_key}); {php_close_tag}" class="label-default"><i class="fa fa-edit "></i> {php_open_tag_echo} cclang('update_button'); {php_close_tag}</a>

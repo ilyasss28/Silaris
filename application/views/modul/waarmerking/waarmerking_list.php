@@ -93,7 +93,7 @@ jQuery(document).ready(domo);
                            <td><?= _ent($waarmerking->penghadap); ?></td> 
                            <td width="200">
                               <?php is_allowed('waarmerking_view', function() use ($waarmerking){?>
-                              <a href="<?= site_url('waarmerking/view/' . $waarmerking->id_waarmerking); ?>" title="Lihat" class="label-default"><i class="fa fa-newspaper-o"></i> 
+                              <a href="<?= site_url('waarmerking/view/' . $waarmerking->id_waarmerking); ?>" title="Lihat" class="label-default"><i class="fa fa-newspaper-o"></i></a>
                               <?php }) ?>
                               <?php is_allowed('waarmerking_update', function() use ($waarmerking){?>
                               <a href="<?= site_url('waarmerking/edit/' . $waarmerking->id_waarmerking); ?>" title="Ubah" class="label-default"><i class="fa fa-edit "></i> </a>

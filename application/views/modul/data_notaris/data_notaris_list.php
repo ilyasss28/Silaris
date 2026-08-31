@@ -120,7 +120,7 @@ jQuery(document).ready(domo);
                            <td><?= _ent($data_notaris->long); ?></td> 
                            <td width="200">
                               <?php is_allowed('data_notaris_view', function() use ($data_notaris){?>
-                              <a href="<?= site_url('data_notaris/view/' . $data_notaris->id_notaris); ?>" title="Lihat" class="label-default"><i class="fa fa-newspaper-o"></i> 
+                              <a href="<?= site_url('data_notaris/view/' . $data_notaris->id_notaris); ?>" title="Lihat" class="label-default"><i class="fa fa-newspaper-o"></i></a>
                               <?php }) ?>
                               <?php is_allowed('data_notaris_update', function() use ($data_notaris){?>
                               <a href="<?= site_url('data_notaris/edit/' . $data_notaris->id_notaris); ?>" title="Ubah" class="label-default"><i class="fa fa-edit "></i> </a>

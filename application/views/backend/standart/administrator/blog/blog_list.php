@@ -118,7 +118,7 @@ jQuery(document).ready(domo);
                            <td><?= _ent($blog->created_at); ?></td>
                            <td width="200">
                               <?php is_allowed('blog_view', function() use ($blog){?>
-                              <a href="<?= site_url('administrator/blog/view/' . $blog->id); ?>" class="label-default"><i class="fa fa-newspaper-o"></i> <?= cclang('view_button'); ?>
+                              <a href="<?= site_url('administrator/blog/view/' . $blog->id); ?>" class="label-default"><i class="fa fa-newspaper-o"></i> <?= cclang('view_button'); ?></a>
                               <?php }) ?>
                               <?php is_allowed('blog_update', function() use ($blog){?>
                               <a href="<?= site_url('administrator/blog/edit/' . $blog->id); ?>" class="label-default"><i class="fa fa-edit "></i> <?= cclang('update_button'); ?></a>

@@ -78,6 +78,9 @@ class Aauth {
      */
     public $aauth_db;
 
+	/** Permission results cached for the lifetime of the current request. */
+	protected $allowed_cache = array();
+
 	########################
 	# Base Functions
 	########################
@@ -1621,9 +1624,14 @@ class Aauth {
 			$user_id = $this->CI->session->userdata('id');
 		}
 
+		$cache_key = (string) $user_id . '|' . (string) $perm_par;
+		if (array_key_exists($cache_key, $this->allowed_cache)) {
+			return $this->allowed_cache[$cache_key];
+		}
+
 		if($this->is_admin($user_id))
 		{
-			return true;
+			return $this->allowed_cache[$cache_key] = true;
 		}
 
 		$perm_id = $this->get_perm_id($perm_par);
@@ -1633,10 +1641,10 @@ class Aauth {
 		$query = $this->aauth_db->get( $this->config_vars['perm_to_user'] );
 
 		if( $query->num_rows() > 0){
-		    return TRUE;
+		    return $this->allowed_cache[$cache_key] = TRUE;
 		} else {
 			if( $user_id===FALSE){
-				return $this->is_group_allowed($perm_id);
+				return $this->allowed_cache[$cache_key] = $this->is_group_allowed($perm_id);
 			} else {
 				$g_allowed=FALSE;
 				foreach( $this->get_user_groups($user_id) as $group ){
@@ -1644,7 +1652,7 @@ class Aauth {
 						$g_allowed=TRUE;
 					}
 				}
-				return $g_allowed;
+				return $this->allowed_cache[$cache_key] = $g_allowed;
 			}
 	    }
 	}

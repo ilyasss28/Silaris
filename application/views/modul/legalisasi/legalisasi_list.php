@@ -93,7 +93,7 @@ jQuery(document).ready(domo);
                            <td><?= _ent($legalisasi->penghadap); ?></td> 
                            <td width="200">
                               <?php is_allowed('legalisasi_view', function() use ($legalisasi){?>
-                              <a href="<?= site_url('legalisasi/view/' . $legalisasi->id_legalisasi); ?>" title="Lihat" class="label-default"><i class="fa fa-newspaper-o"></i> 
+                              <a href="<?= site_url('legalisasi/view/' . $legalisasi->id_legalisasi); ?>" title="Lihat" class="label-default"><i class="fa fa-newspaper-o"></i></a>
                               <?php }) ?>
                               <?php is_allowed('legalisasi_update', function() use ($legalisasi){?>
                               <a href="<?= site_url('legalisasi/edit/' . $legalisasi->id_legalisasi); ?>" title="Ubah" class="label-default"><i class="fa fa-edit "></i> </a>

@@ -326,6 +326,7 @@ class User extends Admin
 		if (!$this->data['user']) {
 			show_404();
 		}
+		$this->data['region_name'] = $this->model_user->get_region_name($this->data['user']->kd_wilayah);
 		$this->data['groups'] = $this->aauth->get_user_groups((int) $id);
 
 		$this->template->title('Detail Profil Notaris');
@@ -347,6 +348,9 @@ class User extends Admin
 
 		$id_user = (int) $this->aauth->get_user()->id;
 		$this->data['user'] = $this->model_user->find($id_user);
+		$this->data['region_name'] = $this->data['user']
+			? $this->model_user->get_region_name($this->data['user']->kd_wilayah)
+			: null;
 		$this->data['groups'] = $this->aauth->get_user_groups($id_user);
 
 		$this->template->title('Profil Saya');

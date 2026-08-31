@@ -87,7 +87,7 @@ jQuery(document).ready(domo);
                            <td><?= _ent($wil->nama_wilayah); ?></td> 
                            <td width="200">
                               <?php is_allowed('wil_view', function() use ($wil){?>
-                              <a href="<?= site_url('wil/view/' . $wil->id); ?>" title="Lihat" class="label-default"><i class="fa fa-newspaper-o"></i> 
+                              <a href="<?= site_url('wil/view/' . $wil->id); ?>" title="Lihat" class="label-default"><i class="fa fa-newspaper-o"></i></a>
                               <?php }) ?>
                               <?php is_allowed('wil_update', function() use ($wil){?>
                               <a href="<?= site_url('wil/edit/' . $wil->id); ?>" title="Ubah" class="label-default"><i class="fa fa-edit "></i> </a>

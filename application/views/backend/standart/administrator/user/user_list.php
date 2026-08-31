@@ -64,7 +64,7 @@ jQuery(document).ready(domo);
                   <form name="form_user" id="form_user" action="<?= base_url('administrator/user/index'); ?>">
                   
                   <div class="table-responsive"> 
-                  <table class="table table-bordered table-striped dataTable">
+                  <table id="admin-user-table" class="table table-bordered table-striped dataTable admin-user-table" data-table-kind="users">
                      <thead>
                         <tr class="">
                            <th>

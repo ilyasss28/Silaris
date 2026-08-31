@@ -94,6 +94,47 @@ class Model_user extends MY_Model {
 		return $result_group_user;
 	}
 
+	/**
+	 * Resolve the stored region code to the human-readable region name.
+	 * The `wilayah` table is the same reference used by user add/edit forms.
+	 */
+	public function get_region_name($region_code = null)
+	{
+		$region_code = trim((string) $region_code);
+		if ($region_code === '') {
+			return null;
+		}
+
+		$region = null;
+		if ($this->db->table_exists('wilayah')) {
+			$region = $this->db
+				->select('nama')
+				->limit(1)
+				->get_where('wilayah', ['kd_wilayah' => $region_code])
+				->row();
+		}
+
+		if ($region && trim((string) $region->nama) !== '') {
+			return trim((string) $region->nama);
+		}
+
+		// Compatibility fallback for older installations that only populated
+		// the generated `wil` reference table.
+		if ($this->db->table_exists('wil')) {
+			$legacy_region = $this->db
+				->select('nama_wilayah')
+				->limit(1)
+				->get_where('wil', ['kd_wilayah' => $region_code])
+				->row();
+
+			if ($legacy_region && trim((string) $legacy_region->nama_wilayah) !== '') {
+				return ucwords(strtolower(trim((string) $legacy_region->nama_wilayah)));
+			}
+		}
+
+		return null;
+	}
+
 
 	public function get_user_oauth($email = null, $provider = null)
 	{

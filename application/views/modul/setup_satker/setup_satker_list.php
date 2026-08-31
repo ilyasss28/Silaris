@@ -85,7 +85,7 @@ jQuery(document).ready(domo);
                            <td><?= _ent($setup_satker->nama_satker); ?></td> 
                            <td width="200">
                               <?php is_allowed('setup_satker_view', function() use ($setup_satker){?>
-                              <a href="<?= site_url('setup_satker/view/' . $setup_satker->id_satker); ?>" title="Lihat" class="label-default"><i class="fa fa-newspaper-o"></i> 
+                              <a href="<?= site_url('setup_satker/view/' . $setup_satker->id_satker); ?>" title="Lihat" class="label-default"><i class="fa fa-newspaper-o"></i></a>
                               <?php }) ?>
                               <?php is_allowed('setup_satker_update', function() use ($setup_satker){?>
                               <a href="<?= site_url('setup_satker/edit/' . $setup_satker->id_satker); ?>" title="Ubah" class="label-default"><i class="fa fa-edit "></i> </a>

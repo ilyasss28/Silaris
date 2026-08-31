@@ -111,7 +111,7 @@
         <ul class="nav sidebar-menu flex-column" data-lte-toggle="treeview" data-accordion="false">
           <!-- DASHBOARD MENU -->
           <li class="nav-item">
-            <a href="<?= site_url('administrator/dashboard'); ?>" class="nav-link <?= ($this->uri->segment(2) == 'dashboard' || $this->uri->segment(2) == '') ? 'active' : ''; ?>">
+            <a href="<?= site_url('administrator/dashboard'); ?>" class="nav-link <?= ($this->uri->segment(1) == 'administrator' && ($this->uri->segment(2) == 'dashboard' || $this->uri->segment(2) == '')) ? 'active' : ''; ?>">
               <i class="nav-icon fa fa-th-large"></i>
               <p>Dashboard</p>
             </a>

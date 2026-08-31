@@ -4,6 +4,8 @@ $profile_title = $is_own_profile ? 'Profil Saya' : 'Detail Profil Notaris';
 $profile_description = $is_own_profile
   ? 'Kelola identitas, wilayah, dan keamanan akun yang sedang digunakan.'
   : 'Informasi akun notaris yang dipilih dari halaman manajemen pengguna.';
+$region_name = trim((string) (isset($region_name) ? $region_name : ''));
+$region_display = $region_name !== '' ? $region_name : '-';
 $avatar_name = !empty($user->avatar) ? basename($user->avatar) : 'default.png';
 $avatar_path = FCPATH . 'uploads/user/' . $avatar_name;
 $avatar_url = BASE_URL . 'uploads/user/' . (is_file($avatar_path) ? $avatar_name : 'default.png');
@@ -55,8 +57,8 @@ $display_date = function ($value) {
 
         <div class="profile-identity-meta">
           <span><i class="fa fa-envelope-o"></i> <?= _ent($user->email); ?></span>
-          <?php if (!empty($user->kd_wilayah)): ?>
-            <span><i class="fa fa-map-marker"></i> Wilayah <?= _ent($user->kd_wilayah); ?></span>
+          <?php if ($region_name !== ''): ?>
+            <span><i class="fa fa-map-marker"></i> <?= _ent($region_name); ?></span>
           <?php endif; ?>
         </div>
 
@@ -84,7 +86,7 @@ $display_date = function ($value) {
             <div><dt>Nama Lengkap</dt><dd><?= _ent(format_person_name($user->full_name)); ?></dd></div>
             <div><dt>Username</dt><dd><?= _ent($user->username); ?></dd></div>
             <div><dt>Email</dt><dd><?= _ent($user->email); ?></dd></div>
-            <div><dt>Kode Wilayah</dt><dd><?= !empty($user->kd_wilayah) ? _ent($user->kd_wilayah) : '-'; ?></dd></div>
+            <div><dt>Wilayah</dt><dd><?= _ent($region_display); ?></dd></div>
           </dl>
         </section>
 

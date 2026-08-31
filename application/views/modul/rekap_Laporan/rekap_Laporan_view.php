@@ -79,7 +79,7 @@ jQuery(document).ready(domo);
                               </a>
                               <?php else: ?>
                               <label>
-                                <a href="<?= BASE_URL . 'administrator/file/download/rekap_Laporan/' . $rekap_Laporan->Laporan; ?>">
+                                <a href="<?= BASE_URL . 'uploads/rekap_Laporan/' . rawurlencode($rekap_Laporan->Laporan); ?>" download>
                                  <img src="<?= get_icon_file($rekap_Laporan->Laporan); ?>" class="image-responsive" alt="image rekap_Laporan" title="Laporan <?= $rekap_Laporan->Laporan; ?>" width="40px"> 
                                <?= $rekap_Laporan->Laporan ?>
                                </a>

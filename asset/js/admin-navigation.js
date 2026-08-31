@@ -54,30 +54,65 @@
   }
 
   function normalizePath(path) {
-    return path.replace(/\/+$/, '') || '/';
+    var normalized = (path || '/').replace(/\/{2,}/g, '/').replace(/\/+$/, '') || '/';
+    return normalized.toLowerCase();
+  }
+
+  function sidebarTargetPaths(url) {
+    var targetPath = normalizePath(url.pathname);
+    var paths = [targetPath];
+
+    // Profil akun memakai controller tersendiri, tetapi secara navigasi tetap
+    // berada di dalam manajemen pengguna.
+    if (/^\/administrator\/profile(?:\/|$)/.test(targetPath)) {
+      paths.push('/administrator/user');
+    }
+
+    return paths;
   }
 
   function updateSidebar(url) {
-    var targetPath = normalizePath(url.pathname);
+    var targetPaths = sidebarTargetPaths(url);
     var links = Array.from(document.querySelectorAll('.sidebar-menu a.nav-link[href]'));
     var bestMatch = null;
 
+    document.querySelectorAll('.sidebar-menu .nav-item').forEach(function (item) {
+      item.classList.remove('active', 'menu-open');
+    });
+
     links.forEach(function (link) {
       link.classList.remove('active');
-      link.closest('.nav-item')?.classList.remove('menu-open');
+      link.removeAttribute('aria-current');
 
-      var linkUrl = new URL(link.href, window.location.href);
+      var rawHref = (link.getAttribute('href') || '').trim();
+      if (!rawHref || rawHref === '#' || /^javascript:/i.test(rawHref)) return;
+
+      var linkUrl;
+      try {
+        linkUrl = new URL(link.href, window.location.href);
+      } catch (error) {
+        return;
+      }
       var linkPath = normalizePath(linkUrl.pathname);
-      var matches = targetPath === linkPath || (linkPath !== '/' && targetPath.indexOf(linkPath + '/') === 0);
+      if (linkUrl.origin !== window.location.origin || linkPath === '/') return;
 
-      if (matches && (!bestMatch || linkPath.length > bestMatch.path.length)) {
-        bestMatch = { link: link, path: linkPath };
+      var exact = targetPaths.some(function (targetPath) {
+        return targetPath === linkPath;
+      });
+      var matches = exact || targetPaths.some(function (targetPath) {
+        return targetPath.indexOf(linkPath + '/') === 0;
+      });
+      var score = (exact ? 10000 : 0) + linkPath.length;
+
+      if (matches && (!bestMatch || score > bestMatch.score)) {
+        bestMatch = { link: link, path: linkPath, score: score };
       }
     });
 
     if (!bestMatch) return;
 
     bestMatch.link.classList.add('active');
+    bestMatch.link.setAttribute('aria-current', 'page');
     var parent = bestMatch.link.closest('.nav-treeview');
     while (parent) {
       var item = parent.closest('.nav-item');
@@ -212,6 +247,11 @@
       setLoading(false);
     }
   }
+
+  // Server-rendered module URLs such as /Laporan do not live below the
+  // /administrator prefix. Synchronize the menu on the first load as well as
+  // after partial navigation so Dashboard is never highlighted by mistake.
+  updateSidebar(new URL(window.location.href));
 
   document.addEventListener('click', function (event) {
     var anchor = event.target.closest('a[href]');

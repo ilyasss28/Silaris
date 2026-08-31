@@ -90,7 +90,10 @@ jQuery(document).ready(domo);
                            <td><?= _ent($rekap_waarmerking->penghadap); ?></td> 
                            <td width="200">
                               <?php is_allowed('rekap_waarmerking_view', function() use ($rekap_waarmerking){?>
-                              <a href="<?= site_url('rekap_waarmerking/view/' . $rekap_waarmerking->id_waarmerking); ?>" title="Lihat" class="label-default"><i class="fa fa-newspaper-o"></i> 
+                              <a href="<?= site_url('rekap_waarmerking/view/' . $rekap_waarmerking->id_waarmerking); ?>" title="Lihat" class="label-default"><i class="fa fa-newspaper-o"></i></a>
+                              <?php }) ?>
+                              <?php is_allowed('rekap_waarmerking_update', function() use ($rekap_waarmerking){?>
+                              <a href="<?= site_url('rekap_waarmerking/edit/' . $rekap_waarmerking->id_waarmerking); ?>" title="Edit" class="label-default"><i class="fa fa-edit"></i></a>
                               <?php }) ?>
                               <?php is_allowed('rekap_waarmerking_delete', function() use ($rekap_waarmerking){?>
                               <a href="javascript:void(0);" data-href="<?= site_url('rekap_waarmerking/delete/' . $rekap_waarmerking->id_waarmerking); ?>" title="Hapus" class="label-default remove-data"><i class="fa fa-close" style="color: red"></i> </a>

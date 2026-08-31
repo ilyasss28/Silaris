@@ -87,7 +87,7 @@ jQuery(document).ready(domo);
                            <td><?= _ent($group->definition); ?></td>
                            <td width="200">
                               <?php is_allowed('group_view', function() use ($group){?>
-                              <a href="<?= site_url('administrator/group/view/' . $group->id); ?>" class="label-default"><i class="fa fa-newspaper-o"></i> <?= cclang('view_button'); ?>
+                              <a href="<?= site_url('administrator/group/view/' . $group->id); ?>" class="label-default"><i class="fa fa-newspaper-o"></i> <?= cclang('view_button'); ?></a>
                               <?php }) ?>
 
                               <?php is_allowed('group_update', function() use ($group){?>

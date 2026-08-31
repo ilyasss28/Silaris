@@ -93,7 +93,7 @@ jQuery(document).ready(domo);
                            <td><?= _ent($rekap_daftar_proses->penghadap); ?></td> 
                            <td width="200">
                               <?php is_allowed('rekap_daftar_proses_view', function() use ($rekap_daftar_proses){?>
-                              <a href="<?= site_url('rekap_daftar_proses/view/' . $rekap_daftar_proses->id_daftar_proses); ?>" title="Lihat" class="label-default"><i class="fa fa-newspaper-o"></i> 
+                              <a href="<?= site_url('rekap_daftar_proses/view/' . $rekap_daftar_proses->id_daftar_proses); ?>" title="Lihat" class="label-default"><i class="fa fa-newspaper-o"></i></a>
                               <?php }) ?>
                               <?php is_allowed('rekap_daftar_proses_update', function() use ($rekap_daftar_proses){?>
                               <a href="<?= site_url('rekap_daftar_proses/edit/' . $rekap_daftar_proses->id_daftar_proses); ?>" title="Ubah" class="label-default"><i class="fa fa-edit "></i> </a>

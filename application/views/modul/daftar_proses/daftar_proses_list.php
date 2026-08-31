@@ -93,7 +93,7 @@ jQuery(document).ready(domo);
                            <td><?= _ent($daftar_proses->penghadap); ?></td> 
                            <td width="200">
                               <?php is_allowed('daftar_proses_view', function() use ($daftar_proses){?>
-                              <a href="<?= site_url('daftar_proses/view/' . $daftar_proses->id_daftar_proses); ?>" title="Lihat" class="label-default"><i class="fa fa-newspaper-o"></i> 
+                              <a href="<?= site_url('daftar_proses/view/' . $daftar_proses->id_daftar_proses); ?>" title="Lihat" class="label-default"><i class="fa fa-newspaper-o"></i></a>
                               <?php }) ?>
                               <?php is_allowed('daftar_proses_update', function() use ($daftar_proses){?>
                               <a href="<?= site_url('daftar_proses/edit/' . $daftar_proses->id_daftar_proses); ?>" title="Ubah" class="label-default"><i class="fa fa-edit "></i> </a>

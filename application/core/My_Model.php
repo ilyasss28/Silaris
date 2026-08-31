@@ -90,6 +90,44 @@ class MY_Model extends CI_Model {
         return mysqli_real_escape_string($this->db->conn_id, $input);
     }
 
+    /**
+     * Count filtered rows without materializing the complete result set.
+     */
+    protected function count_search_results($table, array $fields, $q = null, $field = null, array $where = [])
+    {
+        $this->apply_search_conditions($table, $fields, $q, $field, $where);
+
+        return $this->db->count_all_results($table);
+    }
+
+    /**
+     * Apply the same escaped search and ownership scope to list and count
+     * queries so server-side tables never report rows they cannot render.
+     */
+    protected function apply_search_conditions($table, array $fields, $q = null, $field = null, array $where = [])
+    {
+        foreach ($where as $column => $value) {
+            $this->db->where($column, $value);
+        }
+
+        $q = trim((string) $q);
+        if ($q !== '') {
+            $field = in_array($field, $fields, true) ? $field : null;
+            $this->db->group_start();
+
+            if ($field !== null) {
+                $this->db->like($table . '.' . $field, $q);
+            } else {
+                foreach ($fields as $index => $search_field) {
+                    $method = $index === 0 ? 'like' : 'or_like';
+                    $this->db->{$method}($table . '.' . $search_field, $q);
+                }
+            }
+
+            $this->db->group_end();
+        }
+    }
+
     public function export($table, $subject = 'file')
     {
         $this->load->library('excel');

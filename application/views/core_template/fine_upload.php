@@ -2,7 +2,7 @@
 <!-- Fine Uploader Gallery template
   ====================================================================== -->
   <script type="text/template" id="qq-template-gallery">
-    <div class="qq-uploader-selector qq-uploader qq-gallery " qq-drop-area-text="Drop files here">
+    <div class="qq-uploader-selector qq-uploader qq-gallery " qq-drop-area-text="Letakkan file di sini">
       <div class="qq-total-progress-bar-container-selector qq-total-progress-bar-container">
         <div role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100" class="qq-total-progress-bar-selector qq-progress-bar qq-total-progress-bar"></div>
       </div>
@@ -10,10 +10,10 @@
         <span class="qq-upload-drop-area-text-selector"></span>
       </div>
       <div class="qq-upload-button-selector qq-upload-button">
-        <div> Upload a file</div>
+        <div>Pilih file</div>
       </div>
       <span class="qq-drop-processing-selector qq-drop-processing">
-        <span>Processing dropped files...</span>
+        <span>Memproses file...</span>
         <span class="qq-drop-processing-spinner-selector qq-drop-processing-spinner"></span>
       </span>
       <ul class="qq-upload-list-selector qq-upload-list" role="region" aria-live="polite" aria-relevant="additions removals">
@@ -28,8 +28,8 @@
           </div>
           <button type="button" class="qq-upload-cancel-selector qq-upload-cancel btn btn-flat btn-warning">X</button>
           <button type="button" class="qq-upload-retry-selector qq-upload-retry btn btn-flat">
-            <span class="qq-btn qq-retry-icon" aria-label="Retry"></span>
-            Retry
+            <span class="qq-btn qq-retry-icon" aria-label="Coba lagi"></span>
+            Coba lagi
           </button>
 
           <div class="qq-file-info">
@@ -55,15 +55,15 @@
       <dialog class="qq-alert-dialog-selector">
         <div class="qq-dialog-message-selector"></div>
         <div class="qq-dialog-buttons">
-          <button type="button" class="qq-cancel-button-selector">Close</button>
+          <button type="button" class="qq-cancel-button-selector">Tutup</button>
         </div>
       </dialog>
 
       <dialog class="qq-confirm-dialog-selector">
         <div class="qq-dialog-message-selector"></div>
         <div class="qq-dialog-buttons">
-          <button type="button" class="qq-cancel-button-selector">No</button>
-          <button type="button" class="qq-ok-button-selector">Yes</button>
+          <button type="button" class="qq-cancel-button-selector">Tidak</button>
+          <button type="button" class="qq-ok-button-selector">Ya</button>
         </div>
       </dialog>
 
@@ -71,7 +71,7 @@
         <div class="qq-dialog-message-selector"></div>
         <input type="text">
         <div class="qq-dialog-buttons">
-          <button type="button" class="qq-cancel-button-selector">Cancel</button>
+          <button type="button" class="qq-cancel-button-selector">Batal</button>
           <button type="button" class="qq-ok-button-selector">Ok</button>
         </div>
       </dialog>

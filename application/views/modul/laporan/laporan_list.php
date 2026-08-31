@@ -102,7 +102,7 @@ jQuery(document).ready(domo);
                             
                            <td width="200">
                               <?php is_allowed('laporan_view', function() use ($laporan){?>
-                              <a href="<?= site_url('laporan/view/' . $laporan->id); ?>" title="Lihat" class="label-default"><i class="fa fa-newspaper-o"></i> 
+                              <a href="<?= site_url('laporan/view/' . $laporan->id); ?>" title="Lihat" class="label-default"><i class="fa fa-newspaper-o"></i></a>
                               <?php }) ?>
                               <?php is_allowed('laporan_update', function() use ($laporan){?>
                               <a href="<?= site_url('laporan/edit/' . $laporan->id); ?>" title="Ubah" class="label-default"><i class="fa fa-edit "></i> </a>

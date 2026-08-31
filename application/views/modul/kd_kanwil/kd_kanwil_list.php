@@ -87,7 +87,7 @@ jQuery(document).ready(domo);
                            <td><?= _ent($kd_kanwil->nama_kanwil); ?></td> 
                            <td width="200">
                               <?php is_allowed('kd_kanwil_view', function() use ($kd_kanwil){?>
-                              <a href="<?= site_url('kd_kanwil/view/' . $kd_kanwil->id); ?>" title="Lihat" class="label-default"><i class="fa fa-newspaper-o"></i> 
+                              <a href="<?= site_url('kd_kanwil/view/' . $kd_kanwil->id); ?>" title="Lihat" class="label-default"><i class="fa fa-newspaper-o"></i></a>
                               <?php }) ?>
                               <?php is_allowed('kd_kanwil_update', function() use ($kd_kanwil){?>
                               <a href="<?= site_url('kd_kanwil/edit/' . $kd_kanwil->id); ?>" title="Ubah" class="label-default"><i class="fa fa-edit "></i> </a>

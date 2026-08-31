@@ -97,7 +97,7 @@ jQuery(document).ready(domo);
                            <td><?= _ent($fidusia->no_sertifikat_jaminan_fidusia); ?></td> 
                            <td width="200">
                               <?php is_allowed('fidusia_view', function() use ($fidusia){?>
-                              <a href="<?= site_url('fidusia/view/' . $fidusia->id_fidusia); ?>" title="Lihat" class="label-default"><i class="fa fa-newspaper-o"></i> 
+                              <a href="<?= site_url('fidusia/view/' . $fidusia->id_fidusia); ?>" title="Lihat" class="label-default"><i class="fa fa-newspaper-o"></i></a>
                               <?php }) ?>
                               <?php is_allowed('fidusia_update', function() use ($fidusia){?>
                               <a href="<?= site_url('fidusia/edit/' . $fidusia->id_fidusia); ?>" title="Ubah" class="label-default"><i class="fa fa-edit "></i> </a>

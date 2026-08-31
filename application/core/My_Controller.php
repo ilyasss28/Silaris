@@ -442,14 +442,20 @@ class MY_Controller extends CI_Controller {
 */
 class Admin extends MY_Controller
 {
-    // Tabel daftar admin dikelola oleh DataTables di browser. Muat seluruh
-    // dataset agar pencarian, pagination dan ekspor tidak hanya memproses
-    // sepuluh baris pertama. Controller API tetap memakai limit terpisah.
-    public $limit_page = 1000000;
-
+    // Keep the initial response small. Legacy list pages are progressively
+    // enhanced by DataTables and request subsequent pages from the server.
+    public $limit_page = 25;
     public function __construct()
     {
-        parent::__construct();  
+        parent::__construct();
+
+        if ($this->input->get_request_header('X-SILARIS-DataTable') === 'legacy') {
+            $requested_length = (int) $this->input->get('length');
+            $is_export = $this->input->get_request_header('X-SILARIS-DataTable-Export') === 'legacy';
+            $maximum_length = $is_export ? 2000 : 100;
+            $this->limit_page = $requested_length > 0 ? min($requested_length, $maximum_length) : 25;
+            $this->output->enable_profiler(false);
+        }
         
         if (!installation_complete()) {
             redirect('');
@@ -468,6 +474,13 @@ class Admin extends MY_Controller
     */
     public function render($view = '', $data = array(), $bool = FALSE)
     {
+		if ($this->input->get_request_header('X-SILARIS-DataTable') === 'legacy') {
+			$this->output
+				->set_content_type('text/html')
+				->set_output($this->load->view($view, $data, true));
+			return;
+		}
+
         $legacy_page = preg_match(
             '#^administrator/(?:crud/(?:add|edit)|rest/(?:add|edit|tool)|(?:user|group|permission|blog|menu)/(?:add|edit|edit_profile)|menu_type/add)(?:/|$)#i',
             trim($this->uri->uri_string(), '/')

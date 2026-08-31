@@ -5,7 +5,7 @@ class Model_rekap_Laporan extends MY_Model {
 
 	private $primary_key 	= 'id';
 	private $table_name 	= 'laporan';
-	private $field_search 	= ['username', 'Tanggal_laporan', 'laporan'];
+	private $field_search 	= ['username', 'nama_notaris', 'Tanggal_Laporan', 'Laporan'];
 
 	public function __construct()
 	{
@@ -20,68 +20,56 @@ class Model_rekap_Laporan extends MY_Model {
 
 	public function count_all($q = null, $field = null)
 	{
-		$iterasi = 1;
-        $num = count($this->field_search);
-        $where = NULL;
-        $q = $this->scurity($q);
-		$field = $this->scurity($field);
+		$this->join_avaiable()->filter_avaiable();
+		$this->apply_search($q, $field);
 
-        if (empty($field)) {
-	        foreach ($this->field_search as $field) {
-	            if ($iterasi == 1) {
-	                $where .= "laporan.".$field . " LIKE '%" . $q . "%' ";
-	            } else {
-	                $where .= "OR " . "laporan.".$field . " LIKE '%" . $q . "%' ";
-	            }
-	            $iterasi++;
-	        }
-
-	        $where = '('.$where.')';
-        } else {
-        	$where .= "(" . "laporan.".$field . " LIKE '%" . $q . "%' )";
+		// COUNT(*) is substantially lighter than loading every report row just
+		// to call num_rows(), especially once the report archive grows.
+		return $this->db->count_all_results($this->table_name);
+	}
+	public function get($q = null, $field = null, $limit = 0, $offset = 0, $select_field = [], $order_field = null, $order_direction = 'DESC')
+	{
+        if (is_array($select_field) AND count($select_field)) {
+			$this->db->select($select_field);
+		} else {
+			$this->db->select('laporan.id, laporan.username, laporan.nama_notaris, laporan.Tanggal_Laporan, laporan.Laporan');
         }
 
 		$this->join_avaiable()->filter_avaiable();
-        $this->db->where($where);
+		$this->apply_search($q, $field);
+		$order_field = in_array($order_field, array_merge([$this->primary_key], $this->field_search), true)
+			? $order_field
+			: $this->primary_key;
+		$order_direction = strtoupper($order_direction) === 'ASC' ? 'ASC' : 'DESC';
+        $this->db->limit(max(0, (int) $limit), max(0, (int) $offset));
+		$this->db->order_by('laporan.'.$order_field, $order_direction);
 		$query = $this->db->get($this->table_name);
-
-		return $query->num_rows();
+		return $query->result();
 	}
 
-	public function get($q = null, $field = null, $limit = 0, $offset = 0, $select_field = [])
+	/**
+	 * Apply an escaped, whitelisted search condition to the current query.
+	 */
+	private function apply_search($q = null, $field = null)
 	{
-		$iterasi = 1;
-        $num = count($this->field_search);
-        $where = NULL;
-        $q = $this->scurity($q);
-		$field = $this->scurity($field);
+		$q = trim((string) $q);
+		if ($q === '') {
+			return;
+		}
 
-        if (empty($field)) {
-	        foreach ($this->field_search as $field) {
-	            if ($iterasi == 1) {
-	                $where .= "laporan.".$field . " LIKE '%" . $q . "%' ";
-	            } else {
-	                $where .= "OR " . "laporan.".$field . " LIKE '%" . $q . "%' ";
-	            }
-	            $iterasi++;
-	        }
+		$field = in_array($field, $this->field_search, true) ? $field : null;
+		$this->db->group_start();
 
-	        $where = '('.$where.')';
-        } else {
-        	$where .= "(" . "laporan.".$field . " LIKE '%" . $q . "%' )";
-        }
+		if ($field !== null) {
+			$this->db->like('laporan.'.$field, $q);
+		} else {
+			foreach ($this->field_search as $index => $search_field) {
+				$method = $index === 0 ? 'like' : 'or_like';
+				$this->db->{$method}('laporan.'.$search_field, $q);
+			}
+		}
 
-        if (is_array($select_field) AND count($select_field)) {
-        	$this->db->select($select_field);
-        }
-		
-		$this->join_avaiable()->filter_avaiable();
-        $this->db->where($where);
-        $this->db->limit($limit, $offset);
-        $this->db->order_by('laporan.'.$this->primary_key, "DESC");
-		$query = $this->db->get($this->table_name);
-
-		return $query->result();
+		$this->db->group_end();
 	}
 
     public function join_avaiable() {

@@ -46,9 +46,67 @@ class Rekap_reportorium extends Admin
 		$this->template->title('Rekap Reportorium List');
 		$this->render('modul/rekap_reportorium/rekap_reportorium_list', $this->data);
 	}
-	
-	
-	
+
+	/**
+	 * Show the update form.
+	 */
+	public function edit($id)
+	{
+		$this->is_allowed('rekap_reportorium_update');
+
+		$this->data['rekap_reportorium'] = $this->model_rekap_reportorium->find($id);
+		if (!$this->data['rekap_reportorium']) {
+			show_404();
+		}
+
+		$this->template->title('Edit Rekap Reportorium');
+		$this->render('modul/rekap_reportorium/rekap_reportorium_update', $this->data);
+	}
+
+	/**
+	 * Persist an updated reportorium record.
+	 */
+	public function edit_save($id)
+	{
+		if (!$this->is_allowed('rekap_reportorium_update', false)) {
+			$this->output->set_content_type('application/json')->set_output(json_encode([
+				'success' => false,
+				'message' => cclang('sorry_you_do_not_have_permission_to_access'),
+			]));
+			return;
+		}
+
+		$this->form_validation->set_rules('nomor_akta', 'Nomor Akta', 'trim|required|max_length[10]');
+		$this->form_validation->set_rules('tanggal_akta', 'Tanggal Akta', 'trim|required');
+		$this->form_validation->set_rules('sifat_akta', 'Sifat Akta', 'trim|required|max_length[100]');
+		$this->form_validation->set_rules('penghadap', 'Penghadap', 'trim|required|max_length[100]');
+
+		if (!$this->form_validation->run()) {
+			$this->output->set_content_type('application/json')->set_output(json_encode([
+				'success' => false,
+				'message' => validation_errors(),
+			]));
+			return;
+		}
+
+		$updated = $this->model_rekap_reportorium->change($id, [
+			'nomor_akta' => $this->input->post('nomor_akta', true),
+			'tanggal_akta' => $this->input->post('tanggal_akta', true),
+			'sifat_akta' => $this->input->post('sifat_akta', true),
+			'penghadap' => $this->input->post('penghadap', true),
+		]);
+
+		if ($updated) {
+			set_message(cclang('success_update_data_redirect', []), 'success');
+		}
+
+		$this->output->set_content_type('application/json')->set_output(json_encode([
+			'success' => (bool) $updated,
+			'message' => $updated ? cclang('success_update_data_stay', [anchor('rekap_reportorium', 'Kembali ke daftar')]) : cclang('data_not_change'),
+			'redirect' => site_url('rekap_reportorium'),
+		]));
+	}
+
 	/**
 	* delete Rekap Reportoriums
 	*

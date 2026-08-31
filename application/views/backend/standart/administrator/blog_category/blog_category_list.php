@@ -96,7 +96,7 @@ jQuery(document).ready(domo);
                            <td><?= _ent($blog_category->category_desc); ?></td> 
                            <td width="200">
                               <?php is_allowed('blog_category_view', function() use ($blog_category){?>
-                              <a href="<?= site_url('administrator/blog_category/view/' . $blog_category->category_id); ?>" class="label-default"><i class="fa fa-newspaper-o"></i> <?= cclang('view_button'); ?>
+                              <a href="<?= site_url('administrator/blog_category/view/' . $blog_category->category_id); ?>" class="label-default"><i class="fa fa-newspaper-o"></i> <?= cclang('view_button'); ?></a>
                               <?php }) ?>
                               <?php is_allowed('blog_category_update', function() use ($blog_category){?>
                               <a href="<?= site_url('administrator/blog_category/edit/' . $blog_category->category_id); ?>" class="label-default"><i class="fa fa-edit "></i> <?= cclang('update_button'); ?></a>

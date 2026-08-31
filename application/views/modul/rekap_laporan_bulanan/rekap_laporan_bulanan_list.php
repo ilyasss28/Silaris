@@ -99,7 +99,7 @@ jQuery(document).ready(domo);
                             
                            <td width="200">
                               <?php is_allowed('rekap_laporan_bulanan_view', function() use ($rekap_laporan_bulanan){?>
-                              <a href="<?= site_url('rekap_laporan_bulanan/view/' . $rekap_laporan_bulanan->id_laporan_bulanan); ?>" title="Lihat" class="label-default"><i class="fa fa-newspaper-o"></i> 
+                              <a href="<?= site_url('rekap_laporan_bulanan/view/' . $rekap_laporan_bulanan->id_laporan_bulanan); ?>" title="Lihat" class="label-default"><i class="fa fa-newspaper-o"></i></a>
                               <?php }) ?>
                               <?php is_allowed('rekap_laporan_bulanan_update', function() use ($rekap_laporan_bulanan){?>
                               <a href="<?= site_url('rekap_laporan_bulanan/edit/' . $rekap_laporan_bulanan->id_laporan_bulanan); ?>" title="Ubah" class="label-default"><i class="fa fa-edit "></i> </a>

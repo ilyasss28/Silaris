@@ -121,7 +121,7 @@ jQuery(document).ready(domo);
                            <?php endforeach; 
                            ?><td width="200">
                               <?php if ($this->input->post('read')) { ?>{php_open_tag} is_allowed('<?= $table_name; ?>_view', function() use ($<?= $table_name; ?>){{php_close_tag}
-                              <a href="{php_open_tag_echo} site_url('<?= $table_name; ?>/view/' . ${table_name}->{primary_key}); {php_close_tag}" title="Lihat" class="label-default"><i class="fa fa-newspaper-o"></i> 
+                              <a href="{php_open_tag_echo} site_url('<?= $table_name; ?>/view/' . ${table_name}->{primary_key}); {php_close_tag}" title="Lihat" class="label-default"><i class="fa fa-newspaper-o"></i></a>
                               {php_open_tag} }) {php_close_tag}
                               <?php } ?><?php if ($this->input->post('update')) { ?>{php_open_tag} is_allowed('<?= $table_name; ?>_update', function() use ($<?= $table_name; ?>){{php_close_tag}
                               <a href="{php_open_tag_echo} site_url('<?= $table_name; ?>/edit/' . ${table_name}->{primary_key}); {php_close_tag}" title="Ubah" class="label-default"><i class="fa fa-edit "></i> </a>

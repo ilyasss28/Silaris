@@ -82,7 +82,7 @@ jQuery(document).ready(domo);
                            <td><?= _ent($rest->table_name); ?></td> 
                            <td width="200">
                               <?php is_allowed('rest_view', function() use ($rest){?>
-                              <a href="<?= site_url('administrator/rest/view/' . $rest->id); ?>" class="label-default"><i class="fa fa-newspaper-o"></i> <?= cclang('view_button'); ?>
+                              <a href="<?= site_url('administrator/rest/view/' . $rest->id); ?>" class="label-default"><i class="fa fa-newspaper-o"></i> <?= cclang('view_button'); ?></a>
                               <?php }) ?>
                                <?php is_allowed('rest_update', function() use ($rest){?>
                               <a href="<?= site_url('administrator/rest/edit/' . $rest->id); ?>" class="label-default"><i class="fa fa-edit "></i> <?= cclang('update_button'); ?></a>

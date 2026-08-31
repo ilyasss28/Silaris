@@ -83,7 +83,7 @@ jQuery(document).ready(domo);
                            <td><?= _ent($permission->definition); ?></td>
                            <td width="200">
                               <?php is_allowed('permission_view', function() use ($permission){?>
-                              <a href="<?= site_url('administrator/permission/view/' . $permission->id); ?>" class="label-default"><i class="fa fa-newspaper-o"></i> <?= cclang('view_button'); ?>
+                              <a href="<?= site_url('administrator/permission/view/' . $permission->id); ?>" class="label-default"><i class="fa fa-newspaper-o"></i> <?= cclang('view_button'); ?></a>
                               <?php }) ?>
                               <?php is_allowed('permission_update', function() use ($permission){?>
                               <a href="<?= site_url('administrator/permission/edit/' . $permission->id); ?>" class="label-default"><i class="fa fa-edit "></i> <?= cclang('update_button'); ?></a>

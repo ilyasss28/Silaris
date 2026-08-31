@@ -7,7 +7,7 @@ function domo(){
  
    // Binding keys
    $('*').bind('keydown', 'Ctrl+a', function assets() {
-       window.location.href = BASE_URL + '/Rekap_Laporan/add';
+       window.location.href = BASE_URL + '/rekap-laporan/add';
        return false;
    });
 
@@ -43,15 +43,11 @@ jQuery(document).ready(domo);
                   <!-- Add the bg color to the header using any of the bg-* classes -->
                   <div class="widget-user-header ">
                      <div class="row pull-right">
-                        <?php is_allowed('rekap_Laporan_add', function(){?>
-                        <a class="btn btn-flat btn-success btn_add_new" id="btn_add_new" title="Tambah Data  (Ctrl+a)" href="<?=  site_url('rekap_Laporan/add'); ?>"><i class="fa fa-plus-square-o" ></i> Tambah Data</a>
-                        <?php }) ?>
-                        <?php is_allowed('Laporan_export', function(){?>
-                        <a class="btn btn-flat btn-success" title="<?= cclang('export'); ?> XLS" href="<?= site_url('Laporan/export'); ?>"><i class="fa fa-file-excel-o" ></i></a>
-                        <?php }) ?>
-                        <?php is_allowed('Laporan_export', function(){?>
-                        <a class="btn btn-flat btn-success" title="<?= cclang('export'); ?> PDF" href="<?= site_url('Laporan/export_pdf'); ?>"><i class="fa fa-file-pdf-o" ></i></a>
-                        <?php }) ?>
+                        <?php if ($rekap_permissions['add']): ?>
+                        <a class="btn btn-flat btn-success btn_add_new" id="btn_add_new" title="Tambah Data  (Ctrl+a)" href="<?= site_url('rekap-laporan/add'); ?>"><i class="fa fa-plus-square-o" ></i> Tambah Data</a>
+                        <?php endif; ?>
+                        <a class="btn btn-flat btn-success" title="<?= cclang('export'); ?> XLS" href="<?= site_url('rekap-laporan/export'); ?>"><i class="fa fa-file-excel-o" ></i></a>
+                        <a class="btn btn-flat btn-success" title="<?= cclang('export'); ?> PDF" href="<?= site_url('rekap-laporan/export_pdf'); ?>"><i class="fa fa-file-pdf-o" ></i></a>
                      </div>
                      <div class="widget-user-image">
                         <img class="img-circle" src="<?= BASE_ASSET; ?>/img/list.png" alt="User Avatar">
@@ -61,11 +57,15 @@ jQuery(document).ready(domo);
                      <h5 class="widget-user-desc"><?= cclang('list_all', ['Rekap Laporan']); ?>  <i class="label bg-yellow"><?= $rekap_Laporan_counts; ?>  <?= cclang('items'); ?></i></h5>
                   </div>
 
-                  <form name="form_rekap_Laporan" id="form_rekap_Laporan" action="<?= base_url('rekap_Laporan/index'); ?>">
+                  <form name="form_rekap_Laporan" id="form_rekap_Laporan" action="<?= base_url('rekap-laporan/index'); ?>">
                   
 
                   <div class="table-responsive"> 
-                  <table class="table table-bordered table-striped dataTable">
+                  <table class="table table-bordered table-striped dataTable"
+                     data-ajax-url="<?= site_url('rekap-laporan/datatable'); ?>"
+                     data-server-side="true"
+                     data-export-excel="<?= site_url('rekap-laporan/export'); ?>"
+                     data-export-pdf="<?= site_url('rekap-laporan/export_pdf'); ?>">
                      <thead>
                         <tr class="">
                            <th>
@@ -78,48 +78,6 @@ jQuery(document).ready(domo);
                         </tr>
                      </thead>
                      <tbody id="tbody_rekap_Laporan">
-                     <?php foreach($rekap_Laporans as $rekap_Laporan): ?>
-                        <tr>
-                           <td width="5">
-                              <input type="checkbox" class="flat-red check" name="id[]" value="<?= $rekap_Laporan->id; ?>">
-                           </td>
-                           
-                           <td><?= _ent($rekap_Laporan->nama_notaris); ?></td> 
-                           <td><?= _ent($rekap_Laporan->Tanggal_Laporan); ?></td> 
-                           <td>
-                              <?php if (!empty($rekap_Laporan->Laporan)): ?>
-                                <?php if (is_image($rekap_Laporan->Laporan)): ?>
-                                <a class="fancybox" rel="group" href="<?= BASE_URL . 'uploads/rekap_Laporan/' . $rekap_Laporan->Laporan; ?>">
-                                  <img src="<?= BASE_URL . 'uploads/rekap_Laporan/' . $rekap_Laporan->Laporan; ?>" class="image-responsive" alt="image rekap_Laporan" title="Laporan rekap_Laporan" width="40px">
-                                </a>
-                                <?php else: ?>
-                                  <a href="<?= BASE_URL . 'uploads/laporan/' . $rekap_Laporan->Laporan; ?>">
-                                   <img src="<?= get_icon_file($rekap_Laporan->Laporan); ?>" class="image-responsive image-icon" alt="image rekap_Laporan" title="Laporan <?= $rekap_Laporan->Laporan; ?>" width="40px"> 
-                                 </a>
-                                <?php endif; ?>
-                              <?php endif; ?>
-                           </td>
-                            
-                           <td width="200">
-                              <?php is_allowed('rekap_Laporan_view', function() use ($rekap_Laporan){?>
-                              <a href="<?= site_url('rekap_Laporan/view/' . $rekap_Laporan->id); ?>" title="Lihat" class="label-default"><i class="fa fa-newspaper-o"></i> 
-                              <?php }) ?>
-                              <?php is_allowed('rekap_Laporan_update', function() use ($rekap_Laporan){?>
-                              <a href="<?= site_url('rekap_Laporan/edit/' . $rekap_Laporan->id); ?>" title="Ubah" class="label-default"><i class="fa fa-edit "></i> </a>
-                              <?php }) ?>
-                              <?php is_allowed('rekap_Laporan_delete', function() use ($rekap_Laporan){?>
-                              <a href="javascript:void(0);" data-href="<?= site_url('rekap_Laporan/delete/' . $rekap_Laporan->id); ?>" title="Hapus" class="label-default remove-data"><i class="fa fa-close" style="color: red"></i> </a>
-                               <?php }) ?>
-                           </td>
-                        </tr>
-                      <?php endforeach; ?>
-                      <?php if ($rekap_Laporan_counts == 0) :?>
-                         <tr>
-                           <td colspan="100">
-                           Rekap Laporan data is not available
-                           </td>
-                         </tr>
-                      <?php endif; ?>
                      </tbody>
                   </table>
                   </div>
@@ -142,7 +100,8 @@ jQuery(document).ready(domo);
                      </div>
                      <div class="col-sm-3 padd-left-0 " >
                         <select type="text" class="form-control chosen chosen-select" name="f" id="field" >
-                           <option value=""><?= cclang('all'); ?></option>
+                          <option value=""><?= cclang('all'); ?></option>
+                           <option <?= $this->input->get('f') == 'nama_notaris' ? 'selected' :''; ?> value="nama_notaris">Nama Notaris</option>
                             <option <?= $this->input->get('f') == 'username' ? 'selected' :''; ?> value="username">Username</option>
                            <option <?= $this->input->get('f') == 'Tanggal_Laporan' ? 'selected' :''; ?> value="Tanggal_Laporan">Tanggal Laporan</option>
                            <option <?= $this->input->get('f') == 'Laporan' ? 'selected' :''; ?> value="Laporan">Laporan</option>
@@ -154,7 +113,7 @@ jQuery(document).ready(domo);
                         </button>
                      </div>
                      <div class="col-sm-1 padd-left-0 ">
-                        <a class="btn btn-default btn-flat" name="reset" id="reset" value="Apply" href="<?= base_url('rekap_Laporan');?>" title="<?= cclang('reset_filter'); ?>">
+                        <a class="btn btn-default btn-flat" name="reset" id="reset" value="Apply" href="<?= base_url('rekap-laporan');?>" title="<?= cclang('reset_filter'); ?>">
                         <i class="fa fa-undo"></i>
                         </a>
                      </div>
@@ -178,7 +137,8 @@ jQuery(document).ready(domo);
 <script>
   $(document).ready(function(){
    
-    $('.remove-data').click(function(){
+    $(document).off('click.rekapReports', '#tbody_rekap_Laporan .remove-data');
+    $(document).on('click.rekapReports', '#tbody_rekap_Laporan .remove-data', function(){
 
       var url = $(this).attr('data-href');
 
@@ -222,7 +182,7 @@ jQuery(document).ready(domo);
           },
           function(isConfirm){
             if (isConfirm) {
-               document.location.href = BASE_URL + '/rekap_Laporan/delete?' + serialize_bulk;      
+               document.location.href = BASE_URL + '/rekap-laporan/delete?' + serialize_bulk;
             }
           });
 
@@ -250,9 +210,12 @@ jQuery(document).ready(domo);
 
     //check all
     var checkAll = $('#check_all');
-    var checkboxes = $('input.check');
+    var getCheckboxes = function() {
+      return $('#tbody_rekap_Laporan input.check');
+    };
 
-    checkAll.on('ifChecked ifUnchecked', function(event) {   
+    checkAll.off('.rekapReports').on('ifChecked.rekapReports ifUnchecked.rekapReports', function(event) {
+        var checkboxes = getCheckboxes();
         if (event.type == 'ifChecked') {
             checkboxes.iCheck('check');
         } else {
@@ -260,7 +223,9 @@ jQuery(document).ready(domo);
         }
     });
 
-    checkboxes.on('ifChanged', function(event){
+    $(document).off('ifChanged.rekapReports', '#tbody_rekap_Laporan input.check');
+    $(document).on('ifChanged.rekapReports', '#tbody_rekap_Laporan input.check', function(){
+        var checkboxes = getCheckboxes();
         if(checkboxes.filter(':checked').length == checkboxes.length) {
             checkAll.prop('checked', 'checked');
         } else {

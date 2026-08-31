@@ -93,7 +93,7 @@ jQuery(document).ready(domo);
                            <td><?= _ent($reportorium->penghadap); ?></td> 
                            <td width="200">
                               <?php is_allowed('reportorium_view', function() use ($reportorium){?>
-                              <a href="<?= site_url('reportorium/view/' . $reportorium->id_reportorium); ?>" title="Lihat" class="label-default"><i class="fa fa-newspaper-o"></i> 
+                              <a href="<?= site_url('reportorium/view/' . $reportorium->id_reportorium); ?>" title="Lihat" class="label-default"><i class="fa fa-newspaper-o"></i></a>
                               <?php }) ?>
                               <?php is_allowed('reportorium_update', function() use ($reportorium){?>
                               <a href="<?= site_url('reportorium/edit/' . $reportorium->id_reportorium); ?>" title="Ubah" class="label-default"><i class="fa fa-edit "></i> </a>
