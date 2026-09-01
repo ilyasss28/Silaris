@@ -1,5 +1,15 @@
 Options -Indexes
 
+<IfModule mod_mime.c>
+    AddType application/pdf .pdf
+    AddType application/msword .doc
+    AddType application/vnd.openxmlformats-officedocument.wordprocessingml.document .docx
+    AddType application/vnd.ms-excel .xls
+    AddType application/vnd.openxmlformats-officedocument.spreadsheetml.sheet .xlsx
+    AddType application/vnd.ms-powerpoint .ppt
+    AddType application/vnd.openxmlformats-officedocument.presentationml.presentation .pptx
+</IfModule>
+
 <FilesMatch "\.(?i:php[0-9]?|phtml|phar|phps|asp|aspx|cgi|pl|py|sh|bash)$">
     <IfModule mod_authz_core.c>
         Require all denied
