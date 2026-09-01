@@ -89,11 +89,11 @@ jQuery(document).ready(domo);
                            <td>
                               <?php if (!empty($laporan->Laporan)): ?>
                                 <?php if (is_image($laporan->Laporan)): ?>
-                                <a href="<?= site_url('document/preview/laporan/' . $laporan->id); ?>" title="Pratinjau dokumen">
+                                <a href="<?= site_url('report-preview/preview/laporan/' . $laporan->id); ?>" title="Pratinjau dokumen">
                                   <img src="<?= BASE_URL . 'uploads/laporan/' . $laporan->Laporan; ?>" class="image-responsive" alt="image laporan" title="Laporan laporan" width="40px">
                                 </a>
                                 <?php else: ?>
-                                  <a href="<?= site_url('document/preview/laporan/' . $laporan->id); ?>" title="Pratinjau dokumen">
+                                  <a href="<?= site_url('report-preview/preview/laporan/' . $laporan->id); ?>" title="Pratinjau dokumen">
                                    <img src="<?= get_icon_file($laporan->Laporan); ?>" class="image-responsive image-icon" alt="image laporan" title="Laporan <?= $laporan->Laporan; ?>" width="40px"> 
                                  </a>
                                 <?php endif; ?>

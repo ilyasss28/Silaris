@@ -74,12 +74,12 @@ jQuery(document).ready(domo);
                         <label for="content" class="col-sm-2 control-label"> File Laporan </label>
                         <div class="col-sm-8">
                              <?php if (is_image($laporan_bulanan->file_laporan)): ?>
-                              <a href="<?= site_url('document/preview/laporan-bulanan/' . $laporan_bulanan->id_laporan_bulanan); ?>" title="Pratinjau dokumen">
+                              <a href="<?= site_url('report-preview/preview/laporan-bulanan/' . $laporan_bulanan->id_laporan_bulanan); ?>" title="Pratinjau dokumen">
                                 <img src="<?= BASE_URL . 'uploads/laporan_bulanan/' . $laporan_bulanan->file_laporan; ?>" class="image-responsive" alt="image laporan_bulanan" title="file_laporan laporan_bulanan" width="40px">
                               </a>
                               <?php else: ?>
                               <label>
-                                <a href="<?= site_url('document/preview/laporan-bulanan/' . $laporan_bulanan->id_laporan_bulanan); ?>" title="Pratinjau dokumen">
+                                <a href="<?= site_url('report-preview/preview/laporan-bulanan/' . $laporan_bulanan->id_laporan_bulanan); ?>" title="Pratinjau dokumen">
                                  <img src="<?= get_icon_file($laporan_bulanan->file_laporan); ?>" class="image-responsive" alt="image laporan_bulanan" title="file_laporan <?= $laporan_bulanan->file_laporan; ?>" width="40px"> 
                                <?= _ent($laporan_bulanan->file_laporan); ?>
                                </a>

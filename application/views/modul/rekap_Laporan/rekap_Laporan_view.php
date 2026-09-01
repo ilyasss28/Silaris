@@ -74,12 +74,12 @@ jQuery(document).ready(domo);
                         <label for="content" class="col-sm-2 control-label"> Laporan </label>
                         <div class="col-sm-8">
                              <?php if (is_image($rekap_Laporan->Laporan)): ?>
-                              <a href="<?= site_url('document/preview/rekap-laporan/' . $rekap_Laporan->id); ?>" title="Pratinjau dokumen">
+                              <a href="<?= site_url('report-preview/preview/rekap-laporan/' . $rekap_Laporan->id); ?>" title="Pratinjau dokumen">
                                 <img src="<?= BASE_URL . 'uploads/rekap_Laporan/' . $rekap_Laporan->Laporan; ?>" class="image-responsive" alt="image rekap_Laporan" title="Laporan rekap_Laporan" width="40px">
                               </a>
                               <?php else: ?>
                               <label>
-                                <a href="<?= site_url('document/preview/rekap-laporan/' . $rekap_Laporan->id); ?>" title="Pratinjau dokumen">
+                                <a href="<?= site_url('report-preview/preview/rekap-laporan/' . $rekap_Laporan->id); ?>" title="Pratinjau dokumen">
                                  <img src="<?= get_icon_file($rekap_Laporan->Laporan); ?>" class="image-responsive" alt="image rekap_Laporan" title="Laporan <?= $rekap_Laporan->Laporan; ?>" width="40px"> 
                                <?= _ent($rekap_Laporan->Laporan); ?>
                                </a>

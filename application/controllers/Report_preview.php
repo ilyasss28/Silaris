@@ -8,7 +8,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
  * controller validates the record, permission and resolved filesystem path
  * before a file is rendered or downloaded.
  */
-class Document extends Admin
+class Report_preview extends Admin
 {
     private $allowed_extensions = [
         'pdf', 'doc', 'docx', 'xls', 'xlsx', 'ppt', 'pptx',
@@ -83,7 +83,7 @@ class Document extends Admin
             trim($document['config']['upload_directory'], '/') . '/' . rawurlencode($document['file_name'])
         );
 
-        $file_url = site_url('document/file/' . rawurlencode($type) . '/' . (int) $id);
+        $file_url = site_url('report-preview/file/' . rawurlencode($type) . '/' . (int) $id);
         $office_viewer_url = 'https://view.officeapps.live.com/op/embed.aspx?src=' . rawurlencode($public_url);
 
         $this->data['document'] = [
@@ -94,7 +94,7 @@ class Document extends Admin
             'date' => $this->record_value($document['record'], $document['config']['date_field']),
             'preview_kind' => $preview_kind,
             'file_url' => $file_url,
-            'download_url' => site_url('document/download/' . rawurlencode($type) . '/' . (int) $id),
+            'download_url' => site_url('report-preview/download/' . rawurlencode($type) . '/' . (int) $id),
             'office_viewer_url' => $office_viewer_url,
             'open_url' => $preview_kind === 'office' ? $office_viewer_url : $file_url,
             'back_url' => site_url($document['config']['back_url'] . (int) $id),
