@@ -88,13 +88,14 @@ jQuery(document).ready(domo);
                            <td><?= _ent($laporan_bulanan->tanggal_laporan); ?></td> 
                            <td>
                               <?php if (!empty($laporan_bulanan->file_laporan)): ?>
+                                <?php $document_viewer_url = google_document_viewer_url(BASE_URL . 'uploads/laporan_bulanan/' . rawurlencode($laporan_bulanan->file_laporan)); ?>
                                 <?php if (is_image($laporan_bulanan->file_laporan)): ?>
-                                <a href="<?= site_url('laporan_bulanan/view/' . $laporan_bulanan->id_laporan_bulanan); ?>" title="Lihat isi dokumen">
+                                <a href="<?= _ent($document_viewer_url); ?>" target="_blank" rel="noopener noreferrer" title="Buka di Google Drive">
                                   <img src="<?= BASE_URL . 'uploads/laporan_bulanan/' . $laporan_bulanan->file_laporan; ?>" class="image-responsive" alt="image laporan_bulanan" title="file_laporan laporan_bulanan" width="40px">
                                 </a>
                                 <?php else: ?>
-                                  <a href="<?= site_url('laporan_bulanan/view/' . $laporan_bulanan->id_laporan_bulanan); ?>" title="Lihat isi dokumen">
-                                   <img src="<?= get_icon_file($laporan_bulanan->file_laporan); ?>" class="image-responsive image-icon" alt="image laporan_bulanan" title="file_laporan <?= $laporan_bulanan->file_laporan; ?>" width="40px"> 
+                                  <a href="<?= _ent($document_viewer_url); ?>" target="_blank" rel="noopener noreferrer" title="Buka di Google Drive">
+                                   <img src="<?= get_icon_file($laporan_bulanan->file_laporan); ?>" class="image-responsive image-icon" alt="image laporan_bulanan" title="file_laporan <?= $laporan_bulanan->file_laporan; ?>" width="40px">
                                  </a>
                                 <?php endif; ?>
                               <?php endif; ?>

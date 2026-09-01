@@ -92,16 +92,16 @@ class Rekap_Laporan extends Admin
 
 		foreach ($records as $record) {
 			$file_name = (string) $record->Laporan;
-			$file_url = site_url('rekap-laporan/view/' . (int) $record->id);
 			$file_asset_url = base_url('uploads/rekap_Laporan/' . rawurlencode($file_name));
+			$file_url = google_document_viewer_url($file_asset_url);
 			$file = '';
 
 			if ($file_name !== '') {
 				if (is_image($file_name)) {
-					$file = '<a href="' . html_escape($file_url) . '" title="Pratinjau dokumen">' .
+					$file = '<a href="' . html_escape($file_url) . '" target="_blank" rel="noopener noreferrer" title="Buka di Google Drive">' .
 						'<img src="' . html_escape($file_asset_url) . '" class="image-responsive" alt="Laporan" width="40"></a>';
 				} else {
-					$file = '<a href="' . html_escape($file_url) . '" title="Pratinjau dokumen">' .
+					$file = '<a href="' . html_escape($file_url) . '" target="_blank" rel="noopener noreferrer" title="Buka di Google Drive">' .
 						'<img src="' . html_escape(get_icon_file($file_name)) . '" class="image-responsive image-icon" alt="Laporan" width="40"></a>';
 				}
 			}

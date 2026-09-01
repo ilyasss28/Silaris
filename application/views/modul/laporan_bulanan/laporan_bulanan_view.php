@@ -73,31 +73,15 @@ jQuery(document).ready(domo);
                     <?php
                     $document_name = (string) $laporan_bulanan->file_laporan;
                     $document_url = BASE_URL . 'uploads/laporan_bulanan/' . rawurlencode($document_name);
-                    $document_extension = strtolower(pathinfo($document_name, PATHINFO_EXTENSION));
-                    $office_document = in_array($document_extension, ['doc', 'docx', 'xls', 'xlsx', 'ppt', 'pptx'], true);
-                    $preview_url = $office_document
-                        ? 'https://view.officeapps.live.com/op/embed.aspx?src=' . rawurlencode($document_url)
-                        : $document_url;
+                    $viewer_url = google_document_viewer_url($document_url);
                     ?>
                     <div class="form-group report-document-field">
                         <label class="col-sm-2 control-label">Dokumen Laporan</label>
                         <div class="col-sm-10">
-                            <div class="report-document-preview">
-                                <div class="report-document-toolbar">
-                                    <div class="report-document-name"><i class="fa fa-file-text-o"></i><span><?= _ent($document_name); ?></span></div>
-                                    <div class="report-document-actions">
-                                        <a href="<?= _ent($preview_url); ?>" target="_blank" rel="noopener" class="btn btn-default"><i class="fa fa-external-link"></i> Buka tab baru</a>
-                                        <a href="<?= _ent($document_url); ?>" download class="btn btn-primary"><i class="fa fa-download"></i> Unduh</a>
-                                    </div>
-                                </div>
-                                <?php if (is_image($document_name)): ?>
-                                    <div class="report-document-image"><img src="<?= _ent($document_url); ?>" alt="Pratinjau laporan bulanan"></div>
-                                <?php elseif ($document_extension === 'pdf' || $office_document): ?>
-                                    <iframe src="<?= _ent($preview_url); ?>" title="Pratinjau <?= _ent($document_name); ?>"></iframe>
-                                <?php else: ?>
-                                    <div class="report-document-unavailable"><i class="fa fa-file-o"></i><strong>Pratinjau belum tersedia untuk format ini.</strong><span>Gunakan tombol Unduh untuk membuka dokumen.</span></div>
-                                <?php endif; ?>
-                            </div>
+                            <a href="<?= _ent($viewer_url); ?>" target="_blank" rel="noopener noreferrer" class="report-drive-link" title="Buka dokumen di Google Drive">
+                                <img src="<?= _ent(get_icon_file($document_name)); ?>" alt="Dokumen laporan bulanan">
+                                <span><strong><?= _ent($document_name); ?></strong><small>Buka di Google Drive <i class="fa fa-external-link"></i></small></span>
+                            </a>
                         </div>
                     </div>
                                        

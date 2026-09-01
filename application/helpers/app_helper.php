@@ -1113,3 +1113,19 @@ if(!function_exists('get_all_blog')) {
 		return db_get_all_data('blog', ['status' => 'publish']);
 	}
 }
+
+if (!function_exists('google_document_viewer_url')) {
+	/**
+	 * Build a standalone Google document viewer URL without triggering a download.
+	 * The source document must be reachable publicly over HTTPS.
+	 */
+	function google_document_viewer_url($document_url = '') {
+		$document_url = trim((string) $document_url);
+
+		if ($document_url === '') {
+			return '';
+		}
+
+		return 'https://drive.google.com/viewerng/viewer?url=' . rawurlencode($document_url);
+	}
+}

@@ -88,13 +88,14 @@ jQuery(document).ready(domo);
                            <td><?= _ent($laporan->Tanggal_Laporan); ?></td> 
                            <td>
                               <?php if (!empty($laporan->Laporan)): ?>
+                                <?php $document_viewer_url = google_document_viewer_url(BASE_URL . 'uploads/laporan/' . rawurlencode($laporan->Laporan)); ?>
                                 <?php if (is_image($laporan->Laporan)): ?>
-                                <a href="<?= site_url('laporan/view/' . $laporan->id); ?>" title="Lihat isi dokumen">
+                                <a href="<?= _ent($document_viewer_url); ?>" target="_blank" rel="noopener noreferrer" title="Buka di Google Drive">
                                   <img src="<?= BASE_URL . 'uploads/laporan/' . $laporan->Laporan; ?>" class="image-responsive" alt="image laporan" title="Laporan laporan" width="40px">
                                 </a>
                                 <?php else: ?>
-                                  <a href="<?= site_url('laporan/view/' . $laporan->id); ?>" title="Lihat isi dokumen">
-                                   <img src="<?= get_icon_file($laporan->Laporan); ?>" class="image-responsive image-icon" alt="image laporan" title="Laporan <?= $laporan->Laporan; ?>" width="40px"> 
+                                  <a href="<?= _ent($document_viewer_url); ?>" target="_blank" rel="noopener noreferrer" title="Buka di Google Drive">
+                                   <img src="<?= get_icon_file($laporan->Laporan); ?>" class="image-responsive image-icon" alt="image laporan" title="Laporan <?= $laporan->Laporan; ?>" width="40px">
                                  </a>
                                 <?php endif; ?>
                               <?php endif; ?>
