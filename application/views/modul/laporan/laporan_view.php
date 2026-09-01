@@ -86,10 +86,13 @@ jQuery(document).ready(domo);
                     <div class="form-group report-document-field">
                         <label class="col-sm-2 control-label">Dokumen Laporan</label>
                         <div class="col-sm-10">
-                            <a href="<?= _ent($viewer_url); ?>" target="_blank" rel="noopener noreferrer" class="report-drive-link" title="Buka dokumen di Google Drive">
-                                <img src="<?= _ent(get_icon_file($document_name)); ?>" alt="Dokumen laporan">
-                                <span><strong><?= _ent($document_name); ?></strong><small>Buka di Google Drive <i class="fa fa-external-link"></i></small></span>
-                            </a>
+                            <div class="report-document-links">
+                                <a href="<?= _ent($viewer_url); ?>" target="_blank" rel="noopener noreferrer" class="report-drive-link" title="Buka dokumen di Google Drive">
+                                    <img src="<?= _ent(get_icon_file($document_name)); ?>" alt="Dokumen laporan">
+                                    <span><strong><?= _ent($document_name); ?></strong><small>Buka di Google Drive <i class="fa fa-external-link"></i></small></span>
+                                </a>
+                                <a href="<?= _ent($document_url); ?>" download="<?= _ent($document_name); ?>" class="report-download-link" title="Unduh dokumen"><i class="fa fa-download"></i> Unduh</a>
+                            </div>
                         </div>
                     </div>
                                       
