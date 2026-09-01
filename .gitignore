@@ -53,7 +53,6 @@ db/tmc_builder.sql
 
 # Local database snapshots and unreferenced working copies.
 backups/
-assets/assets-guest/img/background 1.jpg
 
 ## Sublime Text cache files
 *.tmlanguage.cache
