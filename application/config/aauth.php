@@ -137,9 +137,9 @@ $config_aauth["default"] = array(
  'reset_password_link'            => '/account/reset_password/',
 
  'hash'                           => 'sha256',
- 'use_password_hash'              => false,
- 'password_hash_algo'             => PASSWORD_DEFAULT,
- 'password_hash_options'          => array(),
+ 'use_password_hash'              => true,
+ 'password_hash_algo'             => PASSWORD_BCRYPT,
+ 'password_hash_options'          => array('cost' => 12),
 
  'pm_encryption'                  => false,
  'pm_cleanup_max_age'             => "3 months",

@@ -256,14 +256,7 @@ class Aauth {
 
 		$row = $query->row();
 
-		// if email and pass matches and not banned
-		if ($row) {
-			$password = ($this->config_vars['use_password_hash'] ? $pass : $this->hash_password($pass, $row->id));
-		} else {
-			$password = '';
-		}
-
-		if ( $query->num_rows() != 0 && $this->verify_password($password, $row->pass) ) {
+		if ( $query->num_rows() != 0 && $this->verify_user_password($pass, $row) ) {
 
 			// If email and pass matches
 			// create session
@@ -1197,8 +1190,78 @@ class Aauth {
 		if($this->config_vars['use_password_hash']){
 			return password_verify($password, $hash);
 		}else{
-			return ($password == $hash ? TRUE : FALSE);
+			return hash_equals((string) $hash, (string) $password);
 		}
+	}
+
+	/**
+	 * Verify current bcrypt hashes and historical SHA-256 hashes.
+	 *
+	 * Older Aauth accounts were salted with md5(user_id). During account
+	 * creation Aauth first stored a temporary md5(0) salt and then rewrote it
+	 * with the generated user id. Accounts left between those two writes could
+	 * never log in until an administrator saved their password again.
+	 * Successful legacy logins are upgraded transparently to bcrypt.
+	 */
+	protected function verify_user_password($password, $user) {
+		$stored_hash = isset($user->pass) ? (string) $user->pass : '';
+		$user_id = isset($user->id) ? (int) $user->id : 0;
+		$password_info = password_get_info($stored_hash);
+		$is_modern_hash = !empty($password_info['algo']);
+
+		if ($is_modern_hash) {
+			if (!password_verify($password, $stored_hash)) {
+				return FALSE;
+			}
+
+			if (password_needs_rehash(
+				$stored_hash,
+				$this->config_vars['password_hash_algo'],
+				$this->config_vars['password_hash_options']
+			)) {
+				$this->upgrade_password_hash($user_id, $password);
+			}
+
+			return TRUE;
+		}
+
+		$current_legacy_hash = $this->legacy_password_hash($password, $user_id);
+		$temporary_legacy_hash = $this->legacy_password_hash($password, 0);
+		$valid_legacy_hash = hash_equals($stored_hash, $current_legacy_hash)
+			|| hash_equals($stored_hash, $temporary_legacy_hash);
+
+		if (!$valid_legacy_hash) {
+			return FALSE;
+		}
+
+		$this->upgrade_password_hash($user_id, $password);
+		return TRUE;
+	}
+
+	/** Build the legacy Aauth SHA-256 password hash for compatibility only. */
+	protected function legacy_password_hash($password, $user_id) {
+		$salt = md5((int) $user_id);
+		return hash($this->config_vars['hash'], $salt . $password);
+	}
+
+	/** Upgrade a verified password without making login depend on the write. */
+	protected function upgrade_password_hash($user_id, $password) {
+		if ($user_id <= 0 || !$this->config_vars['use_password_hash']) {
+			return FALSE;
+		}
+
+		$new_hash = password_hash(
+			$password,
+			$this->config_vars['password_hash_algo'],
+			$this->config_vars['password_hash_options']
+		);
+		if ($new_hash === FALSE) {
+			return FALSE;
+		}
+
+		return $this->aauth_db
+			->where('id', $user_id)
+			->update($this->config_vars['users'], array('pass' => $new_hash));
 	}
 
 	########################

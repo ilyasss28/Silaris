@@ -31,7 +31,8 @@ class Auth extends Admin
 
 		$this->form_validation->set_rules('group', 'Group/Role', 'trim|required|in_list[Admin,User,Kanwil,MPD,Pimpinan]');
 		$this->form_validation->set_rules('username', 'Username', 'trim|required');
-		$this->form_validation->set_rules('password', 'Password', 'trim|required');
+		// Passwords are never trimmed: whitespace may be part of an existing password.
+		$this->form_validation->set_rules('password', 'Password', 'required');
 		$this->form_validation->set_rules('captcha', 'Captcha', 'trim|required|callback_valid_captcha');
 
 		if ($this->form_validation->run()) {
@@ -100,10 +101,9 @@ class Auth extends Admin
 	{
 		$data = [];
 
-		$this->form_validation->set_rules('email', 'Email', 'trim|required|valid_email|is_unique[aauth_users.email]');
+		// A password reminder must accept an email that already belongs to a user.
+		$this->form_validation->set_rules('email', 'Email', 'trim|required|valid_email');
 		$this->form_validation->set_rules('captcha', 'Captcha', 'trim|required|callback_valid_captcha');
-
-		$this->form_validation->set_message('is_unique', 'User already used');
 
 		if ($this->form_validation->run()) {
 			//custom your action
