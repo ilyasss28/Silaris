@@ -330,6 +330,8 @@ class Laporan_bulanan extends Admin
 		echo $this->upload_file([
 			'uuid' 		 	=> $uuid,
 			'table_name' 	=> 'laporan_bulanan',
+			'allowed_types' => 'pdf|doc|docx|xls|xlsx|ppt|pptx|jpg|jpeg|png',
+			'max_size'      => 10000,
 		]);
 	}
 

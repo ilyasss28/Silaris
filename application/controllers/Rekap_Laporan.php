@@ -92,15 +92,16 @@ class Rekap_Laporan extends Admin
 
 		foreach ($records as $record) {
 			$file_name = (string) $record->Laporan;
-			$file_url = base_url('uploads/rekap_Laporan/' . rawurlencode($file_name));
+			$file_url = site_url('document/preview/rekap-laporan/' . (int) $record->id);
+			$file_asset_url = base_url('uploads/rekap_Laporan/' . rawurlencode($file_name));
 			$file = '';
 
 			if ($file_name !== '') {
 				if (is_image($file_name)) {
-					$file = '<a class="fancybox" rel="group" href="' . html_escape($file_url) . '">' .
-						'<img src="' . html_escape($file_url) . '" class="image-responsive" alt="Laporan" width="40"></a>';
+					$file = '<a href="' . html_escape($file_url) . '" title="Pratinjau dokumen">' .
+						'<img src="' . html_escape($file_asset_url) . '" class="image-responsive" alt="Laporan" width="40"></a>';
 				} else {
-					$file = '<a href="' . html_escape($file_url) . '" download>' .
+					$file = '<a href="' . html_escape($file_url) . '" title="Pratinjau dokumen">' .
 						'<img src="' . html_escape(get_icon_file($file_name)) . '" class="image-responsive image-icon" alt="Laporan" width="40"></a>';
 				}
 			}
@@ -427,6 +428,8 @@ class Rekap_Laporan extends Admin
 		echo $this->upload_file([
 			'uuid' 		 	=> $uuid,
 			'table_name' 	=> 'laporan',
+			'allowed_types' => 'pdf|doc|docx|xls|xlsx|ppt|pptx|jpg|jpeg|png',
+			'max_size'      => 10000,
 		]);
 	}
 

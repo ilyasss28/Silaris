@@ -89,11 +89,11 @@ jQuery(document).ready(domo);
                            <td>
                               <?php if (!empty($laporan_bulanan->file_laporan)): ?>
                                 <?php if (is_image($laporan_bulanan->file_laporan)): ?>
-                                <a class="fancybox" rel="group" href="<?= BASE_URL . 'uploads/laporan_bulanan/' . $laporan_bulanan->file_laporan; ?>">
+                                <a href="<?= site_url('document/preview/laporan-bulanan/' . $laporan_bulanan->id_laporan_bulanan); ?>" title="Pratinjau dokumen">
                                   <img src="<?= BASE_URL . 'uploads/laporan_bulanan/' . $laporan_bulanan->file_laporan; ?>" class="image-responsive" alt="image laporan_bulanan" title="file_laporan laporan_bulanan" width="40px">
                                 </a>
                                 <?php else: ?>
-                                  <a href="<?= BASE_URL . 'uploads/laporan_bulanan/' . $laporan_bulanan->file_laporan; ?>">
+                                  <a href="<?= site_url('document/preview/laporan-bulanan/' . $laporan_bulanan->id_laporan_bulanan); ?>" title="Pratinjau dokumen">
                                    <img src="<?= get_icon_file($laporan_bulanan->file_laporan); ?>" class="image-responsive image-icon" alt="image laporan_bulanan" title="file_laporan <?= $laporan_bulanan->file_laporan; ?>" width="40px"> 
                                  </a>
                                 <?php endif; ?>

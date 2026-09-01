@@ -65,6 +65,11 @@ $route['kepatuhan'] = 'kepatuhan/index';
 $route['rekap-laporan'] = 'Rekap_Laporan/index';
 $route['rekap-laporan/(.+)'] = 'Rekap_Laporan/$1';
 
+/* Authenticated document preview and explicit download endpoints. */
+$route['document/preview/(:any)/(:num)'] = 'document/preview/$1/$2';
+$route['document/file/(:any)/(:num)'] = 'document/file/$1/$2';
+$route['document/download/(:any)/(:num)'] = 'document/download/$1/$2';
+
 /* Public notary directory. Only known region slugs are accepted. */
 $region_slugs = 'kendari|baubau|wakatobi|muna|mubar|konut|konsel|konkep|konawe|kolut|koltim|kolaka|buton|butur|buteng|busel|bombana';
 $route['daftar'] = 'daftar/index';

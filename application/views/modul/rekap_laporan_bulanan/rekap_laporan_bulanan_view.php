@@ -74,14 +74,14 @@ jQuery(document).ready(domo);
                         <label for="content" class="col-sm-2 control-label"> File Laporan </label>
                         <div class="col-sm-8">
                              <?php if (is_image($rekap_laporan_bulanan->file_laporan)): ?>
-                              <a class="fancybox" rel="group" href="<?= BASE_URL . 'uploads/rekap_laporan_bulanan/' . $rekap_laporan_bulanan->file_laporan; ?>">
+                              <a href="<?= site_url('document/preview/rekap-laporan-bulanan/' . $rekap_laporan_bulanan->id_laporan_bulanan); ?>" title="Pratinjau dokumen">
                                 <img src="<?= BASE_URL . 'uploads/rekap_laporan_bulanan/' . $rekap_laporan_bulanan->file_laporan; ?>" class="image-responsive" alt="image rekap_laporan_bulanan" title="file_laporan rekap_laporan_bulanan" width="40px">
                               </a>
                               <?php else: ?>
                               <label>
-                                <a href="<?= BASE_URL . 'administrator/file/download/rekap_laporan_bulanan/' . $rekap_laporan_bulanan->file_laporan; ?>">
+                                <a href="<?= site_url('document/preview/rekap-laporan-bulanan/' . $rekap_laporan_bulanan->id_laporan_bulanan); ?>" title="Pratinjau dokumen">
                                  <img src="<?= get_icon_file($rekap_laporan_bulanan->file_laporan); ?>" class="image-responsive" alt="image rekap_laporan_bulanan" title="file_laporan <?= $rekap_laporan_bulanan->file_laporan; ?>" width="40px"> 
-                               <?= $rekap_laporan_bulanan->file_laporan ?>
+                               <?= _ent($rekap_laporan_bulanan->file_laporan); ?>
                                </a>
                                </label>
                               <?php endif; ?>
