@@ -285,10 +285,10 @@
       font-size: 12.5px;
       font-weight: 800;
       cursor: pointer;
-      box-shadow: 0 10px 22px rgba(7,6,79,.18);
-      transition: transform .15s ease, background .15s ease, box-shadow .15s ease;
+      box-shadow: none;
+      transition: transform .15s ease, background .15s ease;
     }
-    .login-button:hover { background: #11106a; box-shadow: 0 13px 25px rgba(7,6,79,.24); }
+    .login-button:hover { background: #11106a; box-shadow: none; }
     .login-button:active { transform: translateY(1px); }
     .login-button i { color: var(--yellow); }
     .form-footer { margin: 20px 0 0; color: #98a1b2; font-size: 9.5px; line-height: 1.6; text-align: center; }

@@ -4361,6 +4361,26 @@ input[type="file"].form-control { height: auto; min-height: var(--control-h); pa
   }
 }
 
+/* Keep every admin action flat and consistent; state remains color-driven. */
+.admin-silaris button,
+.admin-silaris button:hover,
+.admin-silaris button:focus,
+.admin-silaris button:active,
+.admin-silaris input[type="button"],
+.admin-silaris input[type="submit"],
+.admin-silaris input[type="reset"],
+.admin-silaris .btn,
+.admin-silaris .btn:hover,
+.admin-silaris .btn:focus,
+.admin-silaris .btn:active,
+.admin-silaris a[class*="btn"],
+.admin-silaris a[class*="btn"]:hover,
+.admin-silaris a[class*="btn"]:focus,
+.admin-silaris a[class*="btn"]:active {
+  box-shadow: none !important;
+  -webkit-box-shadow: none !important;
+}
+
 @media (max-width: 420px) {
   .admin-silaris .table-toolbar .table-toolbar__actions { grid-template-columns: 1fr; }
 }

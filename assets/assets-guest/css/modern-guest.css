@@ -1208,3 +1208,23 @@ body.mobile-nav-active .mobile-nav-overlay {
     overflow: visible;
   }
 }
+
+/* Buttons use borders and color changes for hierarchy, without drop shadows. */
+button,
+button:hover,
+button:focus,
+button:active,
+input[type="button"],
+input[type="submit"],
+input[type="reset"],
+.btn,
+.btn:hover,
+.btn:focus,
+.btn:active,
+a[class*="btn"],
+a[class*="btn"]:hover,
+a[class*="btn"]:focus,
+a[class*="btn"]:active {
+  box-shadow: none !important;
+  -webkit-box-shadow: none !important;
+}
