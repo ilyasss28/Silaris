@@ -6602,3 +6602,125 @@ input[type="file"].form-control { height: auto; min-height: var(--control-h); pa
 .admin-silaris .app-main .content-header {
   display: none !important;
 }
+
+/* Inline report preview: opening a report row leads to its existing detail
+   page, where the document can be reviewed before an explicit download. */
+.admin-silaris .report-document-field {
+  grid-column: 1 / -1 !important;
+  width: 100% !important;
+}
+.admin-silaris .report-document-field > .col-sm-10 {
+  width: 100% !important;
+  padding: 0 !important;
+}
+.admin-silaris .report-document-preview {
+  overflow: hidden;
+  width: 100%;
+  border: 1px solid #dce3ed;
+  border-radius: 10px;
+  background: #eef2f7;
+}
+.admin-silaris .report-document-toolbar {
+  min-height: 66px;
+  padding: 12px 14px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  border-bottom: 1px solid #dce3ed;
+  background: #fff;
+}
+.admin-silaris .report-document-name {
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: #18233e;
+  font-size: 12px;
+  font-weight: 700;
+}
+.admin-silaris .report-document-name i {
+  flex: 0 0 auto;
+  color: #d1a300;
+  font-size: 22px;
+}
+.admin-silaris .report-document-name span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.admin-silaris .report-document-actions {
+  flex: 0 0 auto;
+  display: flex;
+  gap: 8px;
+}
+.admin-silaris .report-document-actions .btn {
+  min-height: 36px !important;
+  padding: 8px 12px !important;
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  border-radius: 7px !important;
+  font-size: 11px !important;
+  font-weight: 700 !important;
+}
+.admin-silaris .report-document-actions .btn-primary {
+  border-color: #080b55 !important;
+  background: #080b55 !important;
+  color: #fff !important;
+}
+.admin-silaris .report-document-preview iframe {
+  display: block;
+  width: 100%;
+  height: min(68vh, 760px);
+  min-height: 520px;
+  border: 0;
+  background: #fff;
+}
+.admin-silaris .report-document-image {
+  max-height: 760px;
+  padding: 18px;
+  overflow: auto;
+  text-align: center;
+}
+.admin-silaris .report-document-image img {
+  max-width: 100%;
+  height: auto;
+  border-radius: 6px;
+  box-shadow: 0 6px 24px rgba(15, 23, 42, .12);
+}
+.admin-silaris .report-document-unavailable {
+  min-height: 260px;
+  padding: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  gap: 7px;
+  background: #fff;
+  color: #748097;
+  text-align: center;
+}
+.admin-silaris .report-document-unavailable i {
+  margin-bottom: 6px;
+  color: #d1a300;
+  font-size: 42px;
+}
+.admin-silaris .report-document-unavailable strong {
+  color: #18233e;
+  font-size: 15px;
+}
+@media (max-width: 767.98px) {
+  .admin-silaris .report-document-toolbar {
+    align-items: stretch;
+    flex-direction: column;
+  }
+  .admin-silaris .report-document-actions .btn {
+    flex: 1;
+    justify-content: center;
+  }
+  .admin-silaris .report-document-preview iframe {
+    height: 62vh;
+    min-height: 420px;
+  }
+}

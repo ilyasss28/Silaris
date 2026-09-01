@@ -92,7 +92,7 @@ class Rekap_Laporan extends Admin
 
 		foreach ($records as $record) {
 			$file_name = (string) $record->Laporan;
-			$file_url = site_url('report-preview/preview/rekap-laporan/' . (int) $record->id);
+			$file_url = site_url('rekap-laporan/view/' . (int) $record->id);
 			$file_asset_url = base_url('uploads/rekap_Laporan/' . rawurlencode($file_name));
 			$file = '';
 
