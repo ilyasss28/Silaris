@@ -7,7 +7,7 @@ class Model_user extends MY_Model {
 	private $primary_key 	= 'id';
 	private $table_name 	= 'aauth_users';
 	private $field_search 	= array('id', 'email', 'username', 'full_name');
-	private $filterable_groups = array('User', 'Kanwil', 'MPD', 'Pimpinan');
+	private $filterable_groups = array('User', 'Kanwil', 'MPD');
 
 	public function __construct()
 	{
@@ -35,12 +35,12 @@ class Model_user extends MY_Model {
 		$this->db->select('aauth_users.*');
 		$this->db->select("(
 			SELECT GROUP_CONCAT(DISTINCT user_groups.name
-				ORDER BY FIELD(user_groups.name, 'Admin', 'User', 'Kanwil', 'MPD', 'Pimpinan')
+				ORDER BY FIELD(user_groups.name, 'Admin', 'User', 'Kanwil', 'MPD')
 				SEPARATOR ', ')
 			FROM aauth_user_to_group AS user_group_links
 			INNER JOIN aauth_groups AS user_groups ON user_groups.id = user_group_links.group_id
 			WHERE user_group_links.user_id = aauth_users.id
-			AND user_groups.name IN ('Admin', 'User', 'Kanwil', 'MPD', 'Pimpinan')
+			AND user_groups.name IN ('Admin', 'User', 'Kanwil', 'MPD')
 		) AS group_names", false);
 		$this->apply_search_conditions($this->table_name, $this->field_search, $q, $field);
 		$this->apply_group_filter($group);
@@ -93,6 +93,109 @@ class Model_user extends MY_Model {
 		}
 
 		return $result_group_user;
+	}
+
+	public function get_mpd_regions($user_id)
+	{
+		if (!$this->db->table_exists('mpd_wilayah')) {
+			return array();
+		}
+
+		$rows = $this->db
+			->select('kode_wilayah')
+			->where('user_id', (int) $user_id)
+			->order_by('kode_wilayah', 'ASC')
+			->get('mpd_wilayah')
+			->result();
+
+		return array_map(function ($row) {
+			return (string) $row->kode_wilayah;
+		}, $rows);
+	}
+
+	public function get_mpd_region_names($user_id)
+	{
+		if (!$this->db->table_exists('mpd_wilayah')) {
+			return array();
+		}
+
+		$rows = $this->db
+			->select('wilayah.nama')
+			->from('mpd_wilayah')
+			->join('wilayah', 'wilayah.kd_wilayah = mpd_wilayah.kode_wilayah', 'inner')
+			->where('mpd_wilayah.user_id', (int) $user_id)
+			->order_by('wilayah.nama', 'ASC')
+			->get()
+			->result();
+
+		return array_map(function ($row) {
+			return (string) $row->nama;
+		}, $rows);
+	}
+
+	public function sync_mpd_regions($user_id, array $region_codes)
+	{
+		if (!$this->db->table_exists('mpd_wilayah')) {
+			return false;
+		}
+
+		$region_codes = array_values(array_unique(array_filter(array_map('trim', $region_codes))));
+		$valid_codes = array();
+		if ($region_codes) {
+			$regions = $this->db
+				->select('kd_wilayah')
+				->where_in('kd_wilayah', $region_codes)
+				->get('wilayah')
+				->result();
+			foreach ($regions as $region) {
+				if ((string) $region->kd_wilayah !== '') {
+					$valid_codes[] = (string) $region->kd_wilayah;
+				}
+			}
+		}
+
+		$this->db->where('user_id', (int) $user_id)->delete('mpd_wilayah');
+		foreach ($valid_codes as $region_code) {
+			$this->db->insert('mpd_wilayah', array(
+				'user_id' => (int) $user_id,
+				'kode_wilayah' => $region_code,
+				'created_at' => date('Y-m-d H:i:s'),
+			));
+		}
+
+		return true;
+	}
+
+	public function validate_mpd_regions(array $region_codes)
+	{
+		if (!$this->db->table_exists('mpd_wilayah')) {
+			return false;
+		}
+
+		$region_codes = array_values(array_unique(array_filter(array_map('trim', $region_codes))));
+		if (!$region_codes) {
+			return false;
+		}
+
+		$valid_count = $this->db
+			->where('kd_wilayah !=', '')
+			->where_in('kd_wilayah', $region_codes)
+			->count_all_results('wilayah');
+
+		return $valid_count === count($region_codes);
+	}
+
+	public function group_ids_include($group_ids, $group_name)
+	{
+		$group_ids = array_values(array_filter(array_map('intval', (array) $group_ids)));
+		if (!$group_ids) {
+			return false;
+		}
+
+		return $this->db
+			->where_in('id', $group_ids)
+			->where('name', (string) $group_name)
+			->count_all_results('aauth_groups') > 0;
 	}
 
 	/**

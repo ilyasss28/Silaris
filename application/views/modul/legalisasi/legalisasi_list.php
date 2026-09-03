@@ -88,7 +88,7 @@ jQuery(document).ready(domo);
                            
                            <td><?= _ent($legalisasi->nama_notaris); ?></td> 
                            <td><?= _ent($legalisasi->nomor_akta); ?></td> 
-                           <td><?= _ent($legalisasi->tanggal_akta); ?></td> 
+                           <td><?= _ent(format_date_id($legalisasi->tanggal_akta)); ?></td> 
                            <td><?= _ent($legalisasi->sifat_akta); ?></td> 
                            <td><?= _ent($legalisasi->penghadap); ?></td> 
                            <td width="200">

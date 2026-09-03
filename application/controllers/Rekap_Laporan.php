@@ -9,14 +9,65 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 *| Rekap Laporan site
 *|
 */
-class Rekap_Laporan extends Admin	
+class Rekap_Laporan extends Admin
 {
-	
+	private $report_upload_path = 'uploads/laporan/';
+	private $legacy_report_upload_path = 'uploads/rekap_Laporan/';
+
 	public function __construct()
 	{
 		parent::__construct();
 
 		$this->load->model('model_rekap_Laporan');
+		$this->load->library('report_access');
+		$this->require_rekap_role();
+	}
+
+	/**
+	 * Rekap is an oversight workspace, never a second personal report list.
+	 * Keep this role boundary independent from potentially stale menu grants.
+	 */
+	private function require_rekap_role()
+	{
+		if (!$this->aauth->is_loggedin()) {
+			return;
+		}
+
+		$allowed_roles = array('Admin', 'Kanwil', 'MPD');
+		$groups = $this->aauth->get_user_groups();
+		foreach ($groups as $group) {
+			if (in_array((string) $group->name, $allowed_roles, true)) {
+				return;
+			}
+		}
+
+		show_error('Rekap Laporan hanya dapat diakses oleh petugas pengawasan.', 403, 'Akses Ditolak');
+	}
+
+	/**
+	 * Resolve the shared report document storage used by Laporan and Rekap.
+	 * Older installations briefly stored Rekap files in a separate directory,
+	 * so retain a read fallback without splitting new documents again.
+	 */
+	private function report_document_path($file_name)
+	{
+		$file_name = basename(str_replace('\\', '/', (string) $file_name));
+		$canonical_path = $this->report_upload_path . $file_name;
+		$legacy_path = $this->legacy_report_upload_path . $file_name;
+
+		if ($file_name !== '' && !is_file(FCPATH . $canonical_path) && is_file(FCPATH . $legacy_path)) {
+			return $legacy_path;
+		}
+
+		return $canonical_path;
+	}
+
+	private function report_document_url($file_name)
+	{
+		$path = $this->report_document_path($file_name);
+		$directory = str_replace('\\', '/', dirname($path));
+
+		return base_url(trim($directory, '/') . '/' . rawurlencode(basename($path)));
 	}
 
 	/**
@@ -33,9 +84,6 @@ class Rekap_Laporan extends Admin
 		// records into the initial HTML made this page unnecessarily large.
 		$this->data['rekap_Laporans'] = [];
 		$this->data['rekap_Laporan_counts'] = $total_rows;
-		$this->data['rekap_permissions'] = [
-			'add' => $this->is_allowed('rekap_Laporan_add', false),
-		];
 
 		$this->data['pagination'] = '';
 
@@ -92,16 +140,16 @@ class Rekap_Laporan extends Admin
 
 		foreach ($records as $record) {
 			$file_name = (string) $record->Laporan;
-			$file_asset_url = base_url('uploads/rekap_Laporan/' . rawurlencode($file_name));
-			$file_url = google_document_viewer_url($file_asset_url);
+			$file_asset_url = $this->report_document_url($file_name);
+			$file_url = document_preview_url($file_asset_url);
 			$file = '';
 
 			if ($file_name !== '') {
 				if (is_image($file_name)) {
-					$file = '<a href="' . html_escape($file_url) . '" target="_blank" rel="noopener noreferrer" title="Buka di Google Drive">' .
+					$file = '<a href="' . html_escape($file_url) . '" target="_blank" rel="noopener noreferrer" title="Buka di tab baru">' .
 						'<img src="' . html_escape($file_asset_url) . '" class="image-responsive" alt="Laporan" width="40"></a>';
 				} else {
-					$file = '<a href="' . html_escape($file_url) . '" target="_blank" rel="noopener noreferrer" title="Buka di Google Drive">' .
+					$file = '<a href="' . html_escape($file_url) . '" target="_blank" rel="noopener noreferrer" title="Buka di tab baru">' .
 						'<img src="' . html_escape(get_icon_file($file_name)) . '" class="image-responsive image-icon" alt="Laporan" width="40"></a>';
 				}
 			}
@@ -120,7 +168,7 @@ class Rekap_Laporan extends Admin
 			$rows[] = [
 				'<input type="checkbox" class="flat-red check" name="id[]" value="' . (int) $record->id . '">',
 				html_escape($record->nama_notaris),
-				html_escape($record->Tanggal_Laporan),
+				html_escape(format_date_id($record->Tanggal_Laporan)),
 				$file,
 				$actions,
 			];
@@ -142,10 +190,11 @@ class Rekap_Laporan extends Admin
 	*/
 	public function add()
 	{
-		$this->is_allowed('rekap_Laporan_add');
-
-		$this->template->title('Rekap Laporan New');
-		$this->render('modul/rekap_Laporan/rekap_Laporan_add', $this->data);
+		show_error(
+			'Laporan baru harus dikirim melalui menu Laporan oleh akun pemiliknya.',
+			405,
+			'Gunakan Menu Laporan'
+		);
 	}
 
 	/**
@@ -155,86 +204,13 @@ class Rekap_Laporan extends Admin
 	*/
 	public function add_save()
 	{
-		if (!$this->is_allowed('rekap_Laporan_add', false)) {
-			echo json_encode([
+		return $this->output
+			->set_status_header(405)
+			->set_content_type('application/json')
+			->set_output(json_encode([
 				'success' => false,
-				'message' => cclang('sorry_you_do_not_have_permission_to_access')
-				]);
-			exit;
-		}
-
-		$this->form_validation->set_rules('Tanggal_Laporan', 'Tanggal Laporan', 'trim|required');
-		$this->form_validation->set_rules('rekap_Laporan_Laporan_name', 'Laporan', 'trim|required|max_length[1000]');
-		
-
-		if ($this->form_validation->run()) {
-			$rekap_Laporan_Laporan_uuid = $this->input->post('rekap_Laporan_Laporan_uuid');
-			$rekap_Laporan_Laporan_name = $this->input->post('rekap_Laporan_Laporan_name');
-		
-			$save_data = [
-				'username' => get_user_data('username'),
-				'nama_notaris' => get_user_data('full_name'),
-				'Tanggal_Laporan' => $this->input->post('Tanggal_Laporan'),
-			];
-
-			if (!is_dir(FCPATH . '/uploads/rekap_Laporan/')) {
-				mkdir(FCPATH . '/uploads/rekap_Laporan/');
-			}
-
-			if (!empty($rekap_Laporan_Laporan_name)) {
-				$rekap_Laporan_Laporan_name_copy = date('YmdHis') . '-' . $rekap_Laporan_Laporan_name;
-
-				rename(FCPATH . 'uploads/tmp/' . $rekap_Laporan_Laporan_uuid . '/' . $rekap_Laporan_Laporan_name, 
-						FCPATH . 'uploads/rekap_Laporan/' . $rekap_Laporan_Laporan_name_copy);
-
-				if (!is_file(FCPATH . '/uploads/rekap_Laporan/' . $rekap_Laporan_Laporan_name_copy)) {
-					echo json_encode([
-						'success' => false,
-						'message' => 'Error uploading file'
-						]);
-					exit;
-				}
-
-				$save_data['Laporan'] = $rekap_Laporan_Laporan_name_copy;
-			}
-		
-			
-			$save_rekap_Laporan = $this->model_rekap_Laporan->store($save_data);
-
-			if ($save_rekap_Laporan) {
-				if ($this->input->post('save_type') == 'stay') {
-					$this->data['success'] = true;
-					$this->data['id'] 	   = $save_rekap_Laporan;
-					$this->data['message'] = cclang('success_save_data_stay', [
-						anchor('rekap_Laporan/edit/' . $save_rekap_Laporan, 'Edit Rekap Laporan'),
-						anchor('rekap_Laporan', ' Go back to list')
-					]);
-				} else {
-					set_message(
-						cclang('success_save_data_redirect', [
-						anchor('rekap_Laporan/edit/' . $save_rekap_Laporan, 'Edit Rekap Laporan')
-					]), 'success');
-
-            		$this->data['success'] = true;
-					$this->data['redirect'] = base_url('rekap_Laporan');
-				}
-			} else {
-				if ($this->input->post('save_type') == 'stay') {
-					$this->data['success'] = false;
-					$this->data['message'] = cclang('data_not_change');
-				} else {
-            		$this->data['success'] = false;
-            		$this->data['message'] = cclang('data_not_change');
-					$this->data['redirect'] = base_url('rekap_Laporan');
-				}
-			}
-
-		} else {
-			$this->data['success'] = false;
-			$this->data['message'] = validation_errors();
-		}
-
-		echo json_encode($this->data);
+				'message' => 'Laporan baru harus dikirim melalui menu Laporan oleh akun pemiliknya.',
+			]));
 	}
 	
 		/**
@@ -269,6 +245,17 @@ class Rekap_Laporan extends Admin
 				]);
 			exit;
 		}
+
+		$current_report = $this->model_rekap_Laporan->find($id);
+		if (!$current_report) {
+			return $this->output
+				->set_status_header(404)
+				->set_content_type('application/json')
+				->set_output(json_encode([
+					'success' => false,
+					'message' => 'Laporan tidak ditemukan.',
+				]));
+		}
 		
 		$this->form_validation->set_rules('Tanggal_Laporan', 'Tanggal Laporan', 'trim|required');
 		$this->form_validation->set_rules('rekap_Laporan_Laporan_name', 'Laporan', 'trim|required|max_length[1000]');
@@ -278,21 +265,20 @@ class Rekap_Laporan extends Admin
 			$rekap_Laporan_Laporan_name = $this->input->post('rekap_Laporan_Laporan_name');
 		
 			$save_data = [
-				'username' => get_user_data('username'),
 				'Tanggal_Laporan' => $this->input->post('Tanggal_Laporan'),
 			];
 
-			if (!is_dir(FCPATH . '/uploads/rekap_Laporan/')) {
-				mkdir(FCPATH . '/uploads/rekap_Laporan/');
+			if (!is_dir(FCPATH . $this->report_upload_path)) {
+				mkdir(FCPATH . $this->report_upload_path, 0755, true);
 			}
 
 			if (!empty($rekap_Laporan_Laporan_uuid)) {
 				$rekap_Laporan_Laporan_name_copy = date('YmdHis') . '-' . $rekap_Laporan_Laporan_name;
 
-				rename(FCPATH . 'uploads/tmp/' . $rekap_Laporan_Laporan_uuid . '/' . $rekap_Laporan_Laporan_name, 
-						FCPATH . 'uploads/rekap_Laporan/' . $rekap_Laporan_Laporan_name_copy);
+				rename(FCPATH . 'uploads/tmp/' . $rekap_Laporan_Laporan_uuid . '/' . $rekap_Laporan_Laporan_name,
+						FCPATH . $this->report_upload_path . $rekap_Laporan_Laporan_name_copy);
 
-				if (!is_file(FCPATH . '/uploads/rekap_Laporan/' . $rekap_Laporan_Laporan_name_copy)) {
+				if (!is_file(FCPATH . $this->report_upload_path . $rekap_Laporan_Laporan_name_copy)) {
 					echo json_encode([
 						'success' => false,
 						'message' => 'Error uploading file'
@@ -383,6 +369,7 @@ class Rekap_Laporan extends Admin
 		if (!$this->data['rekap_Laporan']) {
 			show_404();
 		}
+		$this->data['rekap_document_url'] = $this->report_document_url($this->data['rekap_Laporan']->Laporan);
 
 		$this->template->title('Rekap Laporan Detail');
 		$this->render('modul/rekap_Laporan/rekap_Laporan_view', $this->data);
@@ -398,10 +385,16 @@ class Rekap_Laporan extends Admin
 		$rekap_Laporan = $this->model_rekap_Laporan->find($id);
 
 		if (!empty($rekap_Laporan->Laporan)) {
-			$path = FCPATH . '/uploads/rekap_Laporan/' . $rekap_Laporan->Laporan;
+			$file_name = basename(str_replace('\\', '/', (string) $rekap_Laporan->Laporan));
+			$paths = [
+				FCPATH . $this->report_upload_path . $file_name,
+				FCPATH . $this->legacy_report_upload_path . $file_name,
+			];
 
-			if (is_file($path)) {
-				$delete_file = unlink($path);
+			foreach (array_unique($paths) as $path) {
+				if (is_file($path)) {
+					unlink($path);
+				}
 			}
 		}
 		
@@ -415,7 +408,7 @@ class Rekap_Laporan extends Admin
 	*/
 	public function upload_Laporan_file()
 	{
-		if (!$this->is_allowed('rekap_Laporan_add', false)) {
+		if (!$this->is_allowed('rekap_Laporan_add', false) && !$this->is_allowed('rekap_Laporan_update', false)) {
 			echo json_encode([
 				'success' => false,
 				'message' => cclang('sorry_you_do_not_have_permission_to_access')
@@ -447,6 +440,14 @@ class Rekap_Laporan extends Admin
 			exit;
 		}
 
+		$upload_path = $this->report_upload_path;
+		if (ctype_digit((string) $uuid)) {
+			$rekap_Laporan = $this->model_rekap_Laporan->find($uuid);
+			if ($rekap_Laporan && !empty($rekap_Laporan->Laporan)) {
+				$upload_path = rtrim(str_replace('\\', '/', dirname($this->report_document_path($rekap_Laporan->Laporan))), '/') . '/';
+			}
+		}
+
 		echo $this->delete_file([
             'uuid'              => $uuid, 
             'delete_by'         => $this->input->get('by'), 
@@ -454,7 +455,7 @@ class Rekap_Laporan extends Admin
             'upload_path_tmp'   => './uploads/tmp/',
 			'table_name'        => 'laporan',
             'primary_key'       => 'id',
-            'upload_path'       => 'uploads/rekap_Laporan/'
+			'upload_path'       => $upload_path
         ]);
 	}
 
@@ -474,13 +475,18 @@ class Rekap_Laporan extends Admin
 
 		$rekap_Laporan = $this->model_rekap_Laporan->find($id);
 
+		$upload_path = $this->report_upload_path;
+		if ($rekap_Laporan && !empty($rekap_Laporan->Laporan)) {
+			$upload_path = rtrim(str_replace('\\', '/', dirname($this->report_document_path($rekap_Laporan->Laporan))), '/') . '/';
+		}
+
 		echo $this->get_file([
             'uuid'              => $id, 
             'delete_by'         => 'id', 
             'field_name'        => 'Laporan', 
 			'table_name'        => 'laporan',
             'primary_key'       => 'id',
-            'upload_path'       => 'uploads/rekap_Laporan/',
+			'upload_path'       => $upload_path,
             'delete_endpoint'   => 'rekap_Laporan/delete_Laporan_file'
         ]);
 	}
@@ -495,7 +501,7 @@ class Rekap_Laporan extends Admin
 	{
 		$this->is_allowed('rekap_Laporan_list');
 
-		$this->model_rekap_Laporan->export('laporan', 'rekap_laporan');
+		$this->model_rekap_Laporan->export_scoped('rekap_laporan');
 	}
 
 	/**
@@ -507,7 +513,70 @@ class Rekap_Laporan extends Admin
 	{
 		$this->is_allowed('rekap_Laporan_list');
 
-		$this->model_rekap_Laporan->pdf('laporan', 'Rekap Laporan');
+		$this->model_rekap_Laporan->pdf_scoped('Rekap Laporan');
+	}
+
+	/**
+	 * Download a lightweight inventory that binds every database row to its
+	 * physical document. Include this CSV beside the SQL dump and uploads ZIP
+	 * so a restored backup can be checked without opening files one by one.
+	 */
+	public function backup_manifest()
+	{
+		$this->is_allowed('rekap_Laporan_list');
+		$this->output->enable_profiler(false);
+
+		$file_name = 'manifest-laporan-' . date('Y-m-d-His') . '.csv';
+		header('Content-Type: text/csv; charset=UTF-8');
+		header('Content-Disposition: attachment; filename="' . $file_name . '"');
+		header('Cache-Control: no-store, no-cache, must-revalidate');
+
+		$output = fopen('php://output', 'wb');
+		fwrite($output, "\xEF\xBB\xBF");
+		fputcsv($output, [
+			'id',
+			'username',
+			'nama_notaris',
+			'tanggal_laporan',
+			'nama_file',
+			'path_backup',
+			'status_file',
+			'ukuran_byte',
+			'terakhir_diubah',
+		], ',', '"', '\\');
+
+		$this->report_access->apply_scope($this->db, 'laporan');
+		$query = $this->db
+			->select(
+				"laporan.id, laporan.username, "
+				. "COALESCE(NULLIF(TRIM(laporan.nama_notaris), ''), owner.full_name, laporan.username) AS nama_notaris, "
+				. "laporan.Tanggal_Laporan, laporan.Laporan",
+				false
+			)
+			->join('aauth_users AS owner', 'owner.id = laporan.owner_user_id', 'left')
+			->order_by('laporan.id', 'ASC')
+			->get('laporan');
+
+		foreach ($query->result() as $report) {
+			$relative_path = $this->report_document_path($report->Laporan);
+			$absolute_path = FCPATH . $relative_path;
+			$exists = is_file($absolute_path);
+
+			fputcsv($output, [
+				(int) $report->id,
+				(string) $report->username,
+				(string) $report->nama_notaris,
+				(string) $report->Tanggal_Laporan,
+				basename(str_replace('\\', '/', (string) $report->Laporan)),
+				$relative_path,
+				$exists ? 'ADA' : 'HILANG',
+				$exists ? (int) filesize($absolute_path) : 0,
+				$exists ? date('Y-m-d H:i:s', filemtime($absolute_path)) : '',
+			], ',', '"', '\\');
+		}
+
+		fclose($output);
+		exit;
 	}
 }
 

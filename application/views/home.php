@@ -11,15 +11,19 @@
       <span class="hero-orb hero-orb-2" aria-hidden="true"></span>
       <span class="hero-orb hero-orb-3" aria-hidden="true"></span>
       <div class="container">
-        <div class="row hero-grid">
-          <div class="col-lg-6 hero-copy">
+        <div class="row hero-grid hero-grid-centered">
+          <div class="col-lg-11 col-xl-11 hero-copy hero-copy-centered">
             <span class="hero-badge fade-in-up" style="animation-delay: 0.1s;"><i class="dot"></i> Sistem Pelaporan Notaris <i class="dot"></i></span>
-            <h1 class="hero-title fade-in-up" style="animation-delay: 0.2s;">Kanwil Kemenkum <span class="highlight">Sultra</span></h1>
+            <h1 class="hero-title fade-in-up" style="animation-delay: 0.2s;">
+              <span class="hero-title-line">Kantor Wilayah Kementerian Hukum</span>
+              <span class="highlight">Sulawesi Tenggara</span>
+            </h1>
             <p class="lead fade-in-up" style="animation-delay: 0.3s;">Kanal resmi pelaporan, pemeriksaan, dan pengawasan kenotariatan di wilayah Sulawesi Tenggara.</p>
-          </div>
-          <div class="col-lg-6 hero-media fade-in-up" style="animation-delay: 0.4s;">
-            <span class="hero-media-glow" aria-hidden="true"></span>
-            <img src="<?php echo base_url('assets')?>/assets-guest/img/Model.png" alt="Sistem Pelaporan Notaris - Kanwil Kemenkum Sulawesi Tenggara" class="hero-photo">
+            <a href="<?= site_url('daftar'); ?>" class="hero-primary-action fade-in-up" style="animation-delay: 0.4s;">
+              <i class="icofont-users-alt-4" aria-hidden="true"></i>
+              <span>Lihat Daftar Notaris</span>
+              <i class="icofont-arrow-right" aria-hidden="true"></i>
+            </a>
           </div>
         </div>
       </div>

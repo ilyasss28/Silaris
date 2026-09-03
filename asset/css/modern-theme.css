@@ -439,14 +439,6 @@
   color: var(--ink-500);
 }
 
-.admin-silaris .admin-modern-form .qq-uploader,
-.admin-silaris .admin-modern-form .qq-uploader-selector {
-  min-height: 180px;
-  border: 1px dashed #c5ceda !important;
-  border-radius: 11px;
-  background: #f8f9fc;
-}
-
 .admin-silaris .admin-modern-form .cke,
 .admin-silaris .admin-modern-form .cke_chrome {
   overflow: hidden;
@@ -3669,6 +3661,19 @@ input[type="file"].form-control { height: auto; min-height: var(--control-h); pa
 .admin-silaris .table-striped > tbody > tr:nth-of-type(odd) > * {
   background: #FBFCFE !important;
 }
+.admin-silaris .notaris-name-cell {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.admin-silaris .notaris-name-cell__photo {
+  width: 32px;
+  height: 32px;
+  flex: 0 0 32px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 1px solid var(--border);
+}
 .admin-silaris .table-hover > tbody > tr:hover > * {
   background: #F4F6FA !important;
 }
@@ -4493,6 +4498,160 @@ input[type="file"].form-control { height: auto; min-height: var(--control-h); pa
   border-radius: 7px;
 }
 
+/* File uploads (Fine Uploader gallery template) render as a plain
+   button + filename row everywhere, instead of a tall dropzone with
+   thumbnail cards. */
+.admin-silaris .qq-gallery.qq-uploader-selector,
+.admin-silaris .qq-gallery.qq-uploader {
+  position: relative;
+  min-height: 42px !important;
+  height: 42px !important;
+  max-height: none !important;
+  padding: 0 4px !important;
+  display: flex;
+  flex-wrap: nowrap;
+  align-items: center;
+  gap: 10px;
+  overflow: visible !important;
+  border: 1px solid #D9E0EA !important;
+  border-radius: 8px !important;
+  background: #fff !important;
+}
+.admin-silaris .qq-gallery.qq-uploader:before {
+  content: none !important;
+}
+.admin-silaris .qq-gallery .qq-total-progress-bar-container {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  width: auto;
+  margin: 0;
+}
+.admin-silaris .qq-gallery .qq-upload-drop-area {
+  display: none;
+}
+.admin-silaris .qq-gallery .qq-upload-button {
+  width: auto;
+  height: 34px;
+  min-height: 34px;
+  margin: 0;
+  padding: 0 14px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  float: none;
+  flex: 0 0 auto;
+  border: 0;
+  border-radius: 8px;
+  background: var(--brand);
+  box-shadow: none;
+  color: #fff;
+  font-size: 12px;
+  font-weight: 700;
+}
+.admin-silaris .qq-gallery .qq-upload-button:hover,
+.admin-silaris .qq-gallery .qq-upload-button:focus {
+  background: #171957;
+}
+.admin-silaris .qq-gallery .qq-upload-list {
+  flex: 1 1 auto;
+  min-width: 0;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  max-height: none;
+  overflow: hidden;
+  list-style: none;
+}
+.admin-silaris .qq-gallery .qq-upload-list:empty::after {
+  content: 'Belum ada file dipilih';
+  color: var(--ink-500);
+  font-size: 11.5px;
+}
+.admin-silaris .qq-gallery .qq-upload-list > li {
+  width: 100%;
+  height: 34px;
+  max-width: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: transparent;
+  border: 0;
+  border-radius: 0;
+  box-shadow: none;
+}
+.admin-silaris .qq-gallery .qq-thumbnail-wrapper,
+.admin-silaris .qq-gallery .qq-upload-spinner,
+.admin-silaris .qq-gallery .qq-progress-bar-container,
+.admin-silaris .qq-gallery .qq-upload-status-text,
+.admin-silaris .qq-gallery .qq-upload-size,
+.admin-silaris .qq-gallery .qq-edit-filename-icon,
+.admin-silaris .qq-gallery .qq-upload-cancel,
+.admin-silaris .qq-gallery .qq-upload-retry,
+.admin-silaris .qq-gallery .qq-upload-pause,
+.admin-silaris .qq-gallery .qq-upload-continue {
+  display: none !important;
+}
+.admin-silaris .qq-gallery .qq-file-info {
+  min-width: 0;
+  height: 34px;
+  flex: 1 1 auto;
+  margin: 0;
+  padding: 0 14px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  border-radius: 8px;
+  background: #F3F4F8;
+}
+.admin-silaris .qq-gallery .qq-file-name {
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  overflow: hidden;
+}
+.admin-silaris .qq-gallery .qq-file-name .report-file-icon {
+  flex: 0 0 auto;
+  color: var(--brand);
+  font-size: 15px;
+}
+.admin-silaris .qq-gallery .qq-upload-file {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: var(--ink-800);
+  font-size: 12px;
+  font-weight: 600;
+}
+.admin-silaris .qq-gallery .qq-upload-delete {
+  position: static;
+  flex: 0 0 auto;
+  width: 24px;
+  height: 24px;
+  min-width: 24px;
+  min-height: 24px;
+  margin: 0;
+  padding: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 0;
+  border-radius: 50%;
+  background: #F3F4F8;
+  color: var(--danger);
+  font-size: 11px;
+  line-height: 1;
+}
+.admin-silaris .qq-gallery .qq-upload-cancel:hover,
+.admin-silaris .qq-gallery .qq-upload-delete:hover {
+  background: #FBE9EA;
+}
+
 /* Settings, access matrices and builders can be wider without breaking
    the standard page boundary. */
 .admin-silaris .admin-page--form .nav-tabs-custom,
@@ -5178,6 +5337,30 @@ input[type="file"].form-control { height: auto; min-height: var(--control-h); pa
   .admin-silaris .fidusia-form-fields--document { grid-template-columns: minmax(0, 1fr); }
   .admin-silaris .fidusia-form-field--full { grid-column: auto; }
   .admin-silaris .fidusia-form-actions__buttons .btn { flex-basis: 100%; }
+}
+
+/* The shared service forms use the Fidusia design language. */
+.admin-silaris .service-record-form-page .fidusia-form-card,
+.admin-silaris .monthly-report-form-page .fidusia-form-card {
+  align-self: stretch;
+}
+.admin-silaris .monthly-report-form-page .monthly-report-fields {
+  grid-template-columns: minmax(0, 1fr);
+}
+.admin-silaris .monthly-report-form-page .fidusia-form-grid {
+  grid-template-columns: minmax(0, 1fr);
+}
+.admin-silaris .monthly-report-card__content {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+}
+.admin-silaris .monthly-report-card__section {
+  min-width: 0;
+  padding: 0 0 24px;
+}
+.admin-silaris .monthly-report-card__section--document {
+  padding: 24px 0 0;
+  border-top: 1px solid #e3e8f0;
 }
 
 /* Final administrator header standard: solid surface, shared rhythm, no tint. */
@@ -6633,12 +6816,14 @@ input[type="file"].form-control { height: auto; min-height: var(--control-h); pa
   padding: 0 !important;
 }
 .admin-silaris .report-document-links {
+  width: 100%;
   display: flex;
   align-items: stretch;
   gap: 10px;
 }
 .admin-silaris .report-drive-link {
-  flex: 1 1 auto;
+  flex: 1 1 0%;
+  min-width: 0;
   max-width: 100%;
   min-height: 62px;
   padding: 10px 14px;

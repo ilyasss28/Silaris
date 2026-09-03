@@ -66,22 +66,22 @@ jQuery(document).ready(domo);
                         <label for="content" class="col-sm-2 control-label">Tanggal Laporan </label>
 
                         <div class="col-sm-8">
-                           <?= _ent($rekap_laporan_bulanan->tanggal_laporan); ?>
+                           <?= _ent(format_date_id($rekap_laporan_bulanan->tanggal_laporan)); ?>
                         </div>
                     </div>
                                          
                     <?php
                     $document_name = (string) $rekap_laporan_bulanan->file_laporan;
                     $document_url = BASE_URL . 'uploads/rekap_laporan_bulanan/' . rawurlencode($document_name);
-                    $viewer_url = google_document_viewer_url($document_url);
+                    $viewer_url = document_preview_url($document_url);
                     ?>
                     <div class="form-group report-document-field">
                         <label class="col-sm-2 control-label">Dokumen Laporan</label>
                         <div class="col-sm-10">
                             <div class="report-document-links">
-                                <a href="<?= _ent($viewer_url); ?>" target="_blank" rel="noopener noreferrer" class="report-drive-link" title="Buka dokumen di Google Drive">
+                                <a href="<?= _ent($viewer_url); ?>" target="_blank" rel="noopener noreferrer" class="report-drive-link" title="Buka dokumen di tab baru">
                                     <img src="<?= _ent(get_icon_file($document_name)); ?>" alt="Dokumen rekap laporan bulanan">
-                                    <span><strong><?= _ent($document_name); ?></strong><small>Buka di Google Drive <i class="fa fa-external-link"></i></small></span>
+                                    <span><strong><?= _ent($document_name); ?></strong><small>Buka di tab baru <i class="fa fa-external-link"></i></small></span>
                                 </a>
                                 <a href="<?= _ent($document_url); ?>" download="<?= _ent($document_name); ?>" class="report-download-link" title="Unduh dokumen"><i class="fa fa-download"></i> Unduh</a>
                             </div>

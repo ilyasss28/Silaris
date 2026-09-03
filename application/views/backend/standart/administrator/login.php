@@ -20,10 +20,12 @@
       --border: #dce3ed;
     }
     * { box-sizing: border-box; }
-    html, body { min-height: 100%; }
+    html, body { width: 100%; height: 100%; min-height: 100%; overflow: hidden; }
     body {
       margin: 0;
-      min-height: 100vh;
+      height: 100vh;
+      height: 100dvh;
+      min-height: 0;
       padding: 0;
       display: flex;
       align-items: stretch;
@@ -35,7 +37,9 @@
     }
     .login-shell {
       width: 100%;
-      min-height: 100vh;
+      height: 100vh;
+      height: 100dvh;
+      min-height: 0;
       display: grid;
       grid-template-columns: minmax(380px, 45%) minmax(440px, 55%);
       overflow: hidden;
@@ -46,8 +50,9 @@
     }
     .welcome-panel {
       position: relative;
-      min-height: 100vh;
-      padding: clamp(32px, 5vw, 68px);
+      height: 100%;
+      min-height: 0;
+      padding: clamp(28px, 4vw, 56px);
       display: flex;
       flex-direction: column;
       overflow: hidden;
@@ -148,9 +153,9 @@
       background-image: radial-gradient(var(--yellow) 1.5px, transparent 1.5px);
       background-size: 10px 10px;
     }
-    .form-panel { min-height: 100vh; padding: clamp(28px, 5vh, 52px) clamp(38px, 8vw, 112px); display: flex; align-items: center; background: #fff; }
+    .form-panel { height: 100%; min-height: 0; padding: clamp(20px, 3.5vh, 36px) clamp(38px, 8vw, 112px); display: flex; align-items: center; overflow: hidden; background: #fff; }
     .login-form-wrap { width: 100%; max-width: 440px; margin: 0 auto; }
-    .form-heading { margin-bottom: 25px; }
+    .form-heading { margin-bottom: 20px; }
     .form-heading .eyebrow {
       margin: 0 0 7px;
       color: #a17c00;
@@ -176,8 +181,8 @@
     }
     .alert-message--success { border-color: #b8e0cb; background: #f0faf5; color: #19744a; }
     .alert-message p { margin: 0; }
-    .login-field { margin-bottom: 15px; }
-    .login-field label { margin: 0 0 7px; display: block; color: #344054; font-size: 11.5px; font-weight: 700; }
+    .login-field { margin-bottom: 12px; }
+    .login-field label { margin: 0 0 5px; display: block; color: #344054; font-size: 11.5px; font-weight: 700; }
     .control-wrap { position: relative; }
     .control-icon {
       position: absolute;
@@ -193,7 +198,7 @@
     }
     .login-control {
       width: 100%;
-      height: 46px;
+      height: 44px;
       padding: 0 43px;
       border: 1px solid var(--border);
       border-radius: 11px;
@@ -203,7 +208,7 @@
       font-family: inherit;
       font-size: 12.5px;
       font-weight: 500;
-      line-height: 46px;
+      line-height: 44px;
       text-align: left;
       transition: border-color .18s ease, box-shadow .18s ease, background .18s ease;
     }
@@ -241,7 +246,7 @@
     .captcha-grid { display: grid; grid-template-columns: minmax(120px, 1fr) 142px 46px; gap: 8px; }
     .captcha-grid .login-control { padding-right: 12px; }
     .captcha-image {
-      height: 46px;
+      height: 44px;
       padding: 3px 7px;
       display: flex;
       align-items: center;
@@ -251,10 +256,10 @@
       border-radius: 11px;
       background: #f7f8fb;
     }
-    .captcha-image img, .captcha-image svg { max-width: 100%; max-height: 40px; display: block; }
+    .captcha-image img, .captcha-image svg { max-width: 100%; max-height: 38px; display: block; }
     .captcha-refresh {
       width: 46px;
-      height: 46px;
+      height: 44px;
       display: inline-flex;
       align-items: center;
       justify-content: center;
@@ -267,12 +272,12 @@
     .captcha-refresh:hover { background: #fff0a6; }
     .captcha-refresh.is-loading i { animation: spin .7s linear infinite; }
     @keyframes spin { to { transform: rotate(360deg); } }
-    .form-options { margin: 5px 0 18px; display: flex; align-items: center; justify-content: flex-end; }
+    .form-options { margin: 3px 0 14px; display: flex; align-items: center; justify-content: flex-end; }
     .forgot-link { color: #535d70; font-size: 10.5px; font-weight: 600; text-decoration: none; }
     .forgot-link:hover { color: var(--navy); text-decoration: underline; }
     .login-button {
       width: 100%;
-      height: 48px;
+      height: 46px;
       display: inline-flex;
       align-items: center;
       justify-content: center;
@@ -291,17 +296,35 @@
     .login-button:hover { background: #11106a; box-shadow: none; }
     .login-button:active { transform: translateY(1px); }
     .login-button i { color: var(--yellow); }
-    .form-footer { margin: 20px 0 0; color: #98a1b2; font-size: 9.5px; line-height: 1.6; text-align: center; }
+    .form-footer { margin: 14px 0 0; color: #667085; font-size: 10.5px; line-height: 1.5; text-align: center; }
+    .home-link { display: inline-flex; align-items: center; gap: 7px; color: var(--navy); font-weight: 700; text-decoration: none; }
+    .home-link:hover { color: #a17c00; text-decoration: underline; }
+
+    @media (min-width: 821px) and (max-height: 720px) {
+      .welcome-panel { padding: 26px 44px; }
+      .welcome-copy { padding: 20px 0; }
+      .welcome-copy h1 { font-size: 38px; }
+      .welcome-copy p { margin-top: 12px; line-height: 1.65; }
+      .welcome-notice { padding-top: 14px; }
+      .form-panel { padding-top: 14px; padding-bottom: 14px; }
+      .form-heading { margin-bottom: 14px; }
+      .form-heading h2 { font-size: 27px; }
+      .form-heading p { margin-top: 5px; }
+      .login-field { margin-bottom: 9px; }
+      .form-options { margin: 1px 0 10px; }
+      .form-footer { margin-top: 10px; }
+    }
     @media (max-width: 820px) {
+      html, body { height: auto; min-height: 100%; overflow-x: hidden; overflow-y: auto; }
       body { align-items: flex-start; }
-      .login-shell { grid-template-columns: 1fr; min-height: 0; }
-      .welcome-panel { min-height: 230px; padding: 28px 30px; }
+      .login-shell { height: auto; grid-template-columns: 1fr; min-height: 100dvh; }
+      .welcome-panel { height: auto; min-height: 230px; padding: 28px 30px; }
       .welcome-copy { padding: 38px 0 8px; }
       .welcome-copy h1 { font-size: 30px; }
       .welcome-copy p { margin-top: 10px; }
       .welcome-notice { display: none; }
       .dot-pattern { right: 18px; top: 18px; }
-      .form-panel { min-height: 0; padding: 34px 30px 40px; }
+      .form-panel { height: auto; min-height: 0; padding: 34px 30px 40px; overflow: visible; }
     }
     @media (max-width: 480px) {
       body { padding: 0; background: #fff; }
@@ -400,7 +423,7 @@
           <div class="form-options"><a class="forgot-link" href="<?= site_url('administrator/forgot-password'); ?>">Lupa password?</a></div>
           <button type="submit" class="login-button"><span>Masuk</span><i class="fa fa-arrow-right"></i></button>
         <?= form_close(); ?>
-        <p class="form-footer">Dengan masuk, Anda menyetujui penggunaan sistem sesuai kewenangan dan kebijakan keamanan yang berlaku.</p>
+        <p class="form-footer"><a class="home-link" href="<?= site_url('home'); ?>"><i class="fa fa-arrow-left" aria-hidden="true"></i> Kembali ke Beranda</a></p>
       </div>
     </section>
   </main>

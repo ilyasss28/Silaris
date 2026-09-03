@@ -16,11 +16,13 @@ class Model_rekap_Laporan extends MY_Model {
 		 );
 
 		parent::__construct($config);
+		$this->load->library('report_access');
 	}
 
 	public function count_all($q = null, $field = null)
 	{
 		$this->join_avaiable()->filter_avaiable();
+		$this->report_access->apply_scope($this->db, $this->table_name);
 		$this->apply_search($q, $field);
 
 		// COUNT(*) is substantially lighter than loading every report row just
@@ -32,10 +34,11 @@ class Model_rekap_Laporan extends MY_Model {
         if (is_array($select_field) AND count($select_field)) {
 			$this->db->select($select_field);
 		} else {
-			$this->db->select('laporan.id, laporan.username, laporan.nama_notaris, laporan.Tanggal_Laporan, laporan.Laporan');
+			$this->select_with_notaris_fallback();
         }
 
 		$this->join_avaiable()->filter_avaiable();
+		$this->report_access->apply_scope($this->db, $this->table_name);
 		$this->apply_search($q, $field);
 		$order_field = in_array($order_field, array_merge([$this->primary_key], $this->field_search), true)
 			? $order_field
@@ -45,6 +48,70 @@ class Model_rekap_Laporan extends MY_Model {
 		$this->db->order_by('laporan.'.$order_field, $order_direction);
 		$query = $this->db->get($this->table_name);
 		return $query->result();
+	}
+
+	private function apply_access_scope()
+	{
+		$this->report_access->apply_scope($this->db, $this->table_name);
+	}
+
+	/**
+	 * Many legacy records were imported without laporan.nama_notaris. Fall
+	 * back to the owning account's full name so the display never shows a
+	 * blank notary name.
+	 */
+	private function select_with_notaris_fallback()
+	{
+		$this->db->select(
+			"laporan.id, laporan.username, "
+			. "COALESCE(NULLIF(TRIM(laporan.nama_notaris), ''), notaris_owner.full_name, laporan.username) AS nama_notaris, "
+			. "laporan.Tanggal_Laporan, laporan.Laporan",
+			false
+		);
+		$this->db->join('aauth_users AS notaris_owner', 'notaris_owner.id = laporan.owner_user_id', 'left');
+	}
+
+	public function find($id = null, $select_field = [])
+	{
+		if (is_array($select_field) && count($select_field)) {
+			$this->db->select($select_field);
+		} else {
+			$this->select_with_notaris_fallback();
+		}
+		$this->db->where($this->table_name . '.' . $this->primary_key, $id);
+		$this->apply_access_scope();
+		$query = $this->db->get($this->table_name);
+
+		return $query->num_rows() > 0 ? $query->row() : false;
+	}
+
+	public function change($id = null, $data = [])
+	{
+		$this->db->where($this->primary_key, $id);
+		$this->apply_access_scope();
+		$this->db->update($this->table_name, $data);
+
+		return $this->db->affected_rows();
+	}
+
+	public function remove($id = null)
+	{
+		$this->db->where($this->primary_key, $id);
+		$this->apply_access_scope();
+
+		return $this->db->delete($this->table_name);
+	}
+
+	public function export_scoped($subject = 'rekap_laporan')
+	{
+		$this->apply_access_scope();
+		return parent::export($this->table_name, $subject);
+	}
+
+	public function pdf_scoped($title = 'Rekap Laporan')
+	{
+		$this->apply_access_scope();
+		return parent::pdf($this->table_name, $title);
 	}
 
 	/**

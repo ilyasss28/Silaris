@@ -94,6 +94,7 @@ class User extends Admin
 	public function add()
 	{
 		$this->is_allowed('user_add');
+		$this->data['mpd_regions'] = array();
 
 		$this->template->title('User New');
 		$this->render('backend/standart/administrator/user/user_add', $this->data);
@@ -118,6 +119,18 @@ class User extends Admin
 		$this->form_validation->set_rules('full_name', 'Full Name', 'trim|required');
 		$this->form_validation->set_rules('password', 'Password', 'trim|required|min_length[6]');
 		$this->form_validation->set_rules('kd_wilayah', 'Kd wilayah', 'trim|required|max_length[10]');
+		$selected_groups = (array) $this->input->post('group');
+		$selected_mpd_regions = (array) $this->input->post('mpd_wilayah');
+		$is_mpd = $this->model_user->group_ids_include($selected_groups, 'MPD');
+		if ($is_mpd && !$selected_mpd_regions) {
+			$this->form_validation->set_rules('mpd_wilayah[]', 'Wilayah kerja MPD', 'required');
+		}
+		if ($is_mpd && $selected_mpd_regions && !$this->model_user->validate_mpd_regions($selected_mpd_regions)) {
+			return $this->response(array(
+				'success' => false,
+				'message' => 'Wilayah kerja MPD tidak valid atau migrasi database MPD belum dijalankan.',
+			));
+		}
 
 		if ($this->form_validation->run()) {
 			$user_avatar_uuid = $this->input->post('user_avatar_uuid');
@@ -147,12 +160,13 @@ class User extends Admin
 
 			if ($save_user) {
 				//add user to group
-				if (count($this->input->post('group'))) {
+				if (count($selected_groups)) {
 					$user_id = $save_user;
-					foreach ($this->input->post('group') as $group_id) {
-						$this->aauth->add_member($user_id, $group_id);				
+					foreach ($selected_groups as $group_id) {
+						$this->aauth->add_member($user_id, $group_id);
 					}
 				}
+				$this->model_user->sync_mpd_regions($save_user, $is_mpd ? $selected_mpd_regions : array());
 				if ($this->input->post('save_type') == 'stay') {
 					$this->response['success'] = true;
 					$this->response['message'] = cclang('success_save_data_stay', [
@@ -192,7 +206,8 @@ class User extends Admin
 
 		$this->data = [
 			'user' 			=> $this->model_user->find($id),
-			'group_user' 	=> $this->model_user->get_group_user($id)
+			'group_user' 	=> $this->model_user->get_group_user($id),
+			'mpd_regions' => $this->model_user->get_mpd_regions($id),
 		];
 
 		$this->template->title('User Update');
@@ -216,6 +231,18 @@ class User extends Admin
 		$this->form_validation->set_rules('username', 'Username', 'trim|required');
 		$this->form_validation->set_rules('full_name', 'Full Name', 'trim|required');
 		$this->form_validation->set_rules('kd_wilayah', 'Kd wilayah', 'trim|required|max_length[10]');
+		$selected_groups = (array) $this->input->post('group');
+		$selected_mpd_regions = (array) $this->input->post('mpd_wilayah');
+		$is_mpd = $this->model_user->group_ids_include($selected_groups, 'MPD');
+		if ($is_mpd && !$selected_mpd_regions) {
+			$this->form_validation->set_rules('mpd_wilayah[]', 'Wilayah kerja MPD', 'required');
+		}
+		if ($is_mpd && $selected_mpd_regions && !$this->model_user->validate_mpd_regions($selected_mpd_regions)) {
+			return $this->response(array(
+				'success' => false,
+				'message' => 'Wilayah kerja MPD tidak valid atau migrasi database MPD belum dijalankan.',
+			));
+		}
 
 		if ($this->form_validation->run()) {
 			$user_avatar_uuid = $this->input->post('user_avatar_uuid');
@@ -253,11 +280,12 @@ class User extends Admin
 			if ($save_user) {
 				//update user to group
 				$this->db->delete('aauth_user_to_group', ['user_id' => $id]);
-				if (count($this->input->post('group'))) {
-					foreach ($this->input->post('group') as $group_id) {
-						$this->aauth->add_member($id, $group_id);				
+				if (count($selected_groups)) {
+					foreach ($selected_groups as $group_id) {
+						$this->aauth->add_member($id, $group_id);
 					}
 				}
+				$this->model_user->sync_mpd_regions($id, $is_mpd ? $selected_mpd_regions : array());
 
 				if ($this->input->post('save_type') == 'stay') {
 					$this->response['success'] = true;
@@ -331,6 +359,7 @@ class User extends Admin
 		}
 		$this->data['region_name'] = $this->model_user->get_region_name($this->data['user']->kd_wilayah);
 		$this->data['groups'] = $this->aauth->get_user_groups((int) $id);
+		$this->data['mpd_region_names'] = $this->model_user->get_mpd_region_names((int) $id);
 
 		$this->template->title('Detail Profil Notaris');
 		$this->render('backend/standart/administrator/user/user_view', $this->data);
@@ -402,7 +431,6 @@ class User extends Admin
 
 		$this->form_validation->set_rules('email', 'Email', 'trim|required|valid_email');
 		$this->form_validation->set_rules('full_name', 'Full Name', 'trim|required');
-		$this->form_validation->set_rules('kd_wilayah', 'Kd wilayah', 'trim|required|max_length[10]');
 		if ($this->input->post('password')) {
 			$this->form_validation->set_rules('password', 'Password', 'min_length[6]');
 		}
@@ -413,7 +441,9 @@ class User extends Admin
 
 			$save_data = [
 				'full_name' 	=> $this->input->post('full_name'),
-				'kd_wilayah' => $this->input->post('kd_wilayah')
+				// Official jurisdiction is controlled by User Management, not
+				// editable by the account holder from their personal profile.
+				'kd_wilayah' => $current_user->kd_wilayah
 			];
 
 			if (!empty($user_avatar_name)) {
@@ -463,6 +493,26 @@ class User extends Admin
 	private function _remove($id)
 	{
 		$user = $this->model_user->find($id);
+		if (!$user) {
+			return false;
+		}
+
+		// Preserve report ownership. Accounts with report history are
+		// deactivated instead of being deleted.
+		$this->db->group_start();
+		if ($this->db->field_exists('owner_user_id', 'laporan')) {
+			$this->db->where('owner_user_id', (int) $id);
+			$this->db->or_group_start()
+				->where('owner_user_id IS NULL', null, false)
+				->where('LOWER(username) =', strtolower((string) $user->username))
+				->group_end();
+		} else {
+			$this->db->where('LOWER(username) =', strtolower((string) $user->username));
+		}
+		$this->db->group_end();
+		if ($this->db->count_all_results('laporan') > 0) {
+			return false;
+		}
 
 		if (!empty($user->image)) {
 			$path = FCPATH . '/uploads/user/' . $user->image;
@@ -470,6 +520,10 @@ class User extends Admin
 			if (is_file($path)) {
 				$delete_file = delete_files($path);
 			}
+		}
+
+		if ($this->db->table_exists('mpd_wilayah')) {
+			$this->db->where('user_id', (int) $id)->delete('mpd_wilayah');
 		}
 
 		return $this->model_user->remove($id);

@@ -88,7 +88,7 @@ jQuery(document).ready(domo);
                            
                            <td><?= _ent($daftar_proses->username); ?></td> 
                            <td><?= _ent($daftar_proses->nomor_akta); ?></td> 
-                           <td><?= _ent($daftar_proses->tanggal_akta); ?></td> 
+                           <td><?= _ent(format_date_id($daftar_proses->tanggal_akta)); ?></td> 
                            <td><?= _ent($daftar_proses->sifat_akta); ?></td> 
                            <td><?= _ent($daftar_proses->penghadap); ?></td> 
                            <td width="200">

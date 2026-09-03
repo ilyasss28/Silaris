@@ -41,7 +41,7 @@
       <div class="row justify-content-center">
         <div class="col-lg-9 text-center">
           <span class="hero-badge" data-aos="fade-up" data-aos-delay="100"><i class="dot"></i> MONITORING KEPATUHAN <i class="dot"></i></span>
-          <h1 class="hero-title" data-aos="fade-up" data-aos-delay="200">KEPATUHAN <em>NOTARIS</em></h1>
+          <h1 class="hero-title" data-aos="fade-up" data-aos-delay="200">KEPATUHAN <span class="highlight">NOTARIS</span></h1>
           <p class="lead" data-aos="fade-up" data-aos-delay="300">Pemantauan kepatuhan notaris se-Sulawesi Tenggara dalam menyampaikan laporan bulanan kepada Kanwil Kemenkum, berdasarkan data laporan yang tercatat di SILARIS.</p>
 
           <div class="row stat-row justify-content-center" data-aos="fade-up" data-aos-delay="400">
@@ -54,13 +54,13 @@
             <div class="col-6 col-md-3">
               <div class="stat-tile">
                 <div class="stat-number"><?= $aktif_melapor; ?></div>
-                <div class="stat-label">Aktif Melapor</div>
+                <div class="stat-label">Melapor <?= date('Y'); ?></div>
               </div>
             </div>
             <div class="col-6 col-md-3">
               <div class="stat-tile">
                 <div class="stat-number"><?= $total_laporan; ?></div>
-                <div class="stat-label">Laporan Diterima</div>
+                <div class="stat-label">Laporan <?= date('Y'); ?></div>
               </div>
             </div>
             <div class="col-6 col-md-3">
@@ -79,14 +79,9 @@
   <section id="services" class="services compliance-section">
     <div class="container">
 
-      <ul class="breadcrumb">
-        <li><a class="homeLink" href="<?= site_url('home'); ?>"><i class="icofont-home"></i> Beranda /</a></li>
-        <li class="active">Kepatuhan Notaris</li>
-      </ul>
-
       <div class="section-title text-start" data-aos="fade-up">
         <h2>Daftar Kepatuhan Pelaporan</h2>
-        <p>Status penyampaian laporan bulanan per akun notaris. Notaris yang belum pernah menyampaikan laporan ditandai "Belum Melapor".</p>
+        <p>Status penyampaian laporan pada tahun <?= date('Y'); ?> per akun notaris aktif. Data dihitung langsung dari laporan yang sama dengan panel administrasi.</p>
       </div>
 
       <div class="compliance-search" data-aos="fade-up" data-aos-delay="100">

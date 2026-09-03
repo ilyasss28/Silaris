@@ -77,7 +77,6 @@ jQuery(document).ready(domo);
                            <th style="text-align:center">Jenis Kelamin</th>
                            <th style="text-align:center">Wilayah</th>
                            <th style="text-align:center">Alamat Kantor</th>
-                           <th style="text-align:center">Foto</th>
                            <th style="text-align:center">Kode Wilayah</th>
                            <th style="text-align:center">Lat</th>
                            <th style="text-align:center">No Telepon</th>
@@ -92,27 +91,28 @@ jQuery(document).ready(domo);
                               <input type="checkbox" class="flat-red check" name="id[]" value="<?= $data_notaris->id_notaris; ?>">
                            </td>
                            
-                           <td><?= _ent($data_notaris->nama_notaris); ?></td> 
-                           <td><?= _ent($data_notaris->tempat_lahir); ?></td> 
-                           <td><?= _ent($data_notaris->tanggal_lahir); ?></td> 
-                           <td><?= _ent($data_notaris->jenis_kelamin); ?></td> 
-                           <td><?= _ent($data_notaris->nama_wilayah); ?></td>
-                             
-                           <td><?= _ent($data_notaris->alamat_kantor); ?></td> 
                            <td>
-                              <?php if (!empty($data_notaris->foto)): ?>
-                                <?php if (is_image($data_notaris->foto)): ?>
-                                <a class="fancybox" rel="group" href="<?= BASE_URL . 'uploads/data_notaris/' . $data_notaris->foto; ?>">
-                                  <img src="<?= BASE_URL . 'uploads/data_notaris/' . $data_notaris->foto; ?>" class="image-responsive" alt="image data_notaris" title="foto data_notaris" width="40px">
-                                </a>
-                                <?php else: ?>
-                                  <a href="<?= BASE_URL . 'administrator/file/download/data_notaris/' . $data_notaris->foto; ?>">
-                                   <img src="<?= get_icon_file($data_notaris->foto); ?>" class="image-responsive image-icon" alt="image data_notaris" title="foto <?= $data_notaris->foto; ?>" width="40px"> 
-                                 </a>
+                              <div class="notaris-name-cell">
+                                <?php if (!empty($data_notaris->foto)): ?>
+                                  <?php if (is_image($data_notaris->foto)): ?>
+                                  <a class="fancybox" rel="group" href="<?= BASE_URL . 'uploads/data_notaris/' . $data_notaris->foto; ?>">
+                                    <img src="<?= BASE_URL . 'uploads/data_notaris/' . $data_notaris->foto; ?>" class="notaris-name-cell__photo" alt="Foto <?= _ent($data_notaris->nama_notaris); ?>" title="foto data_notaris">
+                                  </a>
+                                  <?php else: ?>
+                                    <a href="<?= BASE_URL . 'administrator/file/download/data_notaris/' . $data_notaris->foto; ?>">
+                                     <img src="<?= get_icon_file($data_notaris->foto); ?>" class="notaris-name-cell__photo" alt="Foto <?= _ent($data_notaris->nama_notaris); ?>" title="foto <?= $data_notaris->foto; ?>">
+                                   </a>
+                                  <?php endif; ?>
                                 <?php endif; ?>
-                              <?php endif; ?>
+                                <span><?= _ent($data_notaris->nama_notaris); ?></span>
+                              </div>
                            </td>
-                            
+                           <td><?= _ent($data_notaris->tempat_lahir); ?></td>
+                           <td><?= _ent(format_date_id($data_notaris->tanggal_lahir)); ?></td>
+                           <td><?= _ent($data_notaris->jenis_kelamin); ?></td>
+                           <td><?= _ent($data_notaris->nama_wilayah); ?></td>
+
+                           <td><?= _ent($data_notaris->alamat_kantor); ?></td>
                            <td><?= _ent($data_notaris->nama); ?></td>
                              
                            <td><?= _ent($data_notaris->lat); ?></td> 

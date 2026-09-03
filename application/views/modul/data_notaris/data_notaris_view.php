@@ -58,7 +58,20 @@ jQuery(document).ready(domo);
                         <label for="content" class="col-sm-2 control-label">Nama Notaris </label>
 
                         <div class="col-sm-8">
-                           <?= _ent($data_notaris->nama_notaris); ?>
+                           <div class="notaris-name-cell">
+                             <?php if (!empty($data_notaris->foto)): ?>
+                               <?php if (is_image($data_notaris->foto)): ?>
+                               <a class="fancybox" rel="group" href="<?= BASE_URL . 'uploads/data_notaris/' . $data_notaris->foto; ?>">
+                                 <img src="<?= BASE_URL . 'uploads/data_notaris/' . $data_notaris->foto; ?>" class="notaris-name-cell__photo" alt="Foto <?= _ent($data_notaris->nama_notaris); ?>" title="foto data_notaris">
+                               </a>
+                               <?php else: ?>
+                               <a href="<?= BASE_URL . 'administrator/file/download/data_notaris/' . $data_notaris->foto; ?>">
+                                 <img src="<?= get_icon_file($data_notaris->foto); ?>" class="notaris-name-cell__photo" alt="Foto <?= _ent($data_notaris->nama_notaris); ?>" title="foto <?= $data_notaris->foto; ?>">
+                               </a>
+                               <?php endif; ?>
+                             <?php endif; ?>
+                             <span><?= _ent($data_notaris->nama_notaris); ?></span>
+                           </div>
                         </div>
                     </div>
                                          
@@ -74,7 +87,7 @@ jQuery(document).ready(domo);
                         <label for="content" class="col-sm-2 control-label">Tanggal Lahir </label>
 
                         <div class="col-sm-8">
-                           <?= _ent($data_notaris->tanggal_lahir); ?>
+                           <?= _ent(format_date_id($data_notaris->tanggal_lahir)); ?>
                         </div>
                     </div>
                                          
@@ -142,24 +155,6 @@ jQuery(document).ready(domo);
                         </div>
                     </div>
                                          
-                    <div class="form-group ">
-                        <label for="content" class="col-sm-2 control-label"> Foto </label>
-                        <div class="col-sm-8">
-                             <?php if (is_image($data_notaris->foto)): ?>
-                              <a class="fancybox" rel="group" href="<?= BASE_URL . 'uploads/data_notaris/' . $data_notaris->foto; ?>">
-                                <img src="<?= BASE_URL . 'uploads/data_notaris/' . $data_notaris->foto; ?>" class="image-responsive" alt="image data_notaris" title="foto data_notaris" width="40px">
-                              </a>
-                              <?php else: ?>
-                              <label>
-                                <a href="<?= BASE_URL . 'administrator/file/download/data_notaris/' . $data_notaris->foto; ?>">
-                                 <img src="<?= get_icon_file($data_notaris->foto); ?>" class="image-responsive" alt="image data_notaris" title="foto <?= $data_notaris->foto; ?>" width="40px"> 
-                               <?= $data_notaris->foto ?>
-                               </a>
-                               </label>
-                              <?php endif; ?>
-                        </div>
-                    </div>
-                                       
                     <div class="form-group ">
                         <label for="content" class="col-sm-2 control-label">Kode Wilayah </label>
 

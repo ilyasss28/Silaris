@@ -28,8 +28,10 @@ class Model_rekap_legalisasi extends MY_Model {
 	{
         if (is_array($select_field) AND count($select_field)) {
         	$this->db->select($select_field);
+        } else {
+        	$this->select_with_notaris_fallback();
         }
-		
+
 		$this->join_avaiable()->filter_avaiable();
 		$this->apply_search_conditions($this->table_name, $this->field_search, $q, $field);
         $this->db->limit(max(0, (int) $limit), max(0, (int) $offset));
@@ -37,6 +39,20 @@ class Model_rekap_legalisasi extends MY_Model {
 		$query = $this->db->get($this->table_name);
 
 		return $query->result();
+	}
+
+	/**
+	 * Many legacy records were imported without legalisasi.nama_notaris.
+	 * Fall back to the account matching the record's username so the
+	 * display never shows a blank notary name.
+	 */
+	private function select_with_notaris_fallback()
+	{
+		$this->db->select(
+			"legalisasi.*, COALESCE(NULLIF(TRIM(legalisasi.nama_notaris), ''), notaris_owner.full_name, legalisasi.username) AS nama_notaris",
+			false
+		);
+		$this->db->join('aauth_users AS notaris_owner', 'LOWER(notaris_owner.username) = LOWER(legalisasi.username)', 'left');
 	}
 
     public function join_avaiable() {

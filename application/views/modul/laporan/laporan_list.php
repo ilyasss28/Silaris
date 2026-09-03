@@ -1,4 +1,3 @@
-
 <script src="<?= BASE_ASSET; ?>/js/jquery.hotkeys.js"></script>
 
 <script type="text/javascript">
@@ -84,17 +83,17 @@ jQuery(document).ready(domo);
                               <input type="checkbox" class="flat-red check" name="id[]" value="<?= $laporan->id; ?>">
                            </td>
                            
-                           <td><?= _ent($laporan->nama_notaris); ?></td> 
-                           <td><?= _ent($laporan->Tanggal_Laporan); ?></td> 
-                           <td>
+                           <td><?= _ent($laporan->nama_notaris); ?></td>
+                           <td style="text-align:center"><?= _ent(format_date_id($laporan->Tanggal_Laporan)); ?></td>
+                           <td style="text-align:center">
                               <?php if (!empty($laporan->Laporan)): ?>
-                                <?php $document_viewer_url = google_document_viewer_url(BASE_URL . 'uploads/laporan/' . rawurlencode($laporan->Laporan)); ?>
+                                <?php $document_viewer_url = document_preview_url(BASE_URL . 'uploads/laporan/' . rawurlencode($laporan->Laporan)); ?>
                                 <?php if (is_image($laporan->Laporan)): ?>
-                                <a href="<?= _ent($document_viewer_url); ?>" target="_blank" rel="noopener noreferrer" title="Buka di Google Drive">
+                                <a href="<?= _ent($document_viewer_url); ?>" target="_blank" rel="noopener noreferrer" title="Buka di tab baru">
                                   <img src="<?= BASE_URL . 'uploads/laporan/' . $laporan->Laporan; ?>" class="image-responsive" alt="image laporan" title="Laporan laporan" width="40px">
                                 </a>
                                 <?php else: ?>
-                                  <a href="<?= _ent($document_viewer_url); ?>" target="_blank" rel="noopener noreferrer" title="Buka di Google Drive">
+                                  <a href="<?= _ent($document_viewer_url); ?>" target="_blank" rel="noopener noreferrer" title="Buka di tab baru">
                                    <img src="<?= get_icon_file($laporan->Laporan); ?>" class="image-responsive image-icon" alt="image laporan" title="Laporan <?= $laporan->Laporan; ?>" width="40px">
                                  </a>
                                 <?php endif; ?>

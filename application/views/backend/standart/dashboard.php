@@ -4,9 +4,8 @@ $format_value = function ($value) {
 };
 $format_date = function ($date) {
   if (!$date || $date === '0000-00-00') return 'Belum pernah';
-  $months = [1 => 'Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des'];
-  $time = strtotime($date);
-  return $time ? date('d', $time) . ' ' . $months[(int) date('n', $time)] . ' ' . date('Y', $time) : '-';
+  $formatted = format_date_id($date);
+  return $formatted !== '' ? $formatted : '-';
 };
 $trend_max = max(1, max(array_column($dashboard_trend, 'total')));
 $service_max = max(1, max(array_column($dashboard_services, 'total')));

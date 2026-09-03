@@ -85,7 +85,7 @@ class Fidusia extends Admin
 		
 			$save_data = [
 				'username' => get_user_data('username'),
-					'nama_notaris' => get_user_data('full_name'),
+				'nama_notaris' => get_user_data('full_name'),
 				'tanggal' => date('Y-m-d H:i:s'),
 				'tanggal_akta' => $this->input->post('tanggal_akta'),
 				'nomor_akta' => $this->input->post('nomor_akta'),
@@ -93,6 +93,9 @@ class Fidusia extends Admin
 				'nama_penerima_fidusia' => $this->input->post('nama_penerima_fidusia'),
 				'no_sertifikat_jaminan_fidusia' => $this->input->post('no_sertifikat_jaminan_fidusia'),
 			];
+			if ($this->db->field_exists('owner_user_id', 'fidusia')) {
+				$save_data['owner_user_id'] = (int) get_user_data('id');
+			}
 
 			
 			$save_fidusia = $this->model_fidusia->store($save_data);
@@ -143,6 +146,9 @@ class Fidusia extends Admin
 		$this->is_allowed('fidusia_update');
 
 		$this->data['fidusia'] = $this->model_fidusia->find($id);
+		if (!$this->data['fidusia']) {
+			show_404();
+		}
 
 		$this->template->title('Fidusia Update');
 		$this->render('modul/fidusia/fidusia_update', $this->data);
@@ -162,6 +168,16 @@ class Fidusia extends Admin
 				]);
 			exit;
 		}
+
+		if (!$this->model_fidusia->find($id)) {
+			return $this->output
+				->set_status_header(404)
+				->set_content_type('application/json')
+				->set_output(json_encode([
+					'success' => false,
+					'message' => 'Data Fidusia tidak ditemukan atau tidak berada dalam cakupan akses Anda.',
+				]));
+		}
 		
 		$this->form_validation->set_rules('tanggal_akta', 'Tanggal Akta', 'trim|required');
 		$this->form_validation->set_rules('nomor_akta', 'Nomor Akta', 'trim|required|max_length[10]');
@@ -171,9 +187,9 @@ class Fidusia extends Admin
 		
 		if ($this->form_validation->run()) {
 		
+			// Ownership is immutable during an edit. In particular, an Admin or
+			// MPD must not become the owner merely because they corrected a record.
 			$save_data = [
-				'username' => get_user_data('username'),
-				'nama_notaris' => $this->input->post('nama_notaris'),
 				'tanggal' => date('Y-m-d H:i:s'),
 				'tanggal_akta' => $this->input->post('tanggal_akta'),
 				'nomor_akta' => $this->input->post('nomor_akta'),
@@ -234,7 +250,7 @@ class Fidusia extends Admin
 
 		if (!empty($id)) {
 			$remove = $this->_remove($id);
-		} elseif (count($arr_id) >0) {
+		} elseif (is_array($arr_id) && count($arr_id) > 0) {
 			foreach ($arr_id as $id) {
 				$remove = $this->_remove($id);
 			}
@@ -259,6 +275,9 @@ class Fidusia extends Admin
 		$this->is_allowed('fidusia_view');
 
 		$this->data['fidusia'] = $this->model_fidusia->join_avaiable()->filter_avaiable()->find($id);
+		if (!$this->data['fidusia']) {
+			show_404();
+		}
 
 		$this->template->title('Fidusia Detail');
 		$this->render('modul/fidusia/fidusia_view', $this->data);
@@ -275,7 +294,7 @@ class Fidusia extends Admin
 
 		
 		
-		return $this->model_fidusia->remove($id);
+		return $fidusia ? $this->model_fidusia->remove($id) : false;
 	}
 	
 	
@@ -288,7 +307,7 @@ class Fidusia extends Admin
 	{
 		$this->is_allowed('fidusia_export');
 
-		$this->model_fidusia->export('fidusia', 'fidusia');
+		$this->model_fidusia->export_scoped('fidusia');
 	}
 
 	/**
@@ -300,7 +319,7 @@ class Fidusia extends Admin
 	{
 		$this->is_allowed('fidusia_export');
 
-		$this->model_fidusia->pdf('fidusia', 'fidusia');
+		$this->model_fidusia->pdf_scoped('Fidusia');
 	}
 }
 

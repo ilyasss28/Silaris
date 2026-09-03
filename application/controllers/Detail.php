@@ -40,23 +40,20 @@ class Detail extends CI_Controller {
 		}
 
 		$data['area'] = $this->Model_home->get_wilayah();
-		$detail = $this->Model_home->get_where('data_notaris', array('id_notaris'=>$id_notaris));
-		if ($detail->num_rows() === 0) {
+		$detail = $this->Model_home->get_public_notary($id_notaris);
+		if (!$detail) {
 			show_404();
 		}
 
-
-		foreach ($detail->result() as $key) {
-			$data['id_notaris']=$key->id_notaris;
-			$data['nama_notaris']=$key->nama_notaris;
-			$data['wilayah']=$key->wilayah;
-			$data['jenis_kelamin']=$key->jenis_kelamin;
-			$data['no_telepon']=$key->no_telepon;
-			$data['email']=$key->email;
-			$data['foto']=$key->foto;
-			$data['alamat_kantor']=$key->alamat_kantor;
-			$data['lat']=$key->lat;
-		}
+		$data['id_notaris']=$detail->id_notaris;
+		$data['nama_notaris']=$detail->nama_notaris;
+		$data['wilayah']=$detail->wilayah;
+		$data['jenis_kelamin']=$detail->jenis_kelamin;
+		$data['no_telepon']=$detail->no_telepon;
+		$data['email']=$detail->email;
+		$data['foto']=$detail->foto;
+		$data['alamat_kantor']=$detail->alamat_kantor;
+		$data['lat']=$detail->lat;
 		$this->load->view('include/head');
 		$this->load->view('include/header');
 		$this->load->view('detail', $data);

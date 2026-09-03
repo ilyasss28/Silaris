@@ -25,11 +25,7 @@ class Home extends CI_Controller {
 		// $this->load->view('include/slider');
 		$this->load->model('Model_home');
 		$data['wilayah'] = $this->Model_home->get_wilayah();
-		$data['notaris'] = $this->Model_home->get_db();
 
-		       // var_dump($data);
-		// exit ;
-		
 		$this->load->view('home', $data);
 		$this->load->view('include/footer');
 		$this->load->view('include/js');

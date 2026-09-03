@@ -7,7 +7,7 @@ class Model_group extends MY_Model {
 	private $primary_key 	= 'id';
 	private $table_name 	= 'aauth_groups';
 	private $field_search 	= array('name', 'definition');
-	private $application_groups = array('Admin', 'User', 'Kanwil', 'MPD', 'Pimpinan');
+	private $application_groups = array('Admin', 'User', 'Kanwil', 'MPD');
 
 	public function __construct()
 	{

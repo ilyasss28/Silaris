@@ -88,7 +88,7 @@ jQuery(document).ready(domo);
                            
                            <td><?= _ent($waarmerking->nama_notaris); ?></td> 
                            <td><?= _ent($waarmerking->nomor_akta); ?></td> 
-                           <td><?= _ent($waarmerking->tanggal_akta); ?></td> 
+                           <td><?= _ent(format_date_id($waarmerking->tanggal_akta)); ?></td> 
                            <td><?= _ent($waarmerking->sifat_akta); ?></td> 
                            <td><?= _ent($waarmerking->penghadap); ?></td> 
                            <td width="200">

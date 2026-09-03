@@ -307,6 +307,20 @@
                         </div>
                     </div>
 
+                    <div class="form-group user-edit-wide" id="mpd-region-field">
+                        <label for="mpd_wilayah" class="col-sm-2 control-label">Wilayah Kerja MPD</label>
+                        <div class="col-sm-8">
+                            <select class="form-control chosen-select" name="mpd_wilayah[]" id="mpd_wilayah" multiple data-placeholder="Pilih satu atau beberapa wilayah kerja MPD">
+                                <?php foreach (db_get_all_data('wilayah') as $row): ?>
+                                    <?php if (trim((string) $row->kd_wilayah) !== ''): ?>
+                                    <option value="<?= _ent($row->kd_wilayah); ?>" <?= in_array((string) $row->kd_wilayah, (array) $mpd_regions, true) ? 'selected' : ''; ?>><?= _ent($row->nama); ?></option>
+                                    <?php endif; ?>
+                                <?php endforeach; ?>
+                            </select>
+                            <small class="info help-block">Digunakan hanya jika akun memiliki role MPD. Perubahan dapat dilakukan kapan saja setelah data MPD resmi tersedia.</small>
+                        </div>
+                    </div>
+
                     <div class="form-group user-edit-wide user-avatar-field">
                         <label for="username" class="col-sm-2 control-label"><?= cclang('avatar'); ?> </label>
 

@@ -29,7 +29,7 @@ class Auth extends Admin
 		$this->config->load('site');
 		$data['login_groups'] = get_application_groups();
 
-		$this->form_validation->set_rules('group', 'Group/Role', 'trim|required|in_list[Admin,User,Kanwil,MPD,Pimpinan]');
+		$this->form_validation->set_rules('group', 'Group/Role', 'trim|required|in_list[Admin,User,Kanwil,MPD]');
 		$this->form_validation->set_rules('username', 'Username', 'trim|required');
 		// Passwords are never trimmed: whitespace may be part of an existing password.
 		$this->form_validation->set_rules('password', 'Password', 'required');

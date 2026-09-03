@@ -294,7 +294,7 @@ class Group extends API
 
 		$this->form_validation->set_message(
 			'valid_application_group',
-			'Name must be one of Admin, User, Kanwil, MPD, or Pimpinan.'
+			'Name must be one of Admin, User, Kanwil, or MPD.'
 		);
 		return false;
 	}

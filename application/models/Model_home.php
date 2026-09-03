@@ -26,8 +26,9 @@ class Model_home extends CI_Model
 }
 
 public function get_db(){
-$this->db->select('*');
+        $this->select_public_fields();
         $this->db->from('data_notaris');
+        $this->apply_public_notary_scope();
         $this->db->order_by('id_notaris', 'DESC');
         $query = $this->db->get();
         if ($query === FALSE) {
@@ -38,17 +39,10 @@ $this->db->select('*');
 
 }
 
-public function get_where($table = null, $where = null)
-{
-    $this->db->from($table);
-    $this->db->where($where);
-    return $this->db->get();
-}
-
 public function get_wilayah(){
         $this->db->select('kode_wilayah, COUNT(*) as jumlah', FALSE);
         $this->db->from('data_notaris');
-        $this->db->where('kode_wilayah IS NOT NULL', NULL, FALSE);
+        $this->apply_public_notary_scope();
         $this->db->group_by('kode_wilayah');
         $query = $this->db->get();
         if ($query === FALSE) {
@@ -111,7 +105,9 @@ public function get_notaris_by_region($slug)
         return [];
     }
 
+    $this->select_public_fields();
     $this->db->from('data_notaris');
+    $this->apply_public_notary_scope();
     $this->db->where_in('kode_wilayah', [$official_code, strtolower($slug)]);
     $this->db->order_by('id_notaris', 'DESC');
     $query = $this->db->get();
@@ -122,6 +118,41 @@ public function get_notaris_by_region($slug)
     }
 
     return $query->result();
+}
+
+public function get_public_notary($id_notaris)
+{
+    $this->select_public_fields();
+    $this->db->from('data_notaris');
+    $this->apply_public_notary_scope();
+    $this->db->where('id_notaris', (int) $id_notaris);
+
+    return $this->db->limit(1)->get()->row();
+}
+
+private function select_public_fields()
+{
+    // Do not pass private administrative fields (password, identity number,
+    // tax number, BAP, home address) into public views.
+    $this->db->select(array(
+        'id_notaris', 'nama_notaris', 'foto', 'jenis_kelamin', 'email',
+        'wilayah', 'kode_wilayah', 'alamat_kantor', 'lat', 'long',
+        'no_telepon', 'status_notaris',
+    ));
+}
+
+private function apply_public_notary_scope()
+{
+    $valid_regions = array_merge(array_keys($this->region_map), array_column($this->region_map, 'slug'));
+    $escaped_regions = array_map(array($this->db, 'escape'), $valid_regions);
+
+    $this->db->where("UPPER(TRIM(status_notaris)) = 'NOTARIS AKTIF'", null, false);
+    $this->db->where("TRIM(COALESCE(nama_notaris, '')) != ''", null, false);
+    $this->db->where(
+        'LOWER(TRIM(kode_wilayah)) IN (' . implode(',', $escaped_regions) . ')',
+        null,
+        false
+    );
 }
 
 public function kendari(){

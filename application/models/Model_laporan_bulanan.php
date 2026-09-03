@@ -45,7 +45,9 @@ class Model_laporan_bulanan extends MY_Model {
 	}
 
     public function join_avaiable() {
-        
+        $this->db->select('laporan_bulanan.*, wil.nama_wilayah');
+        $this->db->join('wil', 'wil.id = laporan_bulanan.kd_wilayah', 'LEFT');
+
         return $this;
     }
 

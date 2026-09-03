@@ -5,19 +5,7 @@ $display_value = static function ($value) {
 };
 
 $format_date = static function ($value) use ($display_value) {
-    $value = trim((string) $value);
-    $timestamp = $value !== '' && $value !== '0000-00-00' ? strtotime($value) : false;
-
-    if ($timestamp === false) {
-        return $display_value($value);
-    }
-
-    $months = [
-        1 => 'Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni',
-        'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember',
-    ];
-
-    return date('d', $timestamp).' '.$months[(int) date('n', $timestamp)].' '.date('Y', $timestamp);
+    return $display_value(format_date_id($value));
 };
 
 $notary_name = format_person_name($display_value($fidusia->nama_notaris));

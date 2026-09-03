@@ -82,16 +82,16 @@ jQuery(document).ready(domo);
                            </td>
                            
                            <td><?= _ent($rekap_laporan_bulanan->username); ?></td> 
-                           <td><?= _ent($rekap_laporan_bulanan->tanggal_laporan); ?></td> 
+                           <td><?= _ent(format_date_id($rekap_laporan_bulanan->tanggal_laporan)); ?></td> 
                            <td>
                               <?php if (!empty($rekap_laporan_bulanan->file_laporan)): ?>
-                                <?php $document_viewer_url = google_document_viewer_url(BASE_URL . 'uploads/rekap_laporan_bulanan/' . rawurlencode($rekap_laporan_bulanan->file_laporan)); ?>
+                                <?php $document_viewer_url = document_preview_url(BASE_URL . 'uploads/rekap_laporan_bulanan/' . rawurlencode($rekap_laporan_bulanan->file_laporan)); ?>
                                 <?php if (is_image($rekap_laporan_bulanan->file_laporan)): ?>
-                                <a href="<?= _ent($document_viewer_url); ?>" target="_blank" rel="noopener noreferrer" title="Buka di Google Drive">
+                                <a href="<?= _ent($document_viewer_url); ?>" target="_blank" rel="noopener noreferrer" title="Buka di tab baru">
                                   <img src="<?= BASE_URL . 'uploads/rekap_laporan_bulanan/' . $rekap_laporan_bulanan->file_laporan; ?>" class="image-responsive" alt="image rekap_laporan_bulanan" title="file_laporan rekap_laporan_bulanan" width="40px">
                                 </a>
                                 <?php else: ?>
-                                  <a href="<?= _ent($document_viewer_url); ?>" target="_blank" rel="noopener noreferrer" title="Buka di Google Drive">
+                                  <a href="<?= _ent($document_viewer_url); ?>" target="_blank" rel="noopener noreferrer" title="Buka di tab baru">
                                    <img src="<?= get_icon_file($rekap_laporan_bulanan->file_laporan); ?>" class="image-responsive image-icon" alt="image rekap_laporan_bulanan" title="file_laporan <?= $rekap_laporan_bulanan->file_laporan; ?>" width="40px">
                                  </a>
                                 <?php endif; ?>

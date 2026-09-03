@@ -212,7 +212,7 @@ class Group extends Admin
 
 		$this->form_validation->set_message(
 			'valid_application_group',
-			'Nama grup hanya dapat berupa Admin, User, Kanwil, MPD, atau Pimpinan.'
+			'Nama grup hanya dapat berupa Admin, User, Kanwil, atau MPD.'
 		);
 		return false;
 	}

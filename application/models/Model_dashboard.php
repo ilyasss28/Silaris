@@ -13,7 +13,7 @@ class Model_dashboard extends CI_Model
 
     public function resolve_role(array $group_names)
     {
-        foreach (['Admin', 'Pimpinan', 'Kanwil', 'MPD', 'User'] as $role) {
+        foreach (['Admin', 'Kanwil', 'MPD', 'User'] as $role) {
             if (in_array($role, $group_names, true)) {
                 return $role;
             }
@@ -27,7 +27,7 @@ class Model_dashboard extends CI_Model
         $user = $this->db->get_where('aauth_users', ['id' => (int) $user_id])->row();
         $username = $user ? (string) $user->username : '';
         $region_code = $user ? trim((string) $user->kd_wilayah) : '';
-        $profile = in_array($role, ['Admin', 'Kanwil', 'Pimpinan'], true)
+        $profile = in_array($role, ['Admin', 'Kanwil'], true)
             ? 'executive'
             : ($role === 'MPD' ? 'mpd' : 'user');
         $scope_username = $profile === 'user' ? $username : null;
@@ -79,7 +79,7 @@ class Model_dashboard extends CI_Model
         }
 
         $active_notaries = (int) $this->db
-            ->where("UPPER(TRIM(status_notaris)) LIKE '%AKTIF%'", null, false)
+            ->where("UPPER(TRIM(status_notaris)) = 'NOTARIS AKTIF'", null, false)
             ->count_all_results('data_notaris');
 
         return [
@@ -103,6 +103,10 @@ class Model_dashboard extends CI_Model
 
     private function count_records($table, $date_column, $username = null, $region_code = null, $current_year = true)
     {
+        if ($table === 'laporan') {
+            return $this->count_valid_reports($username, $region_code, $current_year);
+        }
+
         $this->db->from($table . ' dashboard_records');
         if ($region_code !== null) {
             $this->db->join('aauth_users dashboard_users', 'dashboard_users.username = dashboard_records.username');
@@ -117,6 +121,41 @@ class Model_dashboard extends CI_Model
         $this->db->where('dashboard_records.' . $date_column . ' <=', date('Y-m-d'));
 
         return (int) $this->db->count_all_results();
+    }
+
+    private function count_valid_reports($username = null, $region_code = null, $current_year = true)
+    {
+        $owner_join = $this->report_owner_join('dashboard_records', 'dashboard_users');
+        $this->db
+            ->from('laporan dashboard_records')
+            ->join('aauth_users dashboard_users', $owner_join, 'inner', false)
+            ->join('aauth_user_to_group memberships', 'memberships.user_id = dashboard_users.id')
+            ->join('aauth_groups groups_table', "groups_table.id = memberships.group_id AND groups_table.name = 'User'")
+            ->where('dashboard_users.banned', 0);
+        if ($region_code !== null) {
+            $this->db->where('dashboard_users.kd_wilayah', $region_code);
+        }
+        if ($username !== null) {
+            $this->db->where('dashboard_users.username', $username);
+        }
+        if ($current_year) {
+            $this->db->where('dashboard_records.Tanggal_Laporan >=', date('Y-01-01'));
+        }
+        $this->db->where('dashboard_records.Tanggal_Laporan <=', date('Y-m-d'));
+
+        $row = $this->db->select('COUNT(DISTINCT dashboard_records.id) AS total', false)->get()->row();
+        return $row ? (int) $row->total : 0;
+    }
+
+    private function report_owner_join($report_alias, $user_alias)
+    {
+        if ($this->db->field_exists('owner_user_id', 'laporan')) {
+            return '(' . $report_alias . '.owner_user_id = ' . $user_alias . '.id'
+                . ' OR (' . $report_alias . '.owner_user_id IS NULL AND LOWER('
+                . $report_alias . '.username) = LOWER(' . $user_alias . '.username)))';
+        }
+
+        return 'LOWER(' . $report_alias . '.username) = LOWER(' . $user_alias . '.username)';
     }
 
     private function compliance($username, $region_code, $profile)
@@ -217,7 +256,7 @@ class Model_dashboard extends CI_Model
         return $this->db
             ->select('regions.nama AS label, COUNT(notaries.id_notaris) AS total', false)
             ->from('wilayah regions')
-            ->join('data_notaris notaries', "notaries.kode_wilayah = regions.kd_wilayah OR UPPER(TRIM(notaries.wilayah)) = UPPER(TRIM(regions.nama))", 'left', false)
+            ->join('data_notaris notaries', "(notaries.kode_wilayah = regions.kd_wilayah OR UPPER(TRIM(notaries.wilayah)) = UPPER(TRIM(regions.nama))) AND UPPER(TRIM(notaries.status_notaris)) = 'NOTARIS AKTIF'", 'left', false)
             ->where('regions.kd_wilayah !=', '')
             ->where('regions.nama IS NOT NULL', null, false)
             ->group_by(['regions.id', 'regions.kd_wilayah', 'regions.nama'])
@@ -269,9 +308,8 @@ class Model_dashboard extends CI_Model
 
     private function format_date($date)
     {
-        $months = [1 => 'Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des'];
-        $timestamp = strtotime($date);
-        return $timestamp ? date('d', $timestamp) . ' ' . $months[(int) date('n', $timestamp)] . ' ' . date('Y', $timestamp) : '-';
+        $formatted = format_date_id($date);
+        return $formatted !== '' ? $formatted : '-';
     }
 
     private function quick_links($profile)

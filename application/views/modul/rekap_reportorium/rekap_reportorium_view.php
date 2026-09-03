@@ -74,7 +74,7 @@ jQuery(document).ready(domo);
                         <label for="content" class="col-sm-2 control-label">Tanggal Akta </label>
 
                         <div class="col-sm-8">
-                           <?= _ent($rekap_reportorium->tanggal_akta); ?>
+                           <?= _ent(format_date_id($rekap_reportorium->tanggal_akta)); ?>
                         </div>
                     </div>
                                          

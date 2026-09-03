@@ -99,26 +99,8 @@
                             <i class="required">*</i>
                             </label>
                             <div class="col-sm-8">
-                                <?php 
-
-                                
-                                    $kd_wilayah = get_user_data('kd_wilayah'); 
-                                    $username = get_user_data('username'); 
-                                    if($username == 'admin'){
-                                    $a = db_get_all_data('wilayah');
-                                    }else{
-                                    $a = db_get_all_data('wilayah',"kd_wilayah = kd_wilayah");
-                                    }
-                                
-                              ?>
-                                <select  class="form-control chosen chosen-select-deselect" name="kd_wilayah" id="kd_wilayah" data-placeholder="Select Kd wilayah" >
-                                    <option value=""></option>
-                                    <?php foreach ($a as $row): ?>
-                                    <option <?=  $row->kd_wilayah ==  $user->kd_wilayah ? 'selected' : ''; ?> value="<?= $row->kd_wilayah ?>"><?= $row->nama; ?></option>
-                                    <?php endforeach; ?>  
-                                </select>
-                                <small class="info help-block">
-                                <b>Input Kd wilayah</b> Max Length : 7.</small>
+                                <input type="text" class="form-control" value="<?= _ent($this->model_user->get_region_name($user->kd_wilayah) ?: $user->kd_wilayah); ?>" readonly>
+                                <small class="info help-block">Wilayah resmi hanya dapat diubah oleh administrator melalui Manajemen User.</small>
                             </div>
                         </div>
                    

@@ -47,8 +47,8 @@ $certificate_value = set_value('no_sertifikat_jaminan_fidusia', $record ? $recor
 
             <div class="fidusia-form-field">
               <label for="nomor_akta">Nomor Akta <i class="required">*</i></label>
-              <input type="number" class="form-control" name="nomor_akta" id="nomor_akta" placeholder="Contoh: 25" value="<?= _ent($number_value); ?>" min="1" max="9999999999" required>
-              <small><i class="fa fa-info-circle" aria-hidden="true"></i>Maksimal 10 digit angka.</small>
+              <input type="number" class="form-control" name="nomor_akta" id="nomor_akta" placeholder="Contoh: 25 atau 0 jika nihil" value="<?= _ent($number_value); ?>" min="0" max="9999999999" step="1" required>
+              <small><i class="fa fa-info-circle" aria-hidden="true"></i>Isi 0 jika nihil; maksimal 10 digit angka.</small>
             </div>
 
             <div class="fidusia-form-field fidusia-form-field--full">

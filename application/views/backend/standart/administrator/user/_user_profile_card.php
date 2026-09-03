@@ -6,6 +6,7 @@ $profile_description = $is_own_profile
   : 'Informasi akun notaris yang dipilih dari halaman manajemen pengguna.';
 $region_name = trim((string) (isset($region_name) ? $region_name : ''));
 $region_display = $region_name !== '' ? $region_name : '-';
+$mpd_region_names = isset($mpd_region_names) && is_array($mpd_region_names) ? $mpd_region_names : array();
 $avatar_name = !empty($user->avatar) ? basename($user->avatar) : 'default.png';
 $avatar_path = FCPATH . 'uploads/user/' . $avatar_name;
 $avatar_url = BASE_URL . 'uploads/user/' . (is_file($avatar_path) ? $avatar_name : 'default.png');
@@ -15,7 +16,7 @@ $display_date = function ($value) {
   }
 
   $timestamp = strtotime($value);
-  return $timestamp ? date('d M Y, H:i', $timestamp) : $value;
+  return $timestamp ? format_date_id($value) . ', ' . date('H:i', $timestamp) : $value;
 };
 ?>
 
@@ -87,6 +88,9 @@ $display_date = function ($value) {
             <div><dt>Username</dt><dd><?= _ent($user->username); ?></dd></div>
             <div><dt>Email</dt><dd><?= _ent($user->email); ?></dd></div>
             <div><dt>Wilayah</dt><dd><?= _ent($region_display); ?></dd></div>
+            <?php if (!empty($mpd_region_names)): ?>
+              <div><dt>Wilayah Kerja MPD</dt><dd><?= _ent(implode(', ', $mpd_region_names)); ?></dd></div>
+            <?php endif; ?>
           </dl>
         </section>
 

@@ -20,7 +20,6 @@ if ($this->aauth->is_admin()) {
   }
 
   $role_priority = array(
-    'pimpinan' => 'Pimpinan',
     'kanwil' => 'Kanwil',
     'mpd' => 'MPD',
     'notaris' => 'Notaris',
@@ -37,9 +36,10 @@ if ($this->aauth->is_admin()) {
   }
 }
 
-$last_login_timestamp = strtotime((string) get_user_data('last_login'));
+$last_login_value = (string) get_user_data('last_login');
+$last_login_timestamp = strtotime($last_login_value);
 $last_login_label = $last_login_timestamp
-  ? date('d/m/Y H:i', $last_login_timestamp)
+  ? format_date_id($last_login_value) . ' ' . date('H:i', $last_login_timestamp)
   : 'Belum tersedia';
 ?>
 <!DOCTYPE html>
@@ -155,7 +155,7 @@ $last_login_label = $last_login_timestamp
           <li class="nav-item">
             <a href="<?= site_url('administrator/dashboard'); ?>" class="nav-link <?= ($this->uri->segment(1) == 'administrator' && ($this->uri->segment(2) == 'dashboard' || $this->uri->segment(2) == '')) ? 'active' : ''; ?>">
               <i class="nav-icon fa fa-th-large"></i>
-              <p>Dashboard</p>
+              <p>DASHBOARD</p>
             </a>
           </li>
           <!-- DYNAMIC MENU -->

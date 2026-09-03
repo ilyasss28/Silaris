@@ -480,11 +480,15 @@ class Cc_App
 
 			# Get parent level menu
 			if ($val['parent'] == $parent) {
+				$rawLink = trim((string) $val['link']);
+				$link = ($hasSubMenu || in_array($rawLink, ['', '#', '-'], true))
+					? '#'
+					: webPageUrl($rawLink);
 
 				# Write tag here
 				if ($val['type'] == 'menu') {
 					$html .= "<li ".$parentClass.">
-								<a href='".(webPageUrl($val['link']))."' class='nav-link ".$active."'>".$label;
+								<a href='".$link."' class='nav-link ".$active."'>".$label;
 					if ($hasSubMenu) {
 						$html .= ' <i class="nav-arrow fa fa-angle-left"></i>';
 					}

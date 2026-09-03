@@ -139,6 +139,29 @@ if (!function_exists('format_person_name')) {
 	}
 }
 
+if (!function_exists('format_date_id')) {
+	/**
+	 * Format a date as "10-Agu-2026" for consistent display across the
+	 * admin side. Returns the original value unchanged when it can't be
+	 * parsed as a date (empty, zero-date, or invalid).
+	 */
+	function format_date_id($value = '') {
+		$value = trim((string) $value);
+		$timestamp = $value !== '' && $value !== '0000-00-00' ? strtotime($value) : false;
+
+		if ($timestamp === false) {
+			return $value;
+		}
+
+		$months = array(
+			1 => 'Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun',
+			'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des',
+		);
+
+		return date('d', $timestamp) . '-' . $months[(int) date('n', $timestamp)] . '-' . date('Y', $timestamp);
+	}
+}
+
 if(!function_exists('get_group_user')) {
 	/**
 	 * @param int|string $id_user
@@ -154,7 +177,7 @@ if(!function_exists('get_group_user')) {
 if (!function_exists('get_application_groups')) {
 	function get_application_groups() {
 		$ci =& get_instance();
-		$allowed_names = array('Admin', 'User', 'Kanwil', 'MPD', 'Pimpinan');
+		$allowed_names = array('Admin', 'User', 'Kanwil', 'MPD');
 		$ci->db->where_in('name', $allowed_names);
 		$groups = $ci->db->get('aauth_groups')->result();
 		$order = array_flip($allowed_names);
@@ -218,6 +241,20 @@ if(!function_exists('message_flash')) {
 	}
 }
 
+if (!function_exists('is_default_dashboard_menu')) {
+	/**
+	 * The administrator dashboard is rendered permanently by main_layout.php.
+	 * Legacy databases may still contain the same route as a dynamic side menu.
+	 *
+	 * @param object $menu
+	 * @return bool
+	 */
+	function is_default_dashboard_menu($menu) {
+		$link = isset($menu->link) ? strtolower(trim((string) $menu->link, " /\\\t\n\r\0\x0B")) : '';
+		return $link === 'administrator/dashboard';
+	}
+}
+
 if(!function_exists('display_menu_module')) {
 	/**
 	 * @param int $parent
@@ -235,7 +272,13 @@ if(!function_exists('display_menu_module')) {
 		$ret = '';
 	    if ($result) {
 		    $ret .= '<ol class="dd-list">';
-		   	foreach ($result as $row) {
+			foreach ($result as $row) {
+				// Dashboard is a fixed system menu, so do not expose its legacy
+				// duplicate in the Side Menu manager.
+				if ((int) $menu_type_id === 1 && is_default_dashboard_menu($row)) {
+					continue;
+				}
+
 		        if ($row->Count > 0) {
 		        	 $ret .= '<li class="dd-item dd3-item '.($row->active ? '' : 'menu-toggle-activate_inactive').' menu-toggle-activate" data-id="'.$row->id.'" data-status="'.$row->active.'">';
 
@@ -308,7 +351,12 @@ if(!function_exists('display_menu_admin')) {
 	    	} else {
 	    		$ret = '';
 	    	}
-		   	foreach ($result as $row) {
+			foreach ($result as $row) {
+				// The dashboard link above display_menu_admin() is the canonical
+				// entry; skip any duplicate left in a legacy database.
+				if (is_default_dashboard_menu($row)) {
+					continue;
+				}
 
 
 
@@ -323,17 +371,19 @@ if(!function_exists('display_menu_admin')) {
 		   		} else {
 		   			$active = '';
 		   		}
-		   		$raw_link = trim((string) $row->link);
-		   		if ($raw_link === '' OR $raw_link === '#') {
-		   			// Placeholder link for a collapsible parent menu. Keep it as a
-		   			// literal "#" so AdminLTE's treeview handler suppresses the
-		   			// browser navigation instead of jumping to <base_url>/# .
-		   			$link = '#';
-		   		} elseif (filter_var($raw_link, FILTER_VALIDATE_URL)) {
-		   			$link = $raw_link;
-		   		} else {
-		   			$link = base_url($raw_link);
-		   		}
+				$raw_link = trim((string) $row->link);
+				$is_parent_menu = (int) $row->Count > 0;
+				if ($is_parent_menu OR in_array($raw_link, array('', '#', '-'), true)) {
+					// Placeholder link for a collapsible parent menu. Keep it as a
+					// literal "#" so AdminLTE's treeview handler suppresses the
+					// browser navigation. Older menu records use "-" as their
+					// placeholder, which must never become <base_url>/-.
+					$link = '#';
+				} elseif (filter_var($raw_link, FILTER_VALIDATE_URL)) {
+					$link = $raw_link;
+				} else {
+					$link = base_url($raw_link);
+				}
 		   		if ($row->type == 'label') {
 		   			if ($ci->aauth->is_allowed($perms)) {
 		        		$ret .= '<li class="nav-header">'._ent($row->label).'</li>';
@@ -1114,18 +1164,14 @@ if(!function_exists('get_all_blog')) {
 	}
 }
 
-if (!function_exists('google_document_viewer_url')) {
+if (!function_exists('document_preview_url')) {
 	/**
-	 * Build a standalone Google document viewer URL without triggering a download.
-	 * The source document must be reachable publicly over HTTPS.
+	 * URL used to open a document in a new tab. Links straight to the file
+	 * so the browser's own viewer (e.g. Chrome's built-in PDF viewer) opens
+	 * it, since an external viewer service can't reach documents on a
+	 * private/local domain like this application's.
 	 */
-	function google_document_viewer_url($document_url = '') {
-		$document_url = trim((string) $document_url);
-
-		if ($document_url === '') {
-			return '';
-		}
-
-		return 'https://drive.google.com/viewerng/viewer?url=' . rawurlencode($document_url);
+	function document_preview_url($document_url = '') {
+		return trim((string) $document_url);
 	}
 }

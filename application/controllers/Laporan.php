@@ -87,6 +87,9 @@ class Laporan extends Admin
 				'username' => get_user_data('username'),
 					'Tanggal_Laporan' => $this->input->post('Tanggal_Laporan'),
 			];
+			if ($this->db->field_exists('owner_user_id', 'laporan')) {
+				$save_data['owner_user_id'] = (int) get_user_data('id');
+			}
 
 			if (!is_dir(FCPATH . '/uploads/laporan/')) {
 				mkdir(FCPATH . '/uploads/laporan/');
@@ -158,6 +161,9 @@ class Laporan extends Admin
 		$this->is_allowed('laporan_update');
 
 		$this->data['laporan'] = $this->model_laporan->find($id);
+		if (!$this->data['laporan']) {
+			show_404();
+		}
 
 		$this->template->title('Laporan Update');
 		$this->render('modul/laporan/laporan_update', $this->data);
@@ -177,6 +183,16 @@ class Laporan extends Admin
 				]);
 			exit;
 		}
+
+		if (!$this->model_laporan->find($id)) {
+			return $this->output
+				->set_status_header(404)
+				->set_content_type('application/json')
+				->set_output(json_encode([
+					'success' => false,
+					'message' => 'Laporan tidak ditemukan atau bukan milik akun Anda.',
+				]));
+		}
 		
 		$this->form_validation->set_rules('Tanggal_Laporan', 'Tanggal Laporan', 'trim|required');
 		$this->form_validation->set_rules('laporan_Laporan_name', 'Laporan', 'trim|required');
@@ -185,9 +201,10 @@ class Laporan extends Admin
 			$laporan_Laporan_uuid = $this->input->post('laporan_Laporan_uuid');
 			$laporan_Laporan_name = $this->input->post('laporan_Laporan_name');
 		
+			// Ownership is immutable during an edit. This prevents an Admin,
+			// Kanwil, or MPD account from accidentally taking over a
+			// notary's report merely by correcting its date or document.
 			$save_data = [
-				'nama_notaris' => $this->input->post('nama_notaris'),
-				'username' => get_user_data('username'),
 				'Tanggal_Laporan' => $this->input->post('Tanggal_Laporan'),
 			];
 
@@ -264,7 +281,7 @@ class Laporan extends Admin
 
 		if (!empty($id)) {
 			$remove = $this->_remove($id);
-		} elseif (count($arr_id) >0) {
+		} elseif (is_array($arr_id) && count($arr_id) > 0) {
 			foreach ($arr_id as $id) {
 				$remove = $this->_remove($id);
 			}
@@ -289,6 +306,9 @@ class Laporan extends Admin
 		$this->is_allowed('laporan_view');
 
 		$this->data['laporan'] = $this->model_laporan->join_avaiable()->filter_avaiable()->find($id);
+		if (!$this->data['laporan']) {
+			show_404();
+		}
 
 		$this->template->title('Laporan Detail');
 		$this->render('modul/laporan/laporan_view', $this->data);
@@ -303,7 +323,7 @@ class Laporan extends Admin
 	{
 		$laporan = $this->model_laporan->find($id);
 
-		if (!empty($laporan->Laporan)) {
+		if ($laporan && !empty($laporan->Laporan)) {
 			$path = FCPATH . '/uploads/laporan/' . $laporan->Laporan;
 
 			if (is_file($path)) {
@@ -312,7 +332,7 @@ class Laporan extends Admin
 		}
 		
 		
-		return $this->model_laporan->remove($id);
+		return $laporan ? $this->model_laporan->remove($id) : false;
 	}
 	
 	/**
@@ -353,6 +373,16 @@ class Laporan extends Admin
 			exit;
 		}
 
+		if ($this->input->get('by') === 'id' && (!$this->model_laporan->find($uuid))) {
+			return $this->output
+				->set_status_header(404)
+				->set_content_type('application/json')
+				->set_output(json_encode([
+					'success' => false,
+					'error' => 'Laporan tidak ditemukan atau bukan milik akun Anda.',
+				]));
+		}
+
 		echo $this->delete_file([
             'uuid'              => $uuid, 
             'delete_by'         => $this->input->get('by'), 
@@ -379,6 +409,15 @@ class Laporan extends Admin
 		}
 
 		$laporan = $this->model_laporan->find($id);
+		if (!$laporan) {
+			return $this->output
+				->set_status_header(404)
+				->set_content_type('application/json')
+				->set_output(json_encode([
+					'success' => false,
+					'message' => 'Laporan tidak ditemukan atau bukan milik akun Anda.',
+				]));
+		}
 
 		echo $this->get_file([
             'uuid'              => $id, 
@@ -401,7 +440,7 @@ class Laporan extends Admin
 	{
 		$this->is_allowed('laporan_export');
 
-		$this->model_laporan->export('laporan', 'laporan');
+		$this->model_laporan->export_scoped('laporan');
 	}
 
 	/**
@@ -413,7 +452,7 @@ class Laporan extends Admin
 	{
 		$this->is_allowed('laporan_export');
 
-		$this->model_laporan->pdf('laporan', 'laporan');
+		$this->model_laporan->pdf_scoped('Laporan');
 	}
 }
 

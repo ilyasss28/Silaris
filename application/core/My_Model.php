@@ -128,10 +128,13 @@ class MY_Model extends CI_Model {
         }
     }
 
-    public function export($table, $subject = 'file')
+    public function export($table, $subject = 'file', array $where = array())
     {
         $this->load->library('excel');
 
+        foreach ($where as $column => $value) {
+            $this->db->where($column, $value);
+        }
         $result = $this->db->get($table);
 
         $this->excel->setActiveSheetIndex(0);
@@ -237,7 +240,7 @@ class MY_Model extends CI_Model {
         $objWriter->save('php://output');
     }
 
-    public function pdf($table, $title)
+    public function pdf($table, $title, array $where = array())
     {
         $this->load->library('HtmlPdf');
       
@@ -249,6 +252,9 @@ class MY_Model extends CI_Model {
 
         $this->pdf = new HtmlPdf($config);
 
+        foreach ($where as $column => $value) {
+            $this->db->where($column, $value);
+        }
         $result = $this->db->get($table);
         $fields = $result->list_fields();
 

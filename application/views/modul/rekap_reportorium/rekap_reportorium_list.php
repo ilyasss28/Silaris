@@ -85,7 +85,7 @@ jQuery(document).ready(domo);
                            
                            <td><?= _ent($rekap_reportorium->nama_notaris); ?></td> 
                            <td><?= _ent($rekap_reportorium->nomor_akta); ?></td> 
-                           <td><?= _ent($rekap_reportorium->tanggal_akta); ?></td> 
+                           <td><?= _ent(format_date_id($rekap_reportorium->tanggal_akta)); ?></td> 
                            <td><?= _ent($rekap_reportorium->sifat_akta); ?></td> 
                            <td><?= _ent($rekap_reportorium->penghadap); ?></td> 
                            <td width="200">

@@ -5,6 +5,51 @@
     return element ? element.textContent.replace(/\s+/g, ' ').trim() : '';
   }
 
+  var UPLOAD_FILE_ICON_BY_EXTENSION = {
+    jpg: 'fa-file-image-o', jpeg: 'fa-file-image-o', png: 'fa-file-image-o',
+    gif: 'fa-file-image-o', bmp: 'fa-file-image-o', webp: 'fa-file-image-o',
+    pdf: 'fa-file-pdf-o',
+    doc: 'fa-file-word-o', docx: 'fa-file-word-o',
+    xls: 'fa-file-excel-o', xlsx: 'fa-file-excel-o', csv: 'fa-file-excel-o',
+    ppt: 'fa-file-powerpoint-o', pptx: 'fa-file-powerpoint-o',
+    zip: 'fa-file-archive-o', rar: 'fa-file-archive-o'
+  };
+
+  function uploadFileIconClass(fileName) {
+    var match = /\.([a-z0-9]+)$/i.exec(fileName || '');
+    var extension = match ? match[1].toLowerCase() : '';
+    return UPLOAD_FILE_ICON_BY_EXTENSION[extension] || 'fa-file-o';
+  }
+
+  // Fine Uploader's gallery template has no file-type icon of its own, so a
+  // small icon matching the extension (image, PDF, Word, ...) is inserted
+  // next to the filename for both freshly chosen files and ones restored
+  // from an existing record.
+  function applyUploadFileIcons(root) {
+    if (!root || root.nodeType !== 1) return;
+
+    var items = [];
+    if (root.matches && root.matches('.qq-gallery .qq-upload-list > li')) items.push(root);
+    root.querySelectorAll('.qq-gallery .qq-upload-list > li').forEach(function (item) { items.push(item); });
+
+    items.forEach(function (item) {
+      var nameNode = item.querySelector('.qq-upload-file');
+      var nameContainer = item.querySelector('.qq-file-name');
+      var fileName = textOf(nameNode);
+      if (!nameNode || !nameContainer || !fileName) return;
+
+      var icon = nameContainer.querySelector(':scope > .report-file-icon');
+      if (!icon) {
+        icon = document.createElement('i');
+        icon.setAttribute('aria-hidden', 'true');
+        nameContainer.insertBefore(icon, nameNode);
+      }
+
+      var iconClass = 'report-file-icon fa ' + uploadFileIconClass(fileName);
+      if (icon.className !== iconClass) icon.className = iconClass;
+    });
+  }
+
   function removeLegacyPageHeaders(root) {
     if (!root || root.nodeType !== 1) return;
 
@@ -624,6 +669,7 @@
       window.initializeNativeDateInputs(document.querySelector('.app-main'));
     }
     classifyPage(document.querySelector('.app-main'));
+    applyUploadFileIcons(document.querySelector('.app-main'));
   }
 
   if (document.readyState === 'loading') {
@@ -633,7 +679,14 @@
   }
 
   var dynamicButtonObserver = new MutationObserver(function (mutations) {
+    var touchedUploadList = false;
+
     mutations.forEach(function (mutation) {
+      if (!touchedUploadList) {
+        var changed = mutation.target && mutation.target.nodeType === 1 ? mutation.target : mutation.target && mutation.target.parentElement;
+        if (changed && changed.closest && changed.closest('.qq-gallery .qq-upload-list')) touchedUploadList = true;
+      }
+
       mutation.addedNodes.forEach(function (node) {
         removeLegacyPageHeaders(node);
         normalizeButtons(node);
@@ -644,6 +697,11 @@
         }
       });
     });
+
+    // Fine Uploader inserts a file's <li> first and fills in its filename
+    // text a moment later, so the icon is (re)applied once per batch rather
+    // than per added node to avoid missing that follow-up text mutation.
+    if (touchedUploadList) applyUploadFileIcons(document.querySelector('.app-main'));
   });
   var appMain = document.querySelector('.app-main');
   if (appMain) dynamicButtonObserver.observe(appMain, { childList: true, subtree: true });

@@ -58,7 +58,7 @@ jQuery(document).ready(domo);
                      </div>
                      <!-- /.widget-user-image -->
                      <h3 class="widget-user-username"><b>Fidusia</b></h3>
-                     <h5 class="widget-user-desc"><?= cclang('list_all', ['Fidusia']); ?>  <i class="label bg-yellow"><?= $fidusia_counts; ?>  <?= cclang('items'); ?></i></h5>
+                     <h5 class="widget-user-desc">Daftar Fidusia  <i class="label bg-yellow"><?= $fidusia_counts; ?>  <?= cclang('items'); ?></i></h5>
                   </div>
 
                   <form name="form_fidusia" id="form_fidusia" action="<?= base_url('fidusia/index'); ?>">
@@ -89,8 +89,8 @@ jQuery(document).ready(domo);
                            </td>
                            
                            <td><?= _ent($fidusia->nama_notaris); ?></td> 
-                           <td><?= _ent($fidusia->tanggal); ?></td> 
-                           <td><?= _ent($fidusia->tanggal_akta); ?></td> 
+                           <td><?= _ent(format_date_id($fidusia->tanggal)); ?></td>
+                           <td><?= _ent(format_date_id($fidusia->tanggal_akta)); ?></td> 
                            <td><?= _ent($fidusia->nomor_akta); ?></td> 
                            <td><?= _ent($fidusia->nama_pemberi_fidusia); ?></td> 
                            <td><?= _ent($fidusia->nama_penerima_fidusia); ?></td> 

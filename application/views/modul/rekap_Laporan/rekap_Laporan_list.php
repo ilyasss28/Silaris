@@ -6,11 +6,6 @@
 function domo(){
  
    // Binding keys
-   $('*').bind('keydown', 'Ctrl+a', function assets() {
-       window.location.href = BASE_URL + '/rekap-laporan/add';
-       return false;
-   });
-
    $('*').bind('keydown', 'Ctrl+f', function assets() {
        $('#sbtn').trigger('click');
        return false;
@@ -43,11 +38,9 @@ jQuery(document).ready(domo);
                   <!-- Add the bg color to the header using any of the bg-* classes -->
                   <div class="widget-user-header ">
                      <div class="row pull-right">
-                        <?php if ($rekap_permissions['add']): ?>
-                        <a class="btn btn-flat btn-success btn_add_new" id="btn_add_new" title="Tambah Data  (Ctrl+a)" href="<?= site_url('rekap-laporan/add'); ?>"><i class="fa fa-plus-square-o" ></i> Tambah Data</a>
-                        <?php endif; ?>
                         <a class="btn btn-flat btn-success" title="<?= cclang('export'); ?> XLS" href="<?= site_url('rekap-laporan/export'); ?>"><i class="fa fa-file-excel-o" ></i></a>
                         <a class="btn btn-flat btn-success" title="<?= cclang('export'); ?> PDF" href="<?= site_url('rekap-laporan/export_pdf'); ?>"><i class="fa fa-file-pdf-o" ></i></a>
+                        <a class="btn btn-flat btn-success" title="Unduh manifest backup laporan" href="<?= site_url('rekap-laporan/backup_manifest'); ?>"><i class="fa fa-list-alt"></i> Manifest Backup</a>
                      </div>
                      <div class="widget-user-image">
                         <img class="img-circle" src="<?= BASE_ASSET; ?>/img/list.png" alt="User Avatar">
