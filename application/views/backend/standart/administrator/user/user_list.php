@@ -61,26 +61,38 @@ jQuery(document).ready(domo);
                      <h5 class="widget-user-desc">Daftar Semua Pengguna <i class="label bg-yellow"><?= $user_counts; ?> <?= cclang('items'); ?></i></h5>
                   </div>
 
-                  <form name="form_user" id="form_user" action="<?= base_url('administrator/user/index'); ?>">
-
+                  <form name="user_table_filters" id="user_table_filters" method="get" action="<?= base_url('administrator/user/index'); ?>">
+                  <input type="hidden" name="q" value="<?= _ent($this->input->get('q', true)); ?>">
+                  <input type="hidden" name="f" value="<?= _ent($this->input->get('f', true)); ?>">
                   <div class="user-group-filterbar">
                      <div class="user-group-filterbar__copy">
                         <span class="user-group-filterbar__icon"><i class="fa fa-users"></i></span>
-                        <span><strong>Filter Group</strong><small>Tampilkan pengguna berdasarkan kelompok akses.</small></span>
+                        <span><strong>Filter Pengguna</strong><small>Tampilkan pengguna berdasarkan role dan status akun.</small></span>
                      </div>
                      <div class="user-group-filterbar__control">
-                        <label class="sr-only" for="user_group_filter">Pilih group pengguna</label>
+                        <label class="sr-only" for="user_group_filter">Pilih role pengguna</label>
                         <select class="form-control" name="group" id="user_group_filter">
-                           <option value="">Semua Group</option>
+                           <option value="">Semua Role</option>
                            <?php foreach ($filterable_groups as $filter_group): ?>
                            <option value="<?= _ent($filter_group); ?>" <?= $group_filter === $filter_group ? 'selected' : ''; ?>><?= _ent($filter_group); ?></option>
                            <?php endforeach; ?>
                         </select>
-                        <?php if ($group_filter !== ''): ?>
-                        <a href="<?= site_url('administrator/user'); ?>" class="user-group-filterbar__reset" title="Hapus filter group"><i class="fa fa-times"></i><span>Reset</span></a>
+                        <label class="sr-only" for="user_status_filter">Pilih status pengguna</label>
+                        <select class="form-control" name="account_status" id="user_status_filter">
+                           <option value="">Semua Status</option>
+                           <option value="active" <?= $status_filter === 'active' ? 'selected' : ''; ?>>Aktif</option>
+                           <option value="inactive" <?= $status_filter === 'inactive' ? 'selected' : ''; ?>>Nonaktif</option>
+                        </select>
+                        <?php if ($group_filter !== '' || $status_filter !== ''): ?>
+                        <a href="<?= site_url('administrator/user'); ?>" class="user-group-filterbar__reset" title="Hapus filter pengguna"><i class="fa fa-times"></i><span>Reset</span></a>
                         <?php endif; ?>
                      </div>
                   </div>
+                  </form>
+
+                  <form name="form_user" id="form_user" method="get" action="<?= base_url('administrator/user/index'); ?>">
+                  <input type="hidden" name="group" value="<?= _ent($group_filter); ?>">
+                  <input type="hidden" name="account_status" value="<?= _ent($status_filter); ?>">
 
                   <div class="table-responsive">
                   <table id="admin-user-table" class="table table-bordered table-striped dataTable admin-user-table" data-table-kind="users">
@@ -89,7 +101,7 @@ jQuery(document).ready(domo);
                            <th>
                             <input type="checkbox" class="flat-red toltip" id="check_all" name="check_all" title="check all">
                            </th>
-                           <th>Nama Pengguna</th>
+                           <th class="user-table__identity">Nama Pengguna</th>
                            <th>Username</th>
                            <th>Group</th>
                            <th>Status</th>
@@ -102,7 +114,7 @@ jQuery(document).ready(domo);
                            <td width="5">
                               <input type="checkbox" class="flat-red check" name="id[]" value="<?= $user->id; ?>">
                            </td>
-                           <td>
+                           <td class="user-table__identity">
 
                               <div class="chip">
                                 <?php if (is_file(FCPATH . 'uploads/user/' . $user->avatar)): ?>
@@ -117,7 +129,7 @@ jQuery(document).ready(domo);
                               </div>
                            </td>
                            <td><?= _ent($user->username); ?></td>
-                           <td>
+                           <td class="user-table__group">
                               <div class="user-group-badges">
                               <?php $user_groups = array_filter(array_map('trim', explode(',', (string) ($user->group_names ?? '')))); ?>
                               <?php if ($user_groups): ?>
@@ -130,9 +142,11 @@ jQuery(document).ready(domo);
                               </div>
                            </td>
                            <td>
-                              <div class="user-status-control <?= $user->banned ? 'is-inactive' : 'is-active'; ?>">
-                                 <input type="checkbox" name="status" data-user-id="<?= (int) $user->id; ?>" class="switch-button" <?= $user->banned ? '' : 'checked'; ?> aria-label="Status <?= _ent($user->full_name); ?>">
-                                 <span class="user-status-badge"><i class="fa fa-circle"></i><span class="user-status-text"><?= $user->banned ? 'Nonaktif' : 'Aktif'; ?></span></span>
+                              <?php $roster_locked = !empty($user->notary_roster_locked); ?>
+                              <?php $roster_reason = isset($user->roster_lock_reason) ? $user->roster_lock_reason : ''; ?>
+                              <div class="user-status-control <?= $user->banned ? 'is-inactive' : 'is-active'; ?><?= $roster_locked ? ' is-roster-locked' : ''; ?>"<?= $roster_locked ? ' title="Status dikunci: ' . _ent($roster_reason) . '"' : ''; ?>>
+                                 <input type="checkbox" data-user-id="<?= (int) $user->id; ?>" class="switch-button" <?= $user->banned ? '' : 'checked'; ?> <?= $roster_locked ? 'disabled' : ''; ?> aria-label="Status <?= _ent($user->full_name); ?><?= $roster_locked ? ' dikunci. ' . _ent($roster_reason) : ''; ?>">
+                                 <span class="user-status-badge"><i class="fa fa-circle"></i><span class="user-status-text"><?= $user->banned ? 'Nonaktif' : 'Aktif'; ?></span><?= $roster_locked ? '<i class="fa fa-lock user-status-lock-icon" aria-hidden="true"></i>' : ''; ?></span>
                               </div>
                            </td>
                            <td width="200">
@@ -215,8 +229,8 @@ jQuery(document).ready(domo);
 <!-- Page script -->
 <script>
   $(document).ready(function() {
-    $('#user_group_filter').on('change', function() {
-        this.form.submit();
+    $('#user_group_filter, #user_status_filter').on('change', function() {
+        document.getElementById('user_table_filters').submit();
     });
 
     // Delegated handlers survive AJAX page changes, so remove the previous
@@ -238,7 +252,7 @@ jQuery(document).ready(domo);
 
     $(document).on('change.silarisUserStatus', 'input.switch-button', function() {
         var $input = $(this);
-        if ($input.data('status-syncing')) return;
+        if ($input.data('status-syncing') || $input.prop('disabled') || $input.closest('.user-status-control').hasClass('is-roster-locked')) return;
 
         var status = 'inactive';
         var id = $input.attr('data-user-id');
@@ -300,7 +314,9 @@ jQuery(document).ready(domo);
                 toastr['error']('Error update status');
             })
             .always(function() {
-                $input.prop('disabled', false);
+                if (!$control.hasClass('is-roster-locked')) {
+                    $input.prop('disabled', false);
+                }
                 $control.removeClass('is-loading');
             });
     });

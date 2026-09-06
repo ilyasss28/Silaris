@@ -71,7 +71,7 @@ jQuery(document).ready(domo);
                             <input type="checkbox" class="flat-red toltip" id="check_all" name="check_all" title="check all">
                            </th>
                            <th style="text-align:center">Nama Notaris</th>
-                           <th style="text-align:center">Tanggal Laporan</th>
+                           <th class="table-date-cell" style="text-align:center">Tanggal Laporan</th>
                            <th style="text-align:center">Laporan</th>
                            <th style="text-align:center" width="7%">Action</th>
                         </tr>
@@ -82,18 +82,18 @@ jQuery(document).ready(domo);
                            <td width="5">
                               <input type="checkbox" class="flat-red check" name="id[]" value="<?= $laporan->id; ?>">
                            </td>
-                           
+
                            <td><?= _ent($laporan->nama_notaris); ?></td>
-                           <td style="text-align:center"><?= _ent(format_date_id($laporan->Tanggal_Laporan)); ?></td>
-                           <td style="text-align:center">
+                           <td class="table-date-cell"><?= _ent(format_date_id($laporan->Tanggal_Laporan)); ?></td>
+                           <td>
                               <?php if (!empty($laporan->Laporan)): ?>
-                                <?php $document_viewer_url = document_preview_url(BASE_URL . 'uploads/laporan/' . rawurlencode($laporan->Laporan)); ?>
+                                <?php $document_viewer_url = site_url('laporan/document/' . $laporan->id . '/preview'); ?>
                                 <?php if (is_image($laporan->Laporan)): ?>
-                                <a href="<?= _ent($document_viewer_url); ?>" target="_blank" rel="noopener noreferrer" title="Buka di tab baru">
+                                <a href="<?= _ent($document_viewer_url); ?>" target="_blank" rel="noopener noreferrer" title="Preview dokumen">
                                   <img src="<?= BASE_URL . 'uploads/laporan/' . $laporan->Laporan; ?>" class="image-responsive" alt="image laporan" title="Laporan laporan" width="40px">
                                 </a>
                                 <?php else: ?>
-                                  <a href="<?= _ent($document_viewer_url); ?>" target="_blank" rel="noopener noreferrer" title="Buka di tab baru">
+                                  <a href="<?= _ent($document_viewer_url); ?>" target="_blank" rel="noopener noreferrer" title="Preview dokumen">
                                    <img src="<?= get_icon_file($laporan->Laporan); ?>" class="image-responsive image-icon" alt="image laporan" title="Laporan <?= $laporan->Laporan; ?>" width="40px">
                                  </a>
                                 <?php endif; ?>

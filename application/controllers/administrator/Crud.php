@@ -56,11 +56,12 @@ class Crud extends Admin
 		$this->is_allowed('crud_add');
 		$this->template->title('Crud New');
 		$this->load->helper('directory');
-		$directories = directory_map(APPPATH . '/controllers/administrator/');
-
-		$directories = array_map(function($val) {
-			return strtolower(str_replace('.php', '', $val ?? ''));
-		}, $directories);
+		$directories = array();
+		foreach ((array) directory_map(APPPATH . '/controllers/', 1) as $entry) {
+			if (is_string($entry) && strtolower(pathinfo($entry, PATHINFO_EXTENSION)) === 'php') {
+				$directories[] = strtolower(pathinfo($entry, PATHINFO_FILENAME));
+			}
+		}
 		$tables = array_diff($this->db->list_tables(), $directories);
 
 		$tables = array_diff($tables, get_table_not_allowed_for_builder());	
@@ -80,14 +81,10 @@ class Crud extends Admin
 			return $this->response([
 				'success' => false,
 				'message' => cclang('sorry_you_do_not_have_permission_to_access')
-				]);
-			exit;
+			]);
 		}
 
-		$this->form_validation->set_rules('table_name', 'Table', 'trim|required|callback_valid_table_avaiable');
-		$this->form_validation->set_rules('subject', 'Subject', 'trim|required|alpha_numeric_spaces');
-		$this->form_validation->set_rules('title', 'Subject', 'trim|alpha_numeric_spaces');
-		$this->form_validation->set_rules('primary_key', 'Primary Key of Table', 'trim|required');
+		$this->set_builder_validation_rules(true);
 
 		echo $this->save_crud();
 	}
@@ -155,7 +152,6 @@ class Crud extends Admin
 				'success' => false,
 				'message' => cclang('sorry_you_do_not_have_permission_to_access')
 				]);
-			exit;
 		}
 
 		$crud = $this->model_crud->find($id);
@@ -166,7 +162,8 @@ class Crud extends Admin
 		$table_name = trim((string) $this->input->post('table_name'));
 		$primary_key = trim((string) $this->input->post('primary_key'));
 		$posted_fields = $this->input->post('crud');
-		if ($table_name !== $crud->table_name || !$this->db->table_exists($crud->table_name)) {
+		if ($table_name !== $crud->table_name || !$this->db->table_exists($crud->table_name)
+			|| in_array($table_name, get_table_not_allowed_for_builder(), true)) {
 			return $this->response(array('success' => false, 'message' => 'Tabel CRUD tidak valid atau sudah tidak tersedia.'));
 		}
 		if ($primary_key !== $crud->primary_key || !in_array($primary_key, $this->db->list_fields($crud->table_name), true)) {
@@ -184,9 +181,7 @@ class Crud extends Admin
 			}
 		}
 
-		$this->form_validation->set_rules('subject', 'Subject', 'trim|required|alpha_numeric_spaces');
-		$this->form_validation->set_rules('title', 'Subject', 'trim|alpha_numeric_spaces');
-		$this->form_validation->set_rules('primary_key', 'Primary Key of Table', 'trim|required');
+		$this->set_builder_validation_rules(false);
 
 		return $this->output
 			->set_content_type('application/json')
@@ -197,7 +192,7 @@ class Crud extends Admin
 	{
 
 		if ($this->form_validation->run()) {
-			$crud_config = $this->input->post('crud');
+			$crud_config = $this->normalize_crud_configuration($this->input->post('crud'));
 			if (!is_array($crud_config) || empty($crud_config)) {
 				return $this->response(array(
 					'success' => false,
@@ -205,8 +200,13 @@ class Crud extends Admin
 				));
 			}
 			$table_name = trim((string) $this->input->post('table_name'));
-			if ($table_name === '' || !$this->db->table_exists($table_name)) {
+			if (!$this->is_safe_identifier($table_name) || !$this->db->table_exists($table_name)
+				|| in_array($table_name, get_table_not_allowed_for_builder(), true)) {
 				return $this->response(array('success' => false, 'message' => 'Tabel sumber CRUD tidak tersedia.'));
+			}
+			$config_error = $this->validate_crud_configuration($table_name, $crud_config);
+			if ($config_error !== null) {
+				return $this->response(array('success' => false, 'message' => $config_error));
 			}
 			$available_fields = $this->db->list_fields($table_name);
 			$submitted_field_names = array();
@@ -265,69 +265,70 @@ class Crud extends Admin
 					'success' => false,
 					'message' => $validate->getErrorMessage()
 					]);
-				exit;
 			}
 
 			$template_crud_path = 'core_template/crud/';
+			$preserve_custom_files = is_file($view_path . '.tmc-preserve');
 
-			$builder_list = $this->parser->parse($template_crud_path.'builder_list', $this->data, true);
-			if (!write_file($view_path.$table_name.'_list.php', $builder_list)) {
-				return $this->response(array('success' => false, 'message' => 'Halaman daftar CRUD gagal dibuat.'));
-			}
-
-			$builder_list = $this->parser->parse($template_crud_path.'builder_controller', $this->data, true);
-			if (!write_file($controller_path.ucwords($table_name).'.php', $builder_list)) {
-				return $this->response(array('success' => false, 'message' => 'Controller CRUD gagal dibuat.'));
-			}
-
-			$builder_list = $this->parser->parse($template_crud_path.'builder_model', $this->data, true);
-			if (!write_file($model_path.'Model_'.$table_name.'.php', $builder_list)) {
-				return $this->response(array('success' => false, 'message' => 'Model CRUD gagal dibuat.'));
+			$file_plan = array();
+			if (!$preserve_custom_files) {
+				$file_plan[$view_path.$table_name.'_list.php'] = $this->parser->parse($template_crud_path.'builder_list', $this->data, true);
+				$file_plan[$controller_path.ucwords($table_name).'.php'] = $this->parser->parse($template_crud_path.'builder_controller', $this->data, true);
+				$file_plan[$model_path.'Model_'.$table_name.'.php'] = $this->parser->parse($template_crud_path.'builder_model', $this->data, true);
 			}
 
 			if ($this->input->post('create')) {
-				$builder_list = $this->parser->parse($template_crud_path.'builder_add', $this->data, true);
-				if (!write_file($view_path.$table_name.'_add.php', $builder_list)) {
-					return $this->response(array('success' => false, 'message' => 'Halaman tambah CRUD gagal dibuat.'));
+				if (!$preserve_custom_files) {
+					$file_plan[$view_path.$table_name.'_add.php'] = $this->parser->parse($template_crud_path.'builder_add', $this->data, true);
 				}
-				$this->aauth->create_perm($table_name.'_add');
-			} elseif (is_file($view_path.$table_name.'_add.php') && !unlink($view_path.$table_name.'_add.php')) {
-				return $this->response(array('success' => false, 'message' => 'Halaman tambah lama tidak dapat dinonaktifkan.'));
+			} elseif (!$preserve_custom_files) {
+				$file_plan[$view_path.$table_name.'_add.php'] = null;
 			}
 
 			if ($this->input->post('update')) {
-				$builder_list = $this->parser->parse($template_crud_path.'builder_update', $this->data, true);
-				if (!write_file($view_path.$table_name.'_update.php', $builder_list)) {
-					return $this->response(array('success' => false, 'message' => 'Halaman edit CRUD gagal dibuat.'));
+				if (!$preserve_custom_files) {
+					$file_plan[$view_path.$table_name.'_update.php'] = $this->parser->parse($template_crud_path.'builder_update', $this->data, true);
 				}
-				$this->aauth->create_perm($table_name.'_update');
-			} elseif (is_file($view_path.$table_name.'_update.php') && !unlink($view_path.$table_name.'_update.php')) {
-				return $this->response(array('success' => false, 'message' => 'Halaman edit lama tidak dapat dinonaktifkan.'));
-			}
-			
-			if ($this->input->post('read')) {
-				$builder_list = $this->parser->parse($template_crud_path.'builder_view', $this->data, true);
-				if (!write_file($view_path.$table_name.'_view.php', $builder_list)) {
-					return $this->response(array('success' => false, 'message' => 'Halaman detail CRUD gagal dibuat.'));
-				}
-				$this->aauth->create_perm($table_name.'_view');
-			} elseif (is_file($view_path.$table_name.'_view.php') && !unlink($view_path.$table_name.'_view.php')) {
-				return $this->response(array('success' => false, 'message' => 'Halaman detail lama tidak dapat dinonaktifkan.'));
+			} elseif (!$preserve_custom_files) {
+				$file_plan[$view_path.$table_name.'_update.php'] = null;
 			}
 
-			$this->aauth->create_perm($table_name.'_delete');
-			$this->aauth->create_perm($table_name.'_list');
+			if ($this->input->post('read')) {
+				if (!$preserve_custom_files) {
+					$file_plan[$view_path.$table_name.'_view.php'] = $this->parser->parse($template_crud_path.'builder_view', $this->data, true);
+				}
+			} elseif (!$preserve_custom_files) {
+				$file_plan[$view_path.$table_name.'_view.php'] = null;
+			}
 
 			$this->db->trans_begin();
+			$this->aauth->create_perm($table_name.'_list');
+			$this->aauth->create_perm($table_name.'_delete');
+			$this->aauth->create_perm($table_name.'_export');
+			if ($this->post_flag('create')) {
+				$this->aauth->create_perm($table_name.'_add');
+			} else {
+				$this->aauth->delete_perm($table_name.'_add');
+			}
+			if ($this->post_flag('update')) {
+				$this->aauth->create_perm($table_name.'_update');
+			} else {
+				$this->aauth->delete_perm($table_name.'_update');
+			}
+			if ($this->post_flag('read')) {
+				$this->aauth->create_perm($table_name.'_view');
+			} else {
+				$this->aauth->delete_perm($table_name.'_view');
+			}
 
 			$save_data = [
-				'table_name' 		=> $this->input->post('table_name'),
-				'primary_key'		=> $this->input->post('primary_key'),
-				'subject' 			=> $this->input->post('subject'),
-				'title' 			=> $this->input->post('title'),
-				'page_read' 		=> $this->input->post('read'),
-				'page_update' 		=> $this->input->post('update'),
-				'page_create' 		=> $this->input->post('create'),
+				'table_name' 		=> $table_name,
+				'primary_key'		=> $primary_key,
+				'subject' 			=> trim((string) $this->input->post('subject')),
+				'title' 			=> trim((string) $this->input->post('title')),
+				'page_read' 		=> $this->post_flag('read'),
+				'page_update' 		=> $this->post_flag('update'),
+				'page_create' 		=> $this->post_flag('create'),
 			];
 
 			if ($id_crud = $this->model_crud->crud_exist($this->input->post('table_name'))) {
@@ -416,17 +417,25 @@ class Crud extends Admin
 				$this->db->trans_rollback();
 				return $this->response(array('success' => false, 'message' => 'Konfigurasi CRUD gagal disimpan ke database.'));
 			}
+			$file_error = $this->apply_file_plan($file_plan);
+			if ($file_error !== null) {
+				$this->db->trans_rollback();
+				return $this->response(array('success' => false, 'message' => $file_error));
+			}
 			$this->db->trans_commit();
 
+			$preserve_notice = $preserve_custom_files
+				? '<strong>Desain khusus dipertahankan.</strong> Konfigurasi TMC tersimpan tanpa menimpa view, controller, dan model modul ini. '
+				: '';
 			if ($this->input->post('save_type') == 'stay') {
 				$this->response['success'] = true;
-				$this->response['message'] = cclang('success_save_data_stay', [
+				$this->response['message'] = $preserve_notice . cclang('success_save_data_stay', [
 					anchor('administrator/crud', ' Go back to list'),
 					anchor($this->input->post('table_name'), ' View')
 				]);
 			} else {
 				set_message(
-					cclang('success_save_data_redirect', [
+					$preserve_notice . cclang('success_save_data_redirect', [
 					anchor($this->input->post('table_name'), ' View')
 				]), 'success');
         		$this->response['success'] = true;
@@ -445,21 +454,18 @@ class Crud extends Admin
 	*
 	* @var $id String
 	*/
-	public function delete($id = null)
+	public function delete()
 	{
 		$this->is_allowed('crud_delete');
+		if (strtoupper($this->input->method()) !== 'POST') {
+			show_error('Method Not Allowed', 405);
+		}
 
 		$this->load->helper('file');
-
-		$arr_id = $this->input->get('id');
-		$remove = false;
-
-		if (!empty($id)) {
-			$remove = $this->_remove($id);
-		} elseif (count($arr_id) >0) {
-			foreach ($arr_id as $id) {
-				$remove = $this->_remove($id);
-			}
+		$arr_id = array_values(array_unique(array_filter(array_map('intval', (array) $this->input->post('id')))));
+		$remove = !empty($arr_id);
+		foreach ($arr_id as $crud_id) {
+			$remove = $this->_remove($crud_id) && $remove;
 		}
 
 		if ($remove) {
@@ -479,36 +485,58 @@ class Crud extends Admin
 	private function _remove($id)
 	{
 		$crud = $this->model_crud->find($id);
+		if (!$crud || !$this->is_safe_identifier((string) $crud->table_name)) {
+			return false;
+		}
+		$protected_marker = FCPATH . '/application/views/modul/' . $crud->table_name . '/.tmc-preserve';
+		if (is_file($protected_marker)) {
+			set_message('CRUD ini memiliki desain dan logika khusus sehingga tidak dapat dihapus melalui TMC CRUD.', 'error');
+			return false;
+		}
 
 		if ($crud->table_name) {
 			$view_path = FCPATH . '/application/views/modul/'.$crud->table_name.'/';
 			$controller_path = FCPATH . '/application/controllers/'.ucwords($crud->table_name).'.php';
-			$model_path = FCPATH . '/application/models/Model_'.ucwords($crud->table_name).'.php';
-
-			if (is_dir($view_path)) {
-				delete_files($view_path, true);
-				rmdir($view_path);
-			}
-			if (is_file($controller_path)) {
-				unlink($controller_path);
-			}
-			if (is_file($model_path)) {
-				unlink($model_path);
-			}
-
+			$model_path = FCPATH . '/application/models/Model_'.$crud->table_name.'.php';
 			$table_name = $crud->table_name;
-
-			$this->db->where_in('name', [
-				$table_name.'_list', 
-				$table_name.'_add', 
-				$table_name.'_update', 
-				$table_name.'_view', 
-				$table_name.'_delete']
+			$file_plan = array(
+				$view_path.$table_name.'_list.php' => null,
+				$view_path.$table_name.'_add.php' => null,
+				$view_path.$table_name.'_update.php' => null,
+				$view_path.$table_name.'_view.php' => null,
+				$controller_path => null,
+				$model_path => null,
 			);
-			$this->db->delete('aauth_perms');
+
+			$permission_names = [
+				$table_name.'_list',
+				$table_name.'_add',
+				$table_name.'_update',
+				$table_name.'_view',
+				$table_name.'_delete',
+				$table_name.'_export'
+			];
+			$this->db->trans_begin();
+			foreach ($permission_names as $permission_name) {
+				$this->aauth->delete_perm($permission_name);
+			}
+			if (!$this->model_crud->remove($id) || $this->db->trans_status() === false) {
+				$this->db->trans_rollback();
+				return false;
+			}
+			if ($this->apply_file_plan($file_plan) !== null) {
+				$this->db->trans_rollback();
+				return false;
+			}
+			$this->db->trans_commit();
+
+			if (is_dir($view_path) && count(scandir($view_path)) === 2) {
+				@rmdir($view_path);
+			}
+			return true;
 		}
 
-		return $this->model_crud->remove($id);
+		return false;
 	}
 
 	/**
@@ -530,7 +558,7 @@ class Crud extends Admin
 	*/
 	public function get_field_data($table)
 	{
-		if (!$this->is_allowed('crud_add', false)) {
+		if (!$this->can_read_builder_metadata()) {
 			return $this->response([
 				'success' => false,
 				'message' => cclang('sorry_you_do_not_have_permission_to_access')
@@ -561,6 +589,9 @@ class Crud extends Admin
 	*/
 	public function get_list_field_id($table)
 	{
+		if (!$this->can_read_builder_metadata() || !$this->is_allowed_relation_table($table)) {
+			return $this->response(array('success' => false, 'message' => 'Tabel relasi tidak valid atau tidak diizinkan.'));
+		}
 		$this->data['html'] = $this->load->view('backend/standart/administrator/crud/crud_list_field.php', ['table' => $table], true);
 		$this->data['success'] = true;
 
@@ -574,10 +605,299 @@ class Crud extends Admin
 	*/
 	public function get_list_field_label($table)
 	{
+		if (!$this->can_read_builder_metadata() || !$this->is_allowed_relation_table($table)) {
+			return $this->response(array('success' => false, 'message' => 'Tabel relasi tidak valid atau tidak diizinkan.'));
+		}
 		$this->data['html'] = $this->load->view('backend/standart/administrator/crud/crud_list_field_label.php', ['table' => $table], true);
 		$this->data['success'] = true;
 
 		return $this->response($this->data);
+	}
+
+	private function set_builder_validation_rules($validate_table)
+	{
+		$table_rules = 'trim|required|callback_valid_builder_identifier';
+		if ($validate_table) {
+			$table_rules .= '|callback_valid_table_avaiable';
+		}
+		$this->form_validation->set_rules('table_name', 'Table', $table_rules);
+		$this->form_validation->set_rules('subject', 'Subject', 'trim|required|max_length[100]|callback_valid_builder_label');
+		$this->form_validation->set_rules('title', 'Title', 'trim|max_length[150]|callback_valid_builder_label');
+		$this->form_validation->set_rules('primary_key', 'Primary Key of Table', 'trim|required|callback_valid_builder_identifier');
+		$this->form_validation->set_rules('save_type', 'Save Type', 'trim|in_list[stay,back]');
+		$this->form_validation->set_rules('create', 'Create Page', 'trim|in_list[yes]');
+		$this->form_validation->set_rules('read', 'Detail Page', 'trim|in_list[yes]');
+		$this->form_validation->set_rules('update', 'Update Page', 'trim|in_list[yes]');
+	}
+
+	public function valid_builder_identifier($value)
+	{
+		if ($this->is_safe_identifier((string) $value)) {
+			return true;
+		}
+		$this->form_validation->set_message(__FUNCTION__, 'The {field} may only contain letters, numbers, and underscores, and must start with a letter.');
+		return false;
+	}
+
+	public function valid_builder_label($value)
+	{
+		if ($value === '' || preg_match('/^[\pL\pN _.,()\/-]+$/u', (string) $value)) {
+			return true;
+		}
+		$this->form_validation->set_message(__FUNCTION__, 'The {field} contains unsupported characters.');
+		return false;
+	}
+
+	/**
+	 * Kept with the historical method name because it is referenced by the
+	 * existing form-validation callback.
+	 */
+	public function valid_table_avaiable($table_name)
+	{
+		$table_name = trim((string) $table_name);
+		$controller = APPPATH.'controllers/'.ucwords($table_name).'.php';
+		if (!$this->is_safe_identifier($table_name) || !$this->db->table_exists($table_name)
+			|| in_array($table_name, get_table_not_allowed_for_builder(), true)
+			|| $this->model_crud->crud_exist($table_name) || is_file($controller)) {
+			$this->form_validation->set_message(__FUNCTION__, 'The selected table is unavailable, protected, or already has a CRUD/controller.');
+			return false;
+		}
+		return true;
+	}
+
+	private function is_safe_identifier($value)
+	{
+		return (bool) preg_match('/^[A-Za-z][A-Za-z0-9_]*$/', $value);
+	}
+
+	private function post_flag($name)
+	{
+		return $this->input->post($name) === 'yes' ? 'yes' : '';
+	}
+
+	private function can_read_builder_metadata()
+	{
+		return $this->is_allowed('crud_add', false) || $this->is_allowed('crud_update', false);
+	}
+
+	private function is_allowed_relation_table($table)
+	{
+		$table = trim((string) $table);
+		return $this->is_safe_identifier($table)
+			&& $this->db->table_exists($table)
+			&& !in_array($table, get_table_not_allowed_for_builder(), true);
+	}
+
+	/**
+	 * Validate the complete nested builder payload before it reaches templates or SQL.
+	 * Returns NULL when valid, otherwise a user-facing error string.
+	 */
+	private function validate_crud_configuration($table_name, array $crud_config)
+	{
+		$available_fields = $this->db->list_fields($table_name);
+		$allowed_input_types = array_column($this->db->select('type')->get('crud_input_type')->result_array(), 'type');
+		$allowed_validations = array_column($this->db->select('validation')->get('crud_input_validation')->result_array(), 'validation');
+		$seen_fields = array();
+
+		foreach ($crud_config as $field_wrapper) {
+			if (!is_array($field_wrapper) || count($field_wrapper) !== 1) {
+				return 'Struktur konfigurasi field tidak valid.';
+			}
+			$field_name = key($field_wrapper);
+			$config = current($field_wrapper);
+			if (!$this->is_safe_identifier((string) $field_name) || !in_array($field_name, $available_fields, true)
+				|| isset($seen_fields[$field_name]) || !is_array($config)) {
+				return 'Konfigurasi field berisi nama yang tidak valid atau duplikat.';
+			}
+			$seen_fields[$field_name] = true;
+
+			$input_type = isset($config['input_type']) ? (string) $config['input_type'] : '';
+			if (!in_array($input_type, $allowed_input_types, true)) {
+				return 'Tipe input untuk field '.html_escape($field_name).' tidak valid.';
+			}
+			$label = isset($config['label']) ? trim((string) $config['label']) : '';
+			if ($label === '' || mb_strlen($label) > 150 || !preg_match('/^[\pL\pN _.,()\/-]+$/u', $label)) {
+				return 'Label untuk field '.html_escape($field_name).' tidak valid.';
+			}
+			foreach (array('show_in_column', 'show_in_add_form', 'show_in_update_form', 'show_in_detail_page') as $flag) {
+				if (isset($config[$flag]) && $config[$flag] !== 'yes') {
+					return 'Nilai opsi tampilan field tidak valid.';
+				}
+			}
+			if (isset($config['sort']) && (!ctype_digit((string) $config['sort']) || (int) $config['sort'] < 1)) {
+				return 'Urutan field harus berupa bilangan positif.';
+			}
+
+			$relation_table = isset($config['relation_table']) ? trim((string) $config['relation_table']) : '';
+			if ($relation_table !== '') {
+				if (!$this->is_allowed_relation_table($relation_table)) {
+					return 'Tabel relasi untuk field '.html_escape($field_name).' tidak valid.';
+				}
+				$relation_fields = $this->db->list_fields($relation_table);
+				if (!in_array(isset($config['relation_value']) ? $config['relation_value'] : '', $relation_fields, true)
+					|| !in_array(isset($config['relation_label']) ? $config['relation_label'] : '', $relation_fields, true)) {
+					return 'Kolom relasi untuk field '.html_escape($field_name).' tidak valid.';
+				}
+			}
+
+			$rules = isset($config['validation']['rules']) ? $config['validation']['rules'] : array();
+			if (!is_array($rules)) {
+				return 'Aturan validasi field '.html_escape($field_name).' tidak valid.';
+			}
+			foreach ($rules as $rule => $value) {
+				if (!in_array($rule, $allowed_validations, true) || is_array($value) || mb_strlen((string) $value) > 255) {
+					return 'Aturan validasi field '.html_escape($field_name).' tidak diizinkan.';
+				}
+			}
+			if (in_array($input_type, array('file', 'file_multiple'), true)) {
+				$extensions = isset($rules['allowed_extension']) ? trim((string) $rules['allowed_extension']) : '';
+				if ($extensions === '' || !preg_match('/^[A-Za-z0-9,|]+$/', $extensions)) {
+					return 'Ekstensi file yang diizinkan wajib diisi untuk field '.html_escape($field_name).'.';
+				}
+				if (isset($rules['max_size']) && (!ctype_digit((string) $rules['max_size']) || (int) $rules['max_size'] < 1)) {
+					return 'Batas ukuran file untuk field '.html_escape($field_name).' harus berupa bilangan positif.';
+				}
+			}
+
+			if (isset($config['custom_option'])) {
+				if (!is_array($config['custom_option']) || count($config['custom_option']) > 100) {
+					return 'Pilihan khusus field '.html_escape($field_name).' tidak valid.';
+				}
+				foreach ($config['custom_option'] as $option) {
+					if (!is_array($option) || !array_key_exists('value', $option) || !isset($option['label'])
+						|| mb_strlen((string) $option['value']) > 255 || mb_strlen((string) $option['label']) > 255
+						|| !preg_match('/^[\pL\pN _.,()\/@:+-]*$/u', (string) $option['value'])
+						|| !preg_match('/^[\pL\pN _.,()\/@:+-]+$/u', (string) $option['label'])) {
+						return 'Pilihan khusus field '.html_escape($field_name).' tidak valid.';
+					}
+				}
+			}
+		}
+
+		return null;
+	}
+
+	/**
+	 * Every field renders one hidden custom-option template. Browsers submit that
+	 * empty template even when the selected input type does not use custom
+	 * options. Remove only completely empty template rows; partially completed
+	 * rows remain so validation can report them to the user.
+	 */
+	private function normalize_crud_configuration($crud_config)
+	{
+		if (!is_array($crud_config)) {
+			return $crud_config;
+		}
+
+		foreach ($crud_config as &$field_wrapper) {
+			if (!is_array($field_wrapper) || count($field_wrapper) !== 1) {
+				continue;
+			}
+			$field_name = key($field_wrapper);
+			if (!is_array($field_wrapper[$field_name]) || !isset($field_wrapper[$field_name]['custom_option'])
+				|| !is_array($field_wrapper[$field_name]['custom_option'])) {
+				continue;
+			}
+
+			$options = array_filter($field_wrapper[$field_name]['custom_option'], function ($option) {
+				if (!is_array($option)) {
+					return true;
+				}
+				$value = isset($option['value']) ? trim((string) $option['value']) : '';
+				$label = isset($option['label']) ? trim((string) $option['label']) : '';
+				return $value !== '' || $label !== '';
+			});
+
+			if ($options) {
+				$field_wrapper[$field_name]['custom_option'] = array_values($options);
+			} else {
+				unset($field_wrapper[$field_name]['custom_option']);
+			}
+		}
+		unset($field_wrapper);
+
+		return $crud_config;
+	}
+
+	/**
+	 * Apply generated files as one recoverable operation. Every previous file is
+	 * restored when any write/delete fails, so source code cannot be left half-built.
+	 */
+	private function apply_file_plan(array $file_plan)
+	{
+		if (empty($file_plan)) {
+			return null;
+		}
+
+		$allowed_roots = array(
+			realpath(APPPATH.'controllers'),
+			realpath(APPPATH.'models'),
+			realpath(APPPATH.'views/modul')
+		);
+		$snapshots = array();
+		$applied = array();
+
+		foreach ($file_plan as $path => $content) {
+			if ($content === null && !is_file($path)) {
+				continue;
+			}
+			$directory = realpath(dirname($path));
+			$allowed = false;
+			foreach ($allowed_roots as $root) {
+				if ($root !== false && $directory !== false
+					&& strpos(str_replace('\\', '/', $directory).'/', str_replace('\\', '/', $root).'/') === 0) {
+					$allowed = true;
+					break;
+				}
+			}
+			if (!$allowed) {
+				$this->restore_file_snapshots($snapshots, $applied);
+				return 'Lokasi file hasil generator tidak valid.';
+			}
+
+			$snapshots[$path] = is_file($path) ? file_get_contents($path) : null;
+			if ($content === null) {
+				if (is_file($path) && !unlink($path)) {
+					$this->restore_file_snapshots($snapshots, $applied);
+					return 'File CRUD lama tidak dapat dinonaktifkan.';
+				}
+				$applied[] = $path;
+				continue;
+			}
+
+			$temp_path = tempnam($directory, '.tmc-');
+			if ($temp_path === false || !write_file($temp_path, $content)) {
+				$this->restore_file_snapshots($snapshots, $applied);
+				return 'File sementara hasil generator tidak dapat dibuat.';
+			}
+			if (is_file($path) && !unlink($path)) {
+				@unlink($temp_path);
+				$this->restore_file_snapshots($snapshots, $applied);
+				return 'File CRUD lama tidak dapat diganti.';
+			}
+			if (!rename($temp_path, $path)) {
+				@unlink($temp_path);
+				if ($snapshots[$path] !== null) {
+					write_file($path, $snapshots[$path]);
+				}
+				$this->restore_file_snapshots($snapshots, $applied);
+				return 'File hasil generator tidak dapat dipasang.';
+			}
+			$applied[] = $path;
+		}
+
+		return null;
+	}
+
+	private function restore_file_snapshots(array $snapshots, array $applied)
+	{
+		foreach (array_reverse($applied) as $path) {
+			if (array_key_exists($path, $snapshots) && $snapshots[$path] !== null) {
+				write_file($path, $snapshots[$path]);
+			} elseif (is_file($path)) {
+				@unlink($path);
+			}
+		}
 	}
 }
 

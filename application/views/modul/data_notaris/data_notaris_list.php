@@ -65,7 +65,7 @@ jQuery(document).ready(domo);
                   
 
                   <div class="table-responsive"> 
-                  <table class="table table-bordered table-striped dataTable">
+                  <table class="table table-bordered table-striped dataTable data-notaris-table">
                      <thead>
                         <tr class="">
                            <th>
@@ -73,14 +73,12 @@ jQuery(document).ready(domo);
                            </th>
                            <th style="text-align:center">Nama Notaris</th>
                            <th style="text-align:center">Tempat Lahir</th>
-                           <th style="text-align:center">Tanggal Lahir</th>
+                           <th class="table-date-cell" style="text-align:center">Tanggal Lahir</th>
                            <th style="text-align:center">Jenis Kelamin</th>
                            <th style="text-align:center">Wilayah</th>
                            <th style="text-align:center">Alamat Kantor</th>
                            <th style="text-align:center">Kode Wilayah</th>
-                           <th style="text-align:center">Lat</th>
                            <th style="text-align:center">No Telepon</th>
-                           <th style="text-align:center">Long</th>
                            <th style="text-align:center" width="7%">Action</th>
                         </tr>
                      </thead>
@@ -91,33 +89,24 @@ jQuery(document).ready(domo);
                               <input type="checkbox" class="flat-red check" name="id[]" value="<?= $data_notaris->id_notaris; ?>">
                            </td>
                            
-                           <td>
+                           <td class="notaris-table__identity">
                               <div class="notaris-name-cell">
-                                <?php if (!empty($data_notaris->foto)): ?>
-                                  <?php if (is_image($data_notaris->foto)): ?>
-                                  <a class="fancybox" rel="group" href="<?= BASE_URL . 'uploads/data_notaris/' . $data_notaris->foto; ?>">
-                                    <img src="<?= BASE_URL . 'uploads/data_notaris/' . $data_notaris->foto; ?>" class="notaris-name-cell__photo" alt="Foto <?= _ent($data_notaris->nama_notaris); ?>" title="foto data_notaris">
-                                  </a>
-                                  <?php else: ?>
-                                    <a href="<?= BASE_URL . 'administrator/file/download/data_notaris/' . $data_notaris->foto; ?>">
-                                     <img src="<?= get_icon_file($data_notaris->foto); ?>" class="notaris-name-cell__photo" alt="Foto <?= _ent($data_notaris->nama_notaris); ?>" title="foto <?= $data_notaris->foto; ?>">
-                                   </a>
-                                  <?php endif; ?>
-                                <?php endif; ?>
-                                <span><?= _ent($data_notaris->nama_notaris); ?></span>
+                                <?php $notary_photo = $data_notaris->photo_url ?? notary_photo_url($data_notaris->account_avatar ?? '', $data_notaris->foto ?? ''); ?>
+                                <a class="fancybox notaris-name-cell__avatar" rel="group" href="<?= _ent($notary_photo); ?>">
+                                  <img src="<?= _ent($notary_photo); ?>" alt="Foto <?= _ent($data_notaris->nama_notaris); ?>" title="Foto <?= _ent($data_notaris->nama_notaris); ?>" loading="lazy">
+                                </a>
+                                <span class="user-notary-name"><?= _ent($data_notaris->nama_notaris); ?></span>
                               </div>
                            </td>
                            <td><?= _ent($data_notaris->tempat_lahir); ?></td>
-                           <td><?= _ent(format_date_id($data_notaris->tanggal_lahir)); ?></td>
+                           <td class="table-date-cell"><?= _ent(format_date_id($data_notaris->tanggal_lahir)); ?></td>
                            <td><?= _ent($data_notaris->jenis_kelamin); ?></td>
-                           <td><?= _ent($data_notaris->nama_wilayah); ?></td>
-
-                           <td><?= _ent($data_notaris->alamat_kantor); ?></td>
-                           <td><?= _ent($data_notaris->nama); ?></td>
+                           <td><?= _ent(format_title_case($data_notaris->region_name ?? $data_notaris->wilayah)); ?></td>
                              
-                           <td><?= _ent($data_notaris->lat); ?></td> 
+                           <td><?= _ent($data_notaris->alamat_kantor); ?></td>
+                           <td><?= _ent($data_notaris->kode_wilayah ?? $data_notaris->region_code ?? '-'); ?></td>
+                             
                            <td><?= _ent($data_notaris->no_telepon); ?></td> 
-                           <td><?= _ent($data_notaris->long); ?></td> 
                            <td width="200">
                               <?php is_allowed('data_notaris_view', function() use ($data_notaris){?>
                               <a href="<?= site_url('data_notaris/view/' . $data_notaris->id_notaris); ?>" title="Lihat" class="label-default"><i class="fa fa-newspaper-o"></i></a>
@@ -169,9 +158,13 @@ jQuery(document).ready(domo);
                            <option <?= $this->input->get('f') == 'alamat_kantor' ? 'selected' :''; ?> value="alamat_kantor">Alamat Kantor</option>
                            <option <?= $this->input->get('f') == 'foto' ? 'selected' :''; ?> value="foto">Foto</option>
                            <option <?= $this->input->get('f') == 'kode_wilayah' ? 'selected' :''; ?> value="kode_wilayah">Kode Wilayah</option>
-                           <option <?= $this->input->get('f') == 'lat' ? 'selected' :''; ?> value="lat">Lat</option>
                            <option <?= $this->input->get('f') == 'no_telepon' ? 'selected' :''; ?> value="no_telepon">No Telepon</option>
-                           <option <?= $this->input->get('f') == 'long' ? 'selected' :''; ?> value="long">Long</option>
+                           <option <?= $this->input->get('f') == 'npwp' ? 'selected' :''; ?> value="npwp">NPWP</option>
+                           <option <?= $this->input->get('f') == 'nomor_ktp' ? 'selected' :''; ?> value="nomor_ktp">Nomor KTP</option>
+                           <option <?= $this->input->get('f') == 'nomor_bap' ? 'selected' :''; ?> value="nomor_bap">Nomor BAP</option>
+                           <option <?= $this->input->get('f') == 'tanggal_bap' ? 'selected' :''; ?> value="tanggal_bap">Tanggal BAP</option>
+                           <option <?= $this->input->get('f') == 'pemegang_protokol' ? 'selected' :''; ?> value="pemegang_protokol">Pemegang Protokol</option>
+                           <option <?= $this->input->get('f') == 'status_notaris' ? 'selected' :''; ?> value="status_notaris">Status Notaris</option>
                           </select>
                      </div>
                      <div class="col-sm-1 padd-left-0 ">

@@ -6,8 +6,9 @@ class Model_user extends MY_Model {
 
 	private $primary_key 	= 'id';
 	private $table_name 	= 'aauth_users';
-	private $field_search 	= array('id', 'email', 'username', 'full_name');
-	private $filterable_groups = array('User', 'Kanwil', 'MPD');
+	private $field_search 	= array('id', 'email', 'username', 'full_name', 'phone_number');
+	private $filterable_groups = array('Admin', 'User', 'Kanwil', 'MPD');
+	private $filterable_statuses = array('active', 'inactive');
 
 	public function __construct()
 	{
@@ -20,17 +21,18 @@ class Model_user extends MY_Model {
 		parent::__construct($config);
 	}
 
-	public function count_all($q = '', $field = '', $group = '')
+	public function count_all($q = '', $field = '', $group = '', $status = '')
 	{
 		$this->db->select('COUNT(DISTINCT aauth_users.id) AS total', false);
 		$this->apply_search_conditions($this->table_name, $this->field_search, $q, $field);
 		$this->apply_group_filter($group);
+		$this->apply_status_filter($status);
 		$query = $this->db->get($this->table_name)->row();
 
 		return $query ? (int) $query->total : 0;
 	}
 
-	public function get($q = '', $field = '', $limit = 0, $offset = 0, $group = '')
+	public function get($q = '', $field = '', $limit = 0, $offset = 0, $group = '', $status = '')
 	{
 		$this->db->select('aauth_users.*');
 		$this->db->select("(
@@ -44,6 +46,7 @@ class Model_user extends MY_Model {
 		) AS group_names", false);
 		$this->apply_search_conditions($this->table_name, $this->field_search, $q, $field);
 		$this->apply_group_filter($group);
+		$this->apply_status_filter($status);
         $this->db->limit($limit, $offset);
         $this->db->order_by($this->table_name . '.' . $this->primary_key, "DESC");
 		$query = $this->db->get($this->table_name);
@@ -63,6 +66,13 @@ class Model_user extends MY_Model {
 		return $this->filterable_groups;
 	}
 
+	public function normalize_status_filter($status)
+	{
+		$status = strtolower(trim((string) $status));
+
+		return in_array($status, $this->filterable_statuses, true) ? $status : '';
+	}
+
 	private function apply_group_filter($group)
 	{
 		$group = $this->normalize_group_filter($group);
@@ -78,6 +88,16 @@ class Model_user extends MY_Model {
 			null,
 			false
 		);
+	}
+
+	private function apply_status_filter($status)
+	{
+		$status = $this->normalize_status_filter($status);
+		if ($status === '') {
+			return;
+		}
+
+		$this->db->where($this->table_name . '.banned', $status === 'inactive' ? 1 : 0);
 	}
 
 	public function get_group_user($user_id = false)
@@ -166,6 +186,29 @@ class Model_user extends MY_Model {
 		return true;
 	}
 
+	public function detach_mpd_registry($user_id)
+	{
+		$user_id = (int) $user_id;
+		if ($user_id <= 0) {
+			return false;
+		}
+
+		$this->db->trans_start();
+		if ($this->db->table_exists('mpd_wilayah')) {
+			$this->db->where('user_id', $user_id)->delete('mpd_wilayah');
+		}
+		if ($this->db->table_exists('data_mpd')) {
+			$this->db->where('user_id', $user_id)->update('data_mpd', array(
+				'user_id' => null,
+				'is_verified' => 0,
+				'updated_at' => date('Y-m-d H:i:s'),
+			));
+		}
+		$this->db->trans_complete();
+
+		return $this->db->trans_status();
+	}
+
 	public function validate_mpd_regions(array $region_codes)
 	{
 		if (!$this->db->table_exists('mpd_wilayah')) {
@@ -196,6 +239,263 @@ class Model_user extends MY_Model {
 			->where_in('id', $group_ids)
 			->where('name', (string) $group_name)
 			->count_all_results('aauth_groups') > 0;
+	}
+
+	/**
+	 * Audit accounts whose sole application role is User/Notaris against the
+	 * authoritative Data Notaris roster. Privileged accounts are never included.
+	 */
+	public function audit_notary_roster($user_id = null)
+	{
+		if (!$this->db->table_exists('data_notaris')) {
+			return array();
+		}
+
+		$roster = $this->notary_roster_index();
+		$this->db
+			->distinct()
+			->select('users.id, users.username, users.email, users.full_name, users.banned')
+			->from('aauth_users users')
+			->join('aauth_user_to_group memberships', 'memberships.user_id = users.id')
+			->join('aauth_groups groups_table', "groups_table.id = memberships.group_id AND groups_table.name = 'User'")
+			->where(
+				"NOT EXISTS (SELECT 1 FROM aauth_user_to_group privileged_links "
+				. "INNER JOIN aauth_groups privileged_groups ON privileged_groups.id = privileged_links.group_id "
+				. "WHERE privileged_links.user_id = users.id "
+				. "AND privileged_groups.name IN ('Admin', 'Kanwil', 'MPD', 'Pimpinan'))",
+				null,
+				false
+			);
+		if ($user_id !== null) {
+			$this->db->where('users.id', (int) $user_id);
+		}
+
+		$accounts = $this->db->get()->result();
+		$audit = array();
+		foreach ($accounts as $account) {
+			$audit[] = array(
+				'user_id' => (int) $account->id,
+				'username' => (string) $account->username,
+				'full_name' => (string) $account->full_name,
+				'listed' => $this->notary_account_is_listed($account, $roster),
+				'banned' => (int) $account->banned === 1,
+			);
+		}
+
+		return $audit;
+	}
+
+	public function enforce_notary_roster($user_id)
+	{
+		$audit = $this->audit_notary_roster((int) $user_id);
+		if (!$audit) {
+			return array('is_notary' => false, 'listed' => true, 'deactivated' => false);
+		}
+
+		$status = $audit[0];
+		$status['is_notary'] = true;
+		$status['deactivated'] = false;
+		if (!$status['listed'] && !$status['banned']) {
+			$status['deactivated'] = (bool) $this->db
+				->where('id', (int) $status['user_id'])
+				->update('aauth_users', array('banned' => 1));
+			$status['banned'] = $status['deactivated'];
+		}
+
+		return $status;
+	}
+
+	public function enforce_notary_roster_by_identifier($identifier)
+	{
+		$identifier = trim((string) $identifier);
+		if ($identifier === '') {
+			return array('is_notary' => false, 'listed' => true, 'deactivated' => false);
+		}
+
+		$user = $this->db
+			->group_start()
+				->where('username', $identifier)
+				->or_where('email', $identifier)
+			->group_end()
+			->get('aauth_users')
+			->row();
+
+		return $user
+			? $this->enforce_notary_roster((int) $user->id)
+			: array('is_notary' => false, 'listed' => true, 'deactivated' => false);
+	}
+
+	public function sync_missing_notary_accounts()
+	{
+		$audit = $this->audit_notary_roster();
+		$deactivate_ids = array();
+		foreach ($audit as $status) {
+			if (!$status['listed'] && !$status['banned']) {
+				$deactivate_ids[] = (int) $status['user_id'];
+			}
+		}
+
+		if (!$deactivate_ids) {
+			return 0;
+		}
+
+		$this->db->where_in('id', $deactivate_ids)->update('aauth_users', array('banned' => 1));
+		return $this->db->affected_rows();
+	}
+
+	public function audit_mpd_registry($user_id = null)
+	{
+		if (!$this->db->table_exists('data_mpd')) return array();
+
+		$this->db
+			->distinct()
+			->select('users.id, users.username, users.full_name, users.banned, profiles.id_mpd, profiles.is_verified')
+			->from('aauth_users users')
+			->join('aauth_user_to_group memberships', 'memberships.user_id = users.id')
+			->join('aauth_groups groups_table', "groups_table.id = memberships.group_id AND groups_table.name = 'MPD'")
+			->join('data_mpd profiles', 'profiles.user_id = users.id', 'left')
+			->where(
+				"NOT EXISTS (SELECT 1 FROM aauth_user_to_group privileged_links "
+				. "INNER JOIN aauth_groups privileged_groups ON privileged_groups.id = privileged_links.group_id "
+				. "WHERE privileged_links.user_id = users.id AND privileged_groups.name IN ('Admin', 'Kanwil'))",
+				null,
+				false
+			);
+		if ($user_id !== null) $this->db->where('users.id', (int) $user_id);
+
+		$audit = array();
+		foreach ($this->db->get()->result() as $account) {
+			$audit[] = array(
+				'user_id' => (int) $account->id,
+				'username' => (string) $account->username,
+				'full_name' => (string) $account->full_name,
+				'is_mpd' => true,
+				'listed' => !empty($account->id_mpd),
+				'verified' => !empty($account->is_verified),
+				'eligible' => !empty($account->id_mpd) && !empty($account->is_verified),
+				'banned' => (int) $account->banned === 1,
+			);
+		}
+		return $audit;
+	}
+
+	public function enforce_mpd_registry($user_id)
+	{
+		$audit = $this->audit_mpd_registry((int) $user_id);
+		if (!$audit) return array('is_mpd' => false, 'listed' => true, 'verified' => true, 'eligible' => true, 'deactivated' => false);
+
+		$status = $audit[0];
+		$status['deactivated'] = false;
+		if (!$status['eligible'] && !$status['banned']) {
+			$status['deactivated'] = (bool) $this->db->where('id', (int) $status['user_id'])->update('aauth_users', array('banned' => 1));
+			$status['banned'] = $status['deactivated'];
+		}
+		return $status;
+	}
+
+	public function enforce_mpd_registry_by_identifier($identifier)
+	{
+		$identifier = trim((string) $identifier);
+		if ($identifier === '') return array('is_mpd' => false, 'eligible' => true);
+		$user = $this->db->group_start()->where('username', $identifier)->or_where('email', $identifier)->group_end()->get('aauth_users')->row();
+		return $user ? $this->enforce_mpd_registry((int) $user->id) : array('is_mpd' => false, 'eligible' => true);
+	}
+
+	public function sync_ineligible_mpd_accounts()
+	{
+		$ids = array();
+		foreach ($this->audit_mpd_registry() as $status) {
+			if (!$status['eligible'] && !$status['banned']) $ids[] = (int) $status['user_id'];
+		}
+		if (!$ids) return 0;
+		$this->db->where_in('id', $ids)->update('aauth_users', array('banned' => 1));
+		return $this->db->affected_rows();
+	}
+
+	/**
+	 * Mark User/Notaris accounts that are not present in Data Notaris so their
+	 * activation status can be rendered as read-only in the user list.
+	 */
+	public function attach_notary_roster_status(array $users)
+	{
+		$locked_user_ids = array();
+		$locked_reasons = array();
+		foreach ($this->audit_notary_roster() as $status) {
+			if (!$status['listed']) {
+				$locked_user_ids[(int) $status['user_id']] = true;
+				$locked_reasons[(int) $status['user_id']] = 'Notaris belum terdaftar pada Data Notaris.';
+			}
+		}
+		foreach ($this->audit_mpd_registry() as $status) {
+			if (!$status['eligible']) {
+				$locked_user_ids[(int) $status['user_id']] = true;
+				$locked_reasons[(int) $status['user_id']] = $status['listed']
+					? 'Data MPD belum diverifikasi.'
+					: 'MPD belum terdaftar pada Data MPD.';
+			}
+		}
+
+		foreach ($users as $user) {
+			$user->notary_roster_locked = isset($locked_user_ids[(int) $user->id]);
+			$user->roster_lock_reason = isset($locked_reasons[(int) $user->id]) ? $locked_reasons[(int) $user->id] : '';
+		}
+
+		return $users;
+	}
+
+	private function notary_roster_index()
+	{
+		$profile_fields = 'email, nama_notaris';
+		if ($this->db->field_exists('user_id', 'data_notaris')) $profile_fields .= ', user_id';
+		$profiles = $this->db
+			->select($profile_fields)
+			->get('data_notaris')
+			->result();
+		$index = array('user_ids' => array(), 'emails' => array(), 'names' => array(), 'initial_names' => array());
+		foreach ($profiles as $profile) {
+			$user_id = isset($profile->user_id) ? (int) $profile->user_id : 0;
+			$email_key = strtolower(trim((string) $profile->email));
+			$name_key = person_name_identity_key($profile->nama_notaris);
+			$initial_name_key = person_name_initial_key($profile->nama_notaris);
+			if ($user_id > 0) {
+				$index['user_ids'][$user_id] = true;
+			}
+			if ($email_key !== '') {
+				$index['emails'][$email_key] = true;
+			}
+			if ($name_key !== '') {
+				$index['names'][$name_key] = true;
+			}
+			if ($initial_name_key !== '') {
+				$index['initial_names'][$initial_name_key] = isset($index['initial_names'][$initial_name_key])
+					? $index['initial_names'][$initial_name_key] + 1
+					: 1;
+			}
+		}
+
+		return $index;
+	}
+
+	private function notary_account_is_listed($account, array $roster)
+	{
+		if (isset($roster['user_ids'][(int) $account->id])) {
+			return true;
+		}
+
+		$email_key = strtolower(trim((string) $account->email));
+		if ($email_key !== '' && isset($roster['emails'][$email_key])) {
+			return true;
+		}
+
+		$name_key = person_name_identity_key($account->full_name);
+		if ($name_key !== '' && isset($roster['names'][$name_key])) {
+			return true;
+		}
+
+		$initial_name_key = person_name_initial_key($account->full_name);
+		return $initial_name_key !== ''
+			&& isset($roster['initial_names'][$initial_name_key])
+			&& $roster['initial_names'][$initial_name_key] === 1;
 	}
 
 	/**

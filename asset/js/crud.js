@@ -1,10 +1,4 @@
 
-/*replace all string*/
-String.prototype.replaceAll = function(search, replacement) {
-  var target = this;
-  return target.split(search).join(replacement);
-};
-
 function updateValidation(target) {
 	var validation_group = target.find('option:selected').attr('title');
 
@@ -21,27 +15,29 @@ function updateValidation(target) {
 
 function addValidation(target, id, name, type, input_able, input_value, input_placeholder) {
 	if (!target.parents('td').find('.box-validation.'+type).length) {
+		var input;
+		var class_validation_name;
 
 		if (typeof input_value == 'undefined') {
-			var input_value = '';
+			input_value = '';
 		}
 
 		if (typeof input_placeholder == 'undefined') {
-			var input_placeholder = '';
+			input_placeholder = '';
 		}
 
 		var group_validation = target.find('option:selected').attr('class');
 
 		if (input_able == 'yes') {
-			var input = '<input value="'+input_value+'" placeholder="'+input_placeholder+'" class="input_validation" name="crud['+id+']['+name+'][validation][rules]['+type+']" >';
-			var class_validation_name = 'validation-name';
+			input = '<input value="'+input_value+'" placeholder="'+input_placeholder+'" class="input_validation" name="crud['+id+']['+name+'][validation][rules]['+type+']" >';
+			class_validation_name = 'validation-name';
 		} else {
-			var input = '<input type="hidden" class="input_validation" name="crud['+id+']['+name+'][validation][rules]['+type+']" >';
-			var class_validation_name = 'validation-name-max';
+			input = '<input type="hidden" class="input_validation" name="crud['+id+']['+name+'][validation][rules]['+type+']" >';
+			class_validation_name = 'validation-name-max';
 		}
 
 
-		target.parents('td').append('<div class="box-validation '+group_validation+' '+type+'"> <label><div class="'+class_validation_name+'">'+type.replaceAll('_', ' ')+'</div> '+input+'</label> <a class="delete fa fa-trash"></a> </div>'); 
+		target.parents('td').append('<div class="box-validation '+group_validation+' '+type+'"> <label><div class="'+class_validation_name+'">'+type.split('_').join(' ')+'</div> '+input+'</label> <a class="delete fa fa-trash"></a> </div>');
 		target.parents('td').find('.box-validation.'+type+' input').focus();
 	}
 	target.val('').trigger('chosen:updated');

@@ -125,7 +125,7 @@ $last_login_label = $last_login_timestamp
             </li>
 
             <li class="user-footer">
-              <a href="<?= site_url('administrator/profile'); ?>" class="user-menu-action user-menu-action--profile"><i class="fa fa-user-o" aria-hidden="true"></i><span>Profil Saya</span></a>
+              <a href="<?= site_url('administrator/profile'); ?>" class="user-menu-action user-menu-action--profile"><i class="fa fa-user" aria-hidden="true"></i><span>Profil Saya</span></a>
               <a href="<?= site_url('administrator/logout'); ?>" class="user-menu-action user-menu-action--logout"><i class="fa fa-sign-out" aria-hidden="true"></i><span>Keluar</span></a>
             </li>
           </ul>

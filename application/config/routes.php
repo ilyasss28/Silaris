@@ -60,10 +60,22 @@ $route['landing'] = 'home/index';
 $route['panduan'] = 'panduan/index';
 $route['kepatuhan'] = 'kepatuhan/index';
 
-/* Canonical report recap route. Keep the URL lowercase and independent
-   from the legacy mixed-case controller/file name. */
-$route['rekap-laporan'] = 'Rekap_Laporan/index';
-$route['rekap-laporan/(.+)'] = 'Rekap_Laporan/$1';
+/* One read-only recap for every service. Legacy recap URLs remain useful,
+   but mutations are blocked and detail/edit links go to the source module. */
+$route['rekap-layanan'] = 'Rekap_layanan/index';
+$route['rekap-layanan/export'] = 'Rekap_layanan/export';
+$route['rekap-laporan'] = 'Rekap_layanan/index';
+$route['rekap-laporan/(.+)'] = 'Rekap_layanan/legacy/laporan/$1';
+$route['rekap_reportorium'] = 'Rekap_layanan/legacy/reportorium';
+$route['rekap_reportorium/(.+)'] = 'Rekap_layanan/legacy/reportorium/$1';
+$route['rekap_daftar_proses'] = 'Rekap_layanan/legacy/daftar_proses';
+$route['rekap_daftar_proses/(.+)'] = 'Rekap_layanan/legacy/daftar_proses/$1';
+$route['rekap_legalisasi'] = 'Rekap_layanan/legacy/legalisasi';
+$route['rekap_legalisasi/(.+)'] = 'Rekap_layanan/legacy/legalisasi/$1';
+$route['rekap_waarmerking'] = 'Rekap_layanan/legacy/waarmerking';
+$route['rekap_waarmerking/(.+)'] = 'Rekap_layanan/legacy/waarmerking/$1';
+$route['rekap_laporan_bulanan'] = 'Rekap_layanan/legacy/laporan_bulanan';
+$route['rekap_laporan_bulanan/(.+)'] = 'Rekap_layanan/legacy/laporan_bulanan/$1';
 
 /* Public notary directory. Only known region slugs are accepted. */
 $region_slugs = 'kendari|baubau|wakatobi|muna|mubar|konut|konsel|konkep|konawe|kolut|koltim|kolaka|buton|butur|buteng|busel|bombana';

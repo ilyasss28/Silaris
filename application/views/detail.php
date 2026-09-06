@@ -17,7 +17,7 @@
         <div class="row"> 
           <div class="col-lg-3 col-md-3 align-items-stretch" style="text-align: center;">
               <div style="border: 1px solid #d6d6d6; border-radius: 5px; padding: 5px; margin: auto; display: inline-block;">
-                      <img style="border: 1px solid #d6d6d6;" src="<?php echo base_url('assets/uploads/foto_user/')?><?php echo $foto; ?>" alt="foto" height="190">                    
+                      <img style="border: 1px solid #d6d6d6;" src="<?= _ent($photo_url); ?>" alt="Foto <?= _ent($nama_notaris); ?>" height="190">
               </div>
 
               <div class="rate bg-warning py-3 text-white mt-3">
@@ -55,7 +55,7 @@
                 <div class="phone">
                   <i class="icofont-phone"></i>
                   <h4>Telepon kantor:</h4>
-                  <p><?php echo $no_telepon; ?></p>
+                  <p><?= _ent(format_phone_number($no_telepon)); ?></p>
                 </div>
                  
                 <div class="email">

@@ -7,8 +7,8 @@ $format_date = static function ($value) use ($display_value) {
     return $display_value(format_date_id($value));
 };
 $document_name = trim((string) $laporan->Laporan);
-$document_url = $document_name !== '' ? BASE_URL.'uploads/laporan/'.rawurlencode($document_name) : '';
-$viewer_url = $document_url !== '' ? document_preview_url($document_url) : '';
+$document_url = $document_name !== '' ? site_url('laporan/document/'.$laporan->id.'/download') : '';
+$viewer_url = $document_name !== '' ? site_url('laporan/document/'.$laporan->id.'/preview') : '';
 ?>
 
 <section class="content record-detail-page service-record-detail-page report-detail-page">
@@ -47,7 +47,7 @@ $viewer_url = $document_url !== '' ? document_preview_url($document_url) : '';
           <?php if ($document_name !== ''): ?>
             <div class="report-document-links">
               <a href="<?= _ent($viewer_url); ?>" target="_blank" rel="noopener noreferrer" class="report-drive-link" title="Buka dokumen di tab baru"><img src="<?= _ent(get_icon_file($document_name)); ?>" alt=""><span><strong><?= _ent($document_name); ?></strong><small>Buka di tab baru <i class="fa fa-external-link"></i></small></span></a>
-              <a href="<?= _ent($document_url); ?>" download="<?= _ent($document_name); ?>" class="report-download-link"><i class="fa fa-download"></i> Unduh</a>
+              <a href="<?= _ent($document_url); ?>" class="report-download-link"><i class="fa fa-download"></i> Unduh</a>
             </div>
           <?php else: ?>
             <p class="record-detail-empty">Dokumen belum tersedia.</p>

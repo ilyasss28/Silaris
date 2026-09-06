@@ -54,6 +54,7 @@ class Daftar_proses extends Admin
 	public function add()
 	{
 		$this->is_allowed('daftar_proses_add');
+		$this->require_complete_notary_profile();
 
 		$this->template->title('Daftar Proses New');
 		$this->render('modul/daftar_proses/daftar_proses_add', $this->data);
@@ -74,6 +75,7 @@ class Daftar_proses extends Admin
 			exit;
 		}
 
+		if (!$this->require_complete_notary_profile(true)) return;
 		$this->form_validation->set_rules('nomor_akta', 'Nomor Akta', 'trim|required|max_length[10]');
 		$this->form_validation->set_rules('tanggal_akta', 'Tanggal Akta', 'trim|required');
 		$this->form_validation->set_rules('sifat_akta', 'Sifat Akta', 'trim|required|max_length[100]');
@@ -84,10 +86,12 @@ class Daftar_proses extends Admin
 		
 			$save_data = [
 				'username' => get_user_data('username'),
-				'nomor_akta' => $this->input->post('nomor_akta'),
-				'tanggal_akta' => $this->input->post('tanggal_akta'),
-				'sifat_akta' => $this->input->post('sifat_akta'),
-				'penghadap' => $this->input->post('penghadap'),
+				'nama_notaris' => format_person_name(get_user_data('full_name')),
+					'nomor_akta' => $this->input->post('nomor_akta', true),
+				'tanggal_akta' => $this->input->post('tanggal_akta', true),
+				'sifat_akta' => $this->input->post('sifat_akta', true),
+				'penghadap' => $this->input->post('penghadap', true),
+				'owner_user_id' => (int) get_user_data('id'),
 			];
 
 			
@@ -138,7 +142,10 @@ class Daftar_proses extends Admin
 	{
 		$this->is_allowed('daftar_proses_update');
 
-		$this->data['daftar_proses'] = $this->model_daftar_proses->find($id);
+		$this->data['daftar_proses'] = $this->model_daftar_proses->filter_avaiable()->find($id);
+		if (!$this->data['daftar_proses']) {
+			show_404();
+		}
 
 		$this->template->title('Daftar Proses Update');
 		$this->render('modul/daftar_proses/daftar_proses_update', $this->data);
@@ -158,6 +165,9 @@ class Daftar_proses extends Admin
 				]);
 			exit;
 		}
+		if (!$this->model_daftar_proses->filter_avaiable()->find($id)) {
+			return $this->response(array('success' => false, 'message' => 'Data tidak ditemukan atau tidak dapat diakses.'));
+		}
 		
 		$this->form_validation->set_rules('nomor_akta', 'Nomor Akta', 'trim|required|max_length[10]');
 		$this->form_validation->set_rules('tanggal_akta', 'Tanggal Akta', 'trim|required');
@@ -167,11 +177,10 @@ class Daftar_proses extends Admin
 		if ($this->form_validation->run()) {
 		
 			$save_data = [
-				'username' => get_user_data('username'),
-				'nomor_akta' => $this->input->post('nomor_akta'),
-				'tanggal_akta' => $this->input->post('tanggal_akta'),
-				'sifat_akta' => $this->input->post('sifat_akta'),
-				'penghadap' => $this->input->post('penghadap'),
+				'nomor_akta' => $this->input->post('nomor_akta', true),
+				'tanggal_akta' => $this->input->post('tanggal_akta', true),
+				'sifat_akta' => $this->input->post('sifat_akta', true),
+				'penghadap' => $this->input->post('penghadap', true),
 			];
 
 			
@@ -215,21 +224,18 @@ class Daftar_proses extends Admin
 	*
 	* @var $id String
 	*/
-	public function delete($id = null)
+	public function delete()
 	{
 		$this->is_allowed('daftar_proses_delete');
-
+		if (strtoupper($this->input->method()) !== 'POST') {
+			show_error('Method Not Allowed', 405);
+		}
 		$this->load->helper('file');
 
-		$arr_id = $this->input->get('id');
-		$remove = false;
-
-		if (!empty($id)) {
-			$remove = $this->_remove($id);
-		} elseif (count($arr_id) >0) {
-			foreach ($arr_id as $id) {
-				$remove = $this->_remove($id);
-			}
+		$arr_id = array_values(array_unique(array_filter(array_map('intval', (array) $this->input->post('id')))));
+		$remove = !empty($arr_id);
+		foreach ($arr_id as $id) {
+			$remove = $this->_remove($id) && $remove;
 		}
 
 		if ($remove) {
@@ -251,6 +257,9 @@ class Daftar_proses extends Admin
 		$this->is_allowed('daftar_proses_view');
 
 		$this->data['daftar_proses'] = $this->model_daftar_proses->join_avaiable()->filter_avaiable()->find($id);
+		if (!$this->data['daftar_proses']) {
+			show_404();
+		}
 
 		$this->template->title('Daftar Proses Detail');
 		$this->render('modul/daftar_proses/daftar_proses_view', $this->data);
@@ -263,7 +272,10 @@ class Daftar_proses extends Admin
 	*/
 	private function _remove($id)
 	{
-		$daftar_proses = $this->model_daftar_proses->find($id);
+		$daftar_proses = $this->model_daftar_proses->filter_avaiable()->find($id);
+		if (!$daftar_proses) {
+			return false;
+		}
 
 		
 		

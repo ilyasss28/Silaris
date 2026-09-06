@@ -4,31 +4,6 @@
   $aktif_melapor = $summary['aktif_melapor'] ?? 0;
   $tingkat       = $summary['tingkat_persen'] ?? 0;
 
-  if (!function_exists('format_gelar')) {
-      /**
-       * @param string $nama
-       * @return string
-       */
-      function format_gelar($nama) {
-          $nama = ucwords(strtolower($nama));
-          
-          // Standarisasi gelar dengan koma di akhir
-          $nama = preg_replace('/\bS[\.\s]*H\b[\.\s]*/i', 'S.H., ', $nama);
-          $nama = preg_replace('/\bM[\.\s]*K[\.\s]*N\b[\.\s]*/i', 'M.Kn., ', $nama);
-          $nama = preg_replace('/\bM[\.\s]*H\b[\.\s]*/i', 'M.H., ', $nama);
-          $nama = preg_replace('/\bS[\.\s]*E\b[\.\s]*/i', 'S.E., ', $nama);
-          $nama = preg_replace('/\bS[\.\s]*T\b[\.\s]*/i', 'S.T., ', $nama);
-          
-          // Pastikan ada tanda koma dan spasi sebelum gelar
-          $nama = preg_replace('/[\s,]+(S\.H\.|M\.Kn\.|M\.H\.|S\.E\.|S\.T\.)/', ', $1', $nama);
-          
-          // Bersihkan sisa koma ganda
-          $nama = str_replace(',,', ',', $nama);
-          $nama = preg_replace('/\s+/', ' ', $nama);
-          
-          return trim($nama, ' ,');
-      }
-  }
 ?>
 <main id="main">
 
@@ -115,7 +90,7 @@
                   <td class="compliance-name"><?= _ent(format_gelar($row->full_name)); ?></td>
                   <td class="compliance-username">@<?= _ent($row->username); ?></td>
                   <td class="text-center"><b><?= $row->jumlah_laporan; ?></b></td>
-                  <td><?= $row->laporan_terakhir ? date('d M Y', strtotime($row->laporan_terakhir)) : '&mdash;'; ?></td>
+                  <td class="table-date-cell"><?= $row->laporan_terakhir ? _ent(format_date_id($row->laporan_terakhir)) : '&mdash;'; ?></td>
                   <td class="text-center">
                     <?php if ($patuh): ?>
                       <span class="status-badge status-ok"><i class="icofont-check-circled"></i> Aktif Melapor</span>

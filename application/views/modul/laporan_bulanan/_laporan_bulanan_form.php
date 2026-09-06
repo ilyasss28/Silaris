@@ -84,7 +84,10 @@ $(function () {
     deleteFile: {enabled: true, endpoint: BASE_URL + '/laporan_bulanan/delete_file_laporan_file'},
     thumbnails: {placeholders: {waitingPath: BASE_URL + '/asset/fine-upload/placeholders/waiting-generic.png', notAvailablePath: BASE_URL + '/asset/fine-upload/placeholders/not_available-generic.png'}},
     multiple: false,
-    validation: {allowedExtensions: ['*'], sizeLimit: 0},
+    validation: {
+      allowedExtensions: ['pdf', 'doc', 'docx', 'xls', 'xlsx', 'jpg', 'jpeg', 'png'],
+      sizeLimit: 10000 * 1024
+    },
     showMessage: function (message) { toastr.error(message); },
     callbacks: {
       onComplete: function (id, name, response) {

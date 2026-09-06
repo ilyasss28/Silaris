@@ -1,0 +1,2 @@
+Modul Data Notaris memiliki desain dan logika integrasi khusus.
+File ini mencegah TMC CRUD menimpa view, controller, dan model saat konfigurasi disimpan.

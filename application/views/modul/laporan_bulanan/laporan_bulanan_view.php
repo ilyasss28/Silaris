@@ -7,8 +7,8 @@ $format_date = static function ($value) use ($display_value) {
     return $display_value(format_date_id($value));
 };
 $document_name = trim((string) $laporan_bulanan->file_laporan);
-$document_url = $document_name !== '' ? BASE_URL.'uploads/laporan_bulanan/'.rawurlencode($document_name) : '';
-$viewer_url = $document_url !== '' ? document_preview_url($document_url) : '';
+$document_url = $document_name !== '' ? site_url('laporan_bulanan/document/'.$laporan_bulanan->id_laporan_bulanan.'/download') : '';
+$viewer_url = $document_name !== '' ? site_url('laporan_bulanan/document/'.$laporan_bulanan->id_laporan_bulanan.'/preview') : '';
 ?>
 
 <section class="content record-detail-page service-record-detail-page monthly-report-detail-page">
@@ -33,7 +33,7 @@ $viewer_url = $document_url !== '' ? document_preview_url($document_url) : '';
       <div class="record-detail-grid">
         <section class="record-detail-card">
           <div class="record-detail-card__heading"><span><i class="fa fa-user" aria-hidden="true"></i></span><div><h2>Informasi Pelapor</h2><p>Akun yang mengirim laporan.</p></div></div>
-          <dl class="record-detail-list"><div><dt>Username</dt><dd><span class="record-detail-username"><i class="fa fa-at" aria-hidden="true"></i><?= _ent($display_value($laporan_bulanan->username)); ?></span></dd></div></dl>
+          <dl class="record-detail-list"><div><dt>Nama Notaris</dt><dd><span class="record-detail-username"><i class="fa fa-user" aria-hidden="true"></i><?= _ent($display_value($laporan_bulanan->nama_notaris)); ?></span></dd></div></dl>
         </section>
         <section class="record-detail-card">
           <div class="record-detail-card__heading"><span><i class="fa fa-calendar" aria-hidden="true"></i></span><div><h2>Periode dan Wilayah</h2><p>Cakupan laporan yang dicatat.</p></div></div>
@@ -47,7 +47,7 @@ $viewer_url = $document_url !== '' ? document_preview_url($document_url) : '';
           <?php if ($document_name !== ''): ?>
             <div class="report-document-links">
               <a href="<?= _ent($viewer_url); ?>" target="_blank" rel="noopener noreferrer" class="report-drive-link" title="Buka dokumen di tab baru"><img src="<?= _ent(get_icon_file($document_name)); ?>" alt=""><span><strong><?= _ent($document_name); ?></strong><small>Buka di tab baru <i class="fa fa-external-link"></i></small></span></a>
-              <a href="<?= _ent($document_url); ?>" download="<?= _ent($document_name); ?>" class="report-download-link"><i class="fa fa-download"></i> Unduh</a>
+              <a href="<?= _ent($document_url); ?>" class="report-download-link"><i class="fa fa-download"></i> Unduh</a>
             </div>
           <?php else: ?>
             <p class="record-detail-empty">Dokumen belum tersedia.</p>

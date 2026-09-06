@@ -62,9 +62,9 @@
                             <i class="required">*</i>
                             </label>
                             <div class="col-sm-8">
-                                <input type="text" class="form-control" name="nama_notaris" id="nama_notaris" placeholder="Nama Notaris" value="<?= set_value('nama_notaris'); ?>">
+                                <input type="text" class="form-control" name="nama_notaris" id="nama_notaris" maxlength="200" required placeholder="Nama lengkap beserta gelar" value="<?= _ent(set_value('nama_notaris')); ?>">
                                 <small class="info help-block">
-                                <b>Input Nama Notaris</b> Max Length : 100.</small>
+                                Jika akun group User sudah tersedia, gunakan nama yang sama dengan nama lengkap akun.</small>
                             </div>
                         </div>
                                                  
@@ -72,7 +72,7 @@
                             <label for="tempat_lahir" class="col-sm-2 control-label">Tempat Lahir 
                             </label>
                             <div class="col-sm-8">
-                                <input type="text" class="form-control" name="tempat_lahir" id="tempat_lahir" placeholder="Tempat Lahir" value="<?= set_value('tempat_lahir'); ?>">
+                                <input type="text" class="form-control" name="tempat_lahir" id="tempat_lahir" maxlength="100" placeholder="Tempat lahir" value="<?= set_value('tempat_lahir'); ?>">
                                 <small class="info help-block">
                                 <b>Input Tempat Lahir</b> Max Length : 100.</small>
                             </div>
@@ -83,7 +83,7 @@
                             </label>
                             <div class="col-sm-6">
                             <div class="input-group date col-sm-8">
-<input type="date" class="form-control pull-right native-date-input" name="tanggal_lahir" id="tanggal_lahir">
+<input type="date" class="form-control pull-right native-date-input" name="tanggal_lahir" id="tanggal_lahir" max="<?= date('Y-m-d'); ?>">
                             </div>
                             <small class="info help-block">
                             </small>
@@ -95,9 +95,9 @@
                             <i class="required">*</i>
                             </label>
                             <div class="col-sm-8">
-                                <select  class="form-control chosen chosen-select" name="jenis_kelamin" id="jenis_kelamin" data-placeholder="Select Jenis Kelamin" >
+                                <select class="form-control chosen chosen-select" name="jenis_kelamin" id="jenis_kelamin" data-placeholder="Pilih jenis kelamin" required>
                                     <option value=""></option>
-                                    <option value="Laki-Laki">Laki-laki</option>
+                                    <option value="Laki-laki">Laki-laki</option>
                                     <option value="Perempuan">Perempuan</option>
                                     </select>
                                 <small class="info help-block">
@@ -106,32 +106,12 @@
                         </div>
                                                  
                                                 <div class="form-group ">
-                            <label for="email" class="col-sm-2 control-label">Email 
+                            <label for="email" class="col-sm-2 control-label">Email <i class="required">*</i>
                             </label>
                             <div class="col-sm-8">
-                                <input type="email" class="form-control" name="email" id="email" placeholder="Email" value="<?= set_value('email'); ?>">
+                                <input type="email" class="form-control" name="email" id="email" maxlength="150" required placeholder="nama@contoh.com" value="<?= set_value('email'); ?>">
                                 <small class="info help-block">
                                 <b>Input Email</b> Max Length : 100.</small>
-                            </div>
-                        </div>
-                                                 
-                                                <div class="form-group  wrapper-options-crud">
-                            <label for="wilayah" class="col-sm-2 control-label">Wilayah 
-                            <i class="required">*</i>
-                            </label>
-                            <div class="col-sm-8">
-                                    <?php foreach (db_get_all_data('wil') as $row): ?>
-                                    <div class="col-md-3 padding-left-0">
-                                    <label>
-                                    <input type="radio" class="flat-red" name="wilayah" value="<?= $row->nama_wilayah ?>"> <?= $row->nama_wilayah; ?>
-                                    </label>
-                                    </div>
-                                    <?php endforeach; ?>  
-                                </select>
-                                <div class="row-fluid clear-both">
-                                <small class="info help-block">
-                                <b>Input Wilayah</b> Max Length : 100.</small>
-                                </div>
                             </div>
                         </div>
                                                  
@@ -176,21 +156,6 @@
                         </div>
                                                  
                                                 <div class="form-group ">
-                            <label for="password" class="col-sm-2 control-label">Password 
-                            </label>
-                            <div class="col-sm-6">
-                              <div class="input-group col-md-8 input-password">
-                              <input type="password" class="form-control password" name="password" id="password" placeholder="Password" value="">
-                                <span class="input-group-btn">
-                                  <button type="button" class="btn btn-flat show-password"><i class="fa fa-eye eye"></i></button>
-                                </span>
-                              </div>
-                            <small class="info help-block">
-                            <b>Input Password</b> Max Length : 100.</small>
-                            </div>
-                        </div>
-                                                 
-                                                <div class="form-group ">
                             <label for="foto" class="col-sm-2 control-label">Foto 
                             </label>
                             <div class="col-sm-8">
@@ -203,13 +168,13 @@
                         </div>
                                                  
                                                 <div class="form-group ">
-                            <label for="kode_wilayah" class="col-sm-2 control-label">Kode Wilayah 
+                            <label for="kode_wilayah" class="col-sm-2 control-label">Wilayah Kerja <i class="required">*</i>
                             </label>
                             <div class="col-sm-8">
-                                <select  class="form-control chosen chosen-select-deselect" name="kode_wilayah" id="kode_wilayah" data-placeholder="Select Kode Wilayah" >
+                                <select class="form-control chosen chosen-select-deselect" name="kode_wilayah" id="kode_wilayah" data-placeholder="Pilih kabupaten/kota" required>
                                     <option value=""></option>
                                     <?php foreach (db_get_all_data('wilayah') as $row): ?>
-                                    <option value="<?= $row->kd_wilayah ?>"><?= $row->nama; ?></option>
+                                    <option value="<?= $row->kd_wilayah ?>"><?= '[ '._ent($row->kd_wilayah).' ] '._ent($row->nama); ?></option>
                                     <?php endforeach; ?>  
                                 </select>
                                 <small class="info help-block">
@@ -222,17 +187,17 @@
                             <label for="lat" class="col-sm-2 control-label">Lat 
                             </label>
                             <div class="col-sm-8">
-                                <input type="text" class="form-control" name="lat" id="lat" placeholder="Lat" value="<?= set_value('lat'); ?>">
+                                <input type="number" step="any" min="-90" max="90" class="form-control" name="lat" id="lat" placeholder="Contoh: -3.998" value="<?= set_value('lat'); ?>">
                                 <small class="info help-block">
                                 </small>
                             </div>
                         </div>
                                                  
                                                 <div class="form-group ">
-                            <label for="no_telepon" class="col-sm-2 control-label">No Telepon 
+                            <label for="no_telepon" class="col-sm-2 control-label">Nomor Telepon <i class="required">*</i>
                             </label>
                             <div class="col-sm-8">
-                                <input type="text" class="form-control" name="no_telepon" id="no_telepon" placeholder="No Telepon" value="<?= set_value('no_telepon'); ?>">
+                                <input type="tel" inputmode="numeric" minlength="10" maxlength="13" pattern="08[0-9]{8,11}" class="form-control" name="no_telepon" id="no_telepon" required placeholder="Contoh: 081234567890" value="<?= set_value('no_telepon'); ?>">
                                 <small class="info help-block">
                                 </small>
                             </div>
@@ -242,7 +207,71 @@
                             <label for="long" class="col-sm-2 control-label">Long 
                             </label>
                             <div class="col-sm-8">
-                                <input type="text" class="form-control" name="long" id="long" placeholder="Long" value="<?= set_value('long'); ?>">
+                                <input type="number" step="any" min="-180" max="180" class="form-control" name="long" id="long" placeholder="Contoh: 122.512" value="<?= set_value('long'); ?>">
+                                <small class="info help-block">
+                                </small>
+                            </div>
+                        </div>
+                                                 
+                                                <div class="form-group ">
+                            <label for="npwp" class="col-sm-2 control-label">NPWP 
+                            </label>
+                            <div class="col-sm-8">
+                                <input type="text" inputmode="numeric" maxlength="16" pattern="(?:[0-9]{15}|[0-9]{16})" class="form-control" name="npwp" id="npwp" placeholder="15 atau 16 digit" value="<?= set_value('npwp'); ?>">
+                                <small class="info help-block">
+                                </small>
+                            </div>
+                        </div>
+                                                 
+                                                <div class="form-group ">
+                            <label for="nomor_ktp" class="col-sm-2 control-label">Nomor KTP 
+                            </label>
+                            <div class="col-sm-8">
+                                <input type="text" inputmode="numeric" minlength="16" maxlength="16" pattern="[0-9]{16}" class="form-control" name="nomor_ktp" id="nomor_ktp" placeholder="16 digit NIK" value="<?= set_value('nomor_ktp'); ?>">
+                                <small class="info help-block">
+                                </small>
+                            </div>
+                        </div>
+                                                 
+                                                <div class="form-group ">
+                            <label for="nomor_bap" class="col-sm-2 control-label">Nomor BAP 
+                            </label>
+                            <div class="col-sm-8">
+                                <input type="text" class="form-control" name="nomor_bap" id="nomor_bap" placeholder="Masukkan nomor BAP" value="<?= set_value('nomor_bap'); ?>">
+                                <small class="info help-block">
+                                </small>
+                            </div>
+                        </div>
+                                                 
+                                                <div class="form-group ">
+                            <label for="tanggal_bap" class="col-sm-2 control-label">Tanggal BAP 
+                            </label>
+                            <div class="col-sm-8">
+                                <input type="date" class="form-control" name="tanggal_bap" id="tanggal_bap" max="<?= date('Y-m-d'); ?>" value="<?= set_value('tanggal_bap'); ?>">
+                                <small class="info help-block">
+                                </small>
+                            </div>
+                        </div>
+                                                 
+                                                <div class="form-group ">
+                            <label for="pemegang_protokol" class="col-sm-2 control-label">Pemegang Protokol 
+                            </label>
+                            <div class="col-sm-8">
+                                <input type="text" class="form-control" name="pemegang_protokol" id="pemegang_protokol" placeholder="Pemegang Protokol" value="<?= set_value('pemegang_protokol'); ?>">
+                                <small class="info help-block">
+                                </small>
+                            </div>
+                        </div>
+                                                 
+                                                <div class="form-group ">
+                            <label for="status_notaris" class="col-sm-2 control-label">Status Notaris 
+                            </label>
+                            <div class="col-sm-8">
+                                <select class="form-control chosen chosen-select" name="status_notaris" id="status_notaris" required data-placeholder="Pilih status">
+                                    <?php foreach (array('NOTARIS AKTIF', 'NOTARIS NONAKTIF', 'CUTI', 'PINDAH', 'MENINGGAL DUNIA') as $status): ?>
+                                    <option value="<?= $status; ?>" <?= set_select('status_notaris', $status, $status === 'NOTARIS AKTIF'); ?>><?= $status; ?></option>
+                                    <?php endforeach; ?>
+                                </select>
                                 <small class="info help-block">
                                 </small>
                             </div>

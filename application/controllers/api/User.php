@@ -9,6 +9,8 @@ class User extends API
 	public function __construct()
 	{
 		parent::__construct();
+		$this->load->model('model_data_notaris');
+		$this->load->library('storage_manager');
 	}
 
 	/**
@@ -269,7 +271,7 @@ class User extends API
 		if ($this->form_validation->run()) {
 
 			$save_data = [
-				'full_name' 	=> $this->post('full_name'),
+				'full_name' 	=> format_person_name($this->post('full_name')),
 				'date_created'	=> date('Y-m-d H:i:s')
 			];
 
@@ -280,16 +282,18 @@ class User extends API
 				'required' 		=> false
 			];
 			
+			$new_avatar = null;
 			if ($upload = $this->upload_file('avatar', $config)){
 				$upload_data = $this->upload->data();
-				$save_data['avatar'] = $upload['file_name'];
+				$new_avatar = $save_data['avatar'] = $upload['file_name'];
 			}
 
 			$save_user = $this->aauth->create_user($this->post('email'), $this->post('password'), $this->post('username'), $save_data);
 
 			if ($save_user) {
 				
-				$this->aauth->add_member($save_user, 4);				
+				$this->aauth->add_member($save_user, 4);
+				$this->model_data_notaris->sync_account_name((int) $save_user);
 
 				$this->response([
 					'status' 	=> true,
@@ -297,6 +301,9 @@ class User extends API
 				], API::HTTP_OK);
 
 			} else {
+				if ($new_avatar) {
+					$this->storage_manager->delete_if_unreferenced('uploads/user/', $new_avatar);
+				}
 				$this->response([
 					'status' 	=> false,
 					'message' 	=> $this->aauth->print_errors()
@@ -349,9 +356,13 @@ class User extends API
 		$this->form_validation->set_rules('id', 'Id', 'trim|required');
 
 		if ($this->form_validation->run()) {
+			$existing_user = $this->model_user->find((int) $this->post('id'));
+			if (!$existing_user) {
+				return $this->response(['status' => false, 'message' => 'User not found'], API::HTTP_NOT_ACCEPTABLE);
+			}
 
 			$save_data = [
-				'full_name' 	=> $this->post('full_name'),
+				'full_name' 	=> format_person_name($this->post('full_name')),
 			];
 
 			$config = [
@@ -361,9 +372,10 @@ class User extends API
 				'required' 		=> false
 			];
 			
+			$new_avatar = null;
 			if ($upload = $this->upload_file('avatar', $config)){
 				$upload_data = $this->upload->data();
-				$save_data['avatar'] = $upload['file_name'];
+				$new_avatar = $save_data['avatar'] = $upload['file_name'];
 			}
 
 			if ($this->post('password')) {
@@ -375,6 +387,9 @@ class User extends API
 			$save_user = $this->aauth->update_user($this->post('id'), $this->post('email'), $password, null, $save_data);
 
 			if ($save_user) {
+				if ($new_avatar && $new_avatar !== $existing_user->avatar) {
+					$this->storage_manager->delete_if_unreferenced('uploads/user/', $existing_user->avatar);
+				}
 				$group = json_decode($this->post('group'));
 
 				$this->db->delete('aauth_user_to_group', ['user_id' => $this->post('id')]);
@@ -384,6 +399,7 @@ class User extends API
 						$this->aauth->add_member($user_id, $group_id);				
 					}
 				}
+				$this->model_data_notaris->sync_account_name((int) $this->post('id'));
 
 				$this->response([
 					'status' 	=> true,
@@ -391,6 +407,9 @@ class User extends API
 				], API::HTTP_OK);
 
 			} else {
+				if ($new_avatar) {
+					$this->storage_manager->delete_if_unreferenced('uploads/user/', $new_avatar);
+				}
 				$this->response([
 					'status' 	=> false,
 					'message' 	=> $this->aauth->print_errors()
@@ -442,9 +461,14 @@ class User extends API
 		$this->form_validation->set_rules('group', 'Group', 'trim|callback_valid_group');
 
 		if ($this->form_validation->run()) {
+			$id = (int) $this->getUserData('id');
+			$existing_user = $this->model_user->find($id);
+			if (!$existing_user) {
+				return $this->response(['status' => false, 'message' => 'User not found'], API::HTTP_NOT_ACCEPTABLE);
+			}
 
 			$save_data = [
-				'full_name' 	=> $this->post('full_name'),
+				'full_name' 	=> format_person_name($this->post('full_name')),
 			];
 
 			$config = [
@@ -454,9 +478,10 @@ class User extends API
 				'required' 		=> false
 			];
 			
+			$new_avatar = null;
 			if ($upload = $this->upload_file('avatar', $config)){
 				$upload_data = $this->upload->data();
-				$save_data['avatar'] = $upload['file_name'];
+				$new_avatar = $save_data['avatar'] = $upload['file_name'];
 			}
 
 			if ($this->post('password')) {
@@ -465,11 +490,12 @@ class User extends API
 				$password = null;
 			}
 
-			$id = $this->getUserData('id');
-
 			$save_user = $this->aauth->update_user($id, $this->post('email'), $password, null, $save_data);
 
 			if ($save_user) {
+				if ($new_avatar && $new_avatar !== $existing_user->avatar) {
+					$this->storage_manager->delete_if_unreferenced('uploads/user/', $existing_user->avatar);
+				}
 				$group = json_decode($this->post('group'));
 
 				$this->db->delete('aauth_user_to_group', ['user_id' => $id]);
@@ -479,6 +505,7 @@ class User extends API
 						$this->aauth->add_member($user_id, $group_id);				
 					}
 				}
+				$this->model_data_notaris->sync_account_name((int) $id);
 
 				$this->response([
 					'status' 	=> true,
@@ -486,6 +513,9 @@ class User extends API
 				], API::HTTP_OK);
 
 			} else {
+				if ($new_avatar) {
+					$this->storage_manager->delete_if_unreferenced('uploads/user/', $new_avatar);
+				}
 				$this->response([
 					'status' 	=> false,
 					'message' 	=> $this->aauth->print_errors()
@@ -535,19 +565,13 @@ class User extends API
 				'status' 	=> false,
 				'message' 	=> 'User not found'
 			], API::HTTP_NOT_ACCEPTABLE);
-		} else {
-			$delete = $this->model_user->remove($this->post('id'));
-
-			if (!empty($user->avatar)) {
-				$path = FCPATH . '/uploads/user/' . $user->avatar;
-
-				if (is_file($path)) {
-					$delete_file = unlink($path);
-				}
-			}
+			return;
 		}
 
 		$delete = $this->model_user->remove($this->post('id'));
+		if ($delete && !empty($user->avatar)) {
+			$this->storage_manager->delete_if_unreferenced('uploads/user/', $user->avatar);
+		}
 		
 		if ($delete) {
 			$this->response([

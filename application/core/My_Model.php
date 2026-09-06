@@ -7,6 +7,7 @@ class MY_Model extends CI_Model {
     private $primary_key = 'id';
     private $table_name = 'table';
     private $field_search;
+    private $report_scoped = false;
 
     public function __construct($config = array())
     {
@@ -19,16 +20,21 @@ class MY_Model extends CI_Model {
         }
 
         $this->load->database();
+        if ($this->report_scoped) {
+            $this->load->library('report_access');
+        }
     }
 
     public function remove($id = NULL)
     {
+        $this->apply_report_scope();
         $this->db->where($this->primary_key, $id);
         return $this->db->delete($this->table_name);
     }
 
     public function change($id = NULL, $data = array())
-    {        
+    {
+        $this->apply_report_scope();
         $this->db->where($this->primary_key, $id);
         $this->db->update($this->table_name, $data);
 
@@ -41,12 +47,18 @@ class MY_Model extends CI_Model {
             $this->db->select($select_field);
         }
 
+        $this->apply_report_scope();
         $this->db->where("".$this->table_name.'.'.$this->primary_key,$id);
         $query = $this->db->get($this->table_name);
 
         if($query->num_rows()>0)
         {
-            return $query->row();
+            $row = $query->row();
+            if (in_array($this->table_name, $this->report_owner_tables(), true)) {
+                $rows = $this->attach_owner_display_names(array($row));
+                return $rows[0];
+            }
+            return $row;
         }
         else
         {
@@ -56,10 +68,14 @@ class MY_Model extends CI_Model {
 
     public function find_all()
     {
+        $this->apply_report_scope();
         $this->db->order_by($this->primary_key, 'DESC');
         $query = $this->db->get($this->table_name);
 
-        return $query->result();
+        $rows = $query->result();
+        return in_array($this->table_name, $this->report_owner_tables(), true)
+            ? $this->attach_owner_display_names($rows)
+            : $rows;
     }
 
     public function store($data = array())
@@ -78,9 +94,55 @@ class MY_Model extends CI_Model {
 
     public function get_single($where)
     {
+        $this->apply_report_scope();
         $query = $this->db->get_where($this->table_name, $where);
 
-        return $query->row();
+        $row = $query->row();
+        if ($row && in_array($this->table_name, $this->report_owner_tables(), true)) {
+            $rows = $this->attach_owner_display_names(array($row));
+            return $rows[0];
+        }
+        return $row;
+    }
+
+    /**
+     * Resolve a report's Notary name from its owning account. This keeps old
+     * rows readable when the denormalized name is empty or the account name
+     * has subsequently been corrected.
+     */
+    protected function attach_owner_display_names(array $records)
+    {
+        if (!$records || !$this->db->table_exists('aauth_users')) return $records;
+
+        $accounts = $this->db->select('id, username, full_name')->get('aauth_users')->result();
+        $by_id = array();
+        $by_username = array();
+        foreach ($accounts as $account) {
+            $by_id[(int) $account->id] = $account;
+            $username = strtolower(trim((string) $account->username));
+            if ($username !== '') $by_username[$username] = $account;
+        }
+
+        foreach ($records as $record) {
+            $account = null;
+            $owner_id = isset($record->owner_user_id) ? (int) $record->owner_user_id : 0;
+            $username = isset($record->username) ? strtolower(trim((string) $record->username)) : '';
+            if ($owner_id > 0 && isset($by_id[$owner_id])) $account = $by_id[$owner_id];
+            elseif ($username !== '' && isset($by_username[$username])) $account = $by_username[$username];
+
+            $stored_name = isset($record->nama_notaris) ? trim((string) $record->nama_notaris) : '';
+            $account_name = $account ? trim((string) $account->full_name) : '';
+            $fallback = $stored_name !== '' ? $stored_name : (isset($record->username) ? trim((string) $record->username) : '');
+            $record->nama_notaris = function_exists('format_person_name')
+                ? format_person_name($account_name !== '' ? $account_name : $fallback)
+                : ($account_name !== '' ? $account_name : $fallback);
+        }
+        return $records;
+    }
+
+    private function report_owner_tables()
+    {
+        return array('laporan', 'laporan_bulanan', 'daftar_proses', 'reportorium', 'legalisasi', 'waarmerking', 'fidusia');
     }
 
     public function scurity($input)
@@ -128,146 +190,150 @@ class MY_Model extends CI_Model {
         }
     }
 
+    protected function apply_report_scope($table = null)
+    {
+        if ($this->report_scoped) {
+            $this->report_access->apply_scope($this->db, $table ?: $this->table_name);
+        }
+    }
+
     public function export($table, $subject = 'file', array $where = array())
     {
-        $this->load->library('excel');
-
         foreach ($where as $column => $value) {
             $this->db->where($column, $value);
         }
+        $this->apply_report_scope($table);
         $result = $this->db->get($table);
-
-        $this->excel->setActiveSheetIndex(0);
+        $rows = $result->result();
+        if (in_array($table, $this->report_owner_tables(), true)) {
+            $rows = $this->attach_owner_display_names($rows);
+        }
 
         $fields = $result->list_fields();
-
-        $alphabet = 'ABCDEFGHIJKLMOPQRSTUVWXYZ';
-        $alphabet_arr = str_split($alphabet);
-        $column = [];
-
-        foreach ($alphabet_arr as $alpha) {
-            $column[] =  $alpha;
+        if (in_array($table, $this->report_owner_tables(), true)) {
+            $fields = array_values(array_diff($fields, array('owner_user_id')));
         }
-
-        foreach ($alphabet_arr as $alpha) {
-            foreach ($alphabet_arr as $alpha2) {
-                $column[] =  $alpha.$alpha2;
+        $fields = array_values(array_filter($fields, function ($field) {
+            return !preg_match('/(^pass$|password|remember_token|verification_code|forgot_exp|oauth_uid|secret)/i', $field);
+        }));
+        $date_fields = $this->date_result_fields($result);
+        $headers = array('No.');
+        foreach ($fields as $field) $headers[] = ucwords(str_replace('_', ' ', $field));
+        $export_rows = array();
+        foreach ($rows as $index => $data) {
+            $export_row = array($index + 1);
+            foreach ($fields as $field) {
+                $value = isset($data->{$field}) ? $data->{$field} : '';
+                if (isset($date_fields[$field])) $value = format_date_id($value);
+                elseif (preg_match('/(telepon|phone)/i', $field) && trim((string) $value) !== '') $value = format_phone_number($value);
+                elseif ($field === 'wilayah') $value = format_title_case($value);
+                $export_row[] = $value === null ? '' : $value;
             }
-        }
-        foreach ($alphabet_arr as $alpha) {
-            foreach ($alphabet_arr as $alpha2) {
-                foreach ($alphabet_arr as $alpha3) {
-                    $column[] =  $alpha.$alpha2.$alpha3;
-                }
-            }
+            $export_rows[] = $export_row;
         }
 
-        foreach($column as $col)
-        {
-            $this->excel->getActiveSheet()->getColumnDimension($col)->setWidth(20);
-        }
-
-        $col_total = $column[count($fields)-1];
-
-        //styling
-        $this->excel->getActiveSheet()->getStyle('A1:'.$col_total.'1')->applyFromArray(
-            array(
-                'fill' => array(
-                    'type' => PHPExcel_Style_Fill::FILL_SOLID,
-                    'color' => array('rgb' => 'DA3232')
-                ),
-                'alignment' => array(
-                    'horizontal' => PHPExcel_Style_Alignment::HORIZONTAL_CENTER,
-                    'vertical' => PHPExcel_Style_Alignment::VERTICAL_CENTER,
-                )
-            )
+        $this->load->library('silaris_excel');
+        $this->silaris_excel->download(
+            ucwords(str_replace('_', ' ', $subject)),
+            'Data SILARIS • Diekspor pada ' . format_date_id(date('Y-m-d')) . ' ' . date('H:i'),
+            $headers,
+            $export_rows,
+            strtolower(preg_replace('/[^A-Za-z0-9]+/', '-', $subject)) . '-' . date('Ymd-His')
         );
-
-        $phpColor = new PHPExcel_Style_Color();
-        $phpColor->setRGB('FFFFFF');  
-
-        $this->excel->getActiveSheet()->getStyle('A1:'.$col_total.'1')->getFont()->setColor($phpColor);
-
-        $this->excel->getActiveSheet()->getRowDimension(1)->setRowHeight(40);
-
-        $this->excel->getActiveSheet()->getStyle('A1:'.$col_total.'1')
-        ->getAlignment()->setWrapText(true); 
-
-        $col = 0;
-        foreach ($fields as $field)
-        {
-            
-            $this->excel->getActiveSheet()->setCellValueByColumnAndRow($col, 1, ucwords(str_replace('_', ' ', $field)));
-            $col++;
-        }
- 
-        $row = 2;
-        foreach($result->result() as $data)
-        {
-            $col = 0;
-            foreach ($fields as $field)
-            {
-                $this->excel->getActiveSheet()->setCellValueByColumnAndRow($col, $row, $data->$field);
-                $col++;
-            }
- 
-            $row++;
-        }
-
-        //set border
-        $styleArray = array(
-              'borders' => array(
-                  'allborders' => array(
-                      'style' => PHPExcel_Style_Border::BORDER_THIN
-                  )
-              )
-          );
-        $this->excel->getActiveSheet()->getStyle('A1:'.$col_total.''.$row)->applyFromArray($styleArray);
-
-        $this->excel->getActiveSheet()->setTitle(ucwords($subject));
-
-        header('Content-Type: application/vnd.ms-excel');
-        header('Content-Disposition: attachment;filename='.ucwords($subject).'-'.date('Y-m-d').'.xls');
-        header('Cache-Control: max-age=0');
-        header('Cache-Control: max-age=1');
-
-        header ('Expires: Mon, 26 Jul 1997 05:00:00 GMT'); 
-        header ('Last-Modified: '.gmdate('D, d M Y H:i:s').' GMT'); 
-        header ('Cache-Control: cache, must-revalidate');
-        header ('Pragma: public');
-
-        $objWriter = PHPExcel_IOFactory::createWriter($this->excel, 'Excel5');
-        $objWriter->save('php://output');
     }
 
     public function pdf($table, $title, array $where = array())
     {
-        $this->load->library('HtmlPdf');
-      
-        $config = array(
-            'orientation' => 'p',
-            'format' => 'a4',
-            'marges' => array(5, 5, 5, 5)
-        );
-
-        $this->pdf = new HtmlPdf($config);
-
         foreach ($where as $column => $value) {
             $this->db->where($column, $value);
         }
+        $this->apply_report_scope($table);
         $result = $this->db->get($table);
         $fields = $result->list_fields();
+        if (in_array($table, $this->report_owner_tables(), true)) {
+            $fields = array_values(array_diff($fields, array('owner_user_id')));
+        }
+        $fields = array_values(array_filter($fields, function ($field) {
+            return !preg_match('/(^pass$|password|remember_token|verification_code|forgot_exp|oauth_uid|secret)/i', $field);
+        }));
+        $date_fields = $this->date_result_fields($result);
+        $rows = $result->result();
+        if (in_array($table, $this->report_owner_tables(), true)) {
+            $rows = $this->attach_owner_display_names($rows);
+        }
+
+        // Seluruh ekspor memakai A4 lanskap agar kolom tetap terbaca dan tidak
+        // melewati area cetak dengan margin 20 mm.
+        $orientation = 'L';
+        $config = array(
+            'orientation' => $orientation,
+            'format' => 'A4',
+            'marges' => array(20, 20, 20, 20)
+        );
+
+        $this->load->library('HtmlPdf');
+        $this->pdf = new HtmlPdf($config);
+
+        $column_widths = $this->pdf_column_widths($rows, $fields);
 
         $content = $this->pdf->loadHtmlPdf('core_template/pdf/pdf', [
-            'results' => $result->result(),
+            'results' => $rows,
             'fields' => $fields,
-            'title' => $title
+            'date_fields' => $date_fields,
+            'title' => $title,
+            'orientation' => $orientation,
+            'column_widths' => $column_widths,
+            'generated_at' => format_date_id(date('Y-m-d')) . ' ' . date('H:i')
         ], TRUE);
 
-        $this->pdf->initialize($config);
+        $this->pdf->pdf->SetCreator('SILARIS');
+        $this->pdf->pdf->SetAuthor('Kantor Wilayah Kementerian Hukum Sulawesi Tenggara');
+        $this->pdf->pdf->SetTitle((string) $title);
+        // Raster yang kelak disisipkan dipetakan pada kepadatan 300 DPI.
+        // Teks dan garis tabel sendiri tetap berupa vektor (resolution independent).
+        $this->pdf->pdf->setImageScale(300 / 72);
+        $this->pdf->pdf->setJPEGQuality(100);
         $this->pdf->pdf->SetDisplayMode('fullpage');
         $this->pdf->writeHTML($content);
         $this->pdf->Output($table.'.pdf', 'H');
+    }
+
+    /**
+     * Calculate printable percentage widths from headers and representative
+     * values. The small fixed number column is included at index zero.
+     */
+    private function pdf_column_widths(array $rows, array $fields)
+    {
+        $weights = array(3.5);
+        foreach ($fields as $field) {
+            $longest = strlen(ucwords(str_replace(array('_', '-'), ' ', $field)));
+            foreach (array_slice($rows, 0, 250) as $row) {
+                $value = isset($row->{$field}) ? trim(strip_tags((string) $row->{$field})) : '';
+                $longest = max($longest, min(strlen($value), 80));
+            }
+            $weights[] = min(max(sqrt(max($longest, 1)), 3.5), 9.0);
+        }
+
+        $total = array_sum($weights) ?: 1;
+        $widths = array();
+        foreach ($weights as $weight) {
+            $widths[] = round(($weight / $total) * 100, 2);
+        }
+        // Prevent floating-point rounding from making the table exceed 100%.
+        $widths[count($widths) - 1] += 100 - array_sum($widths);
+        return $widths;
+    }
+
+    /** Return database DATE/DATETIME/TIMESTAMP columns as a lookup map. */
+    private function date_result_fields($result)
+    {
+        $date_fields = array();
+        foreach ($result->field_data() as $field) {
+            if (in_array(strtolower((string) $field->type), array('date', 'datetime', 'timestamp'), true)) {
+                $date_fields[$field->name] = true;
+            }
+        }
+        return $date_fields;
     }
 }
 

@@ -85,7 +85,7 @@ jQuery(document).ready(domo);
                            <td><code class="api-key-value"><?= _ent($keys->key); ?></code></td>
                            <td><?= $keys->is_private_key ? '<span class="label label-warning">Ya</span>' : '<span class="label label-default">Tidak</span>'; ?></td>
                            <td><?= $keys->ip_addresses ? _ent($keys->ip_addresses) : '<span class="text-muted">Semua IP</span>'; ?></td>
-                           <td><?= _ent($keys->date_created); ?></td>
+                           <td class="table-date-cell"><?= _ent(format_date_id($keys->date_created)); ?></td>
                            <td width="200">
                               <?php is_allowed('keys_view', function() use ($keys){?>
                               <a href="<?= site_url('administrator/keys/view/' . $keys->id); ?>" class="label-default"><i class="fa fa-newspaper-o"></i> <?= cclang('view_button'); ?></a>

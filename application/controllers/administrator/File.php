@@ -27,9 +27,11 @@ class File extends Admin
 	*/
 	public function download($file_path = null, $file_name = null)
 	{
-		$this->load->helper('download');
-		$path = FCPATH . '/uploads/siswa/' . $file_name;
-		
-		force_download($file_name, $path);
+		$directory = basename(trim((string) $file_path));
+		if ($directory === '' || trim((string) $file_name) === '') {
+			show_404();
+		}
+
+		$this->serve_document('uploads/' . $directory, $file_name, true);
 	}
 }

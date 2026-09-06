@@ -170,6 +170,44 @@
       </div>
 
       <div class="section-title text-start panduan-section-gap" data-aos="fade-up">
+        <span class="eyebrow"><i class="icofont-people"></i> Untuk MPD</span>
+        <h2>Pengawasan Laporan Beberapa Wilayah</h2>
+        <p>Data MPD menjadi sumber resmi identitas dan cakupan pengawasan. Satu akun MPD dapat ditugaskan pada satu atau beberapa kabupaten/kota tanpa mencampurkan data di luar wilayahnya.</p>
+      </div>
+
+      <div class="panduan-report-flow" data-aos="fade-up" data-aos-delay="100">
+        <article class="panduan-report-step">
+          <div class="panduan-report-node"><i class="icofont-user-alt-3" aria-hidden="true"></i><span>1</span></div>
+          <div class="panduan-report-content"><h4>Buat Akun MPD</h4><p>Admin membuat akun melalui <strong>Administrator &rarr; User</strong> dan memberikan role MPD. Akun baru tetap nonaktif sampai data resminya selesai diverifikasi.</p></div>
+        </article>
+        <article class="panduan-report-step">
+          <div class="panduan-report-node"><i class="icofont-id-card" aria-hidden="true"></i><span>2</span></div>
+          <div class="panduan-report-content"><h4>Lengkapi Data MPD</h4><p>Buka <strong>Setup &rarr; Data MPD</strong>, hubungkan akun, lalu isi nama, jabatan, kontak, nomor SK, dan masa jabatan.</p></div>
+        </article>
+        <article class="panduan-report-step">
+          <div class="panduan-report-node"><i class="icofont-map-pins" aria-hidden="true"></i><span>3</span></div>
+          <div class="panduan-report-content"><h4>Tentukan Beberapa Wilayah</h4><p>Pilih seluruh kabupaten/kota yang menjadi wilayah kerja. Penambahan atau pengurangan wilayah langsung mengubah cakupan laporan dan rekap MPD.</p></div>
+        </article>
+        <article class="panduan-report-step">
+          <div class="panduan-report-node"><i class="icofont-verification-check" aria-hidden="true"></i><span>4</span></div>
+          <div class="panduan-report-content"><h4>Verifikasi dan Aktifkan</h4><p>Admin atau Kanwil mencentang verifikasi setelah data diperiksa, kemudian mengaktifkan akun pada daftar pengguna. MPD yang belum terdaftar atau belum terverifikasi tidak dapat login.</p></div>
+        </article>
+        <article class="panduan-report-step">
+          <div class="panduan-report-node"><i class="icofont-eye-alt" aria-hidden="true"></i><span>5</span></div>
+          <div class="panduan-report-content"><h4>Pantau Laporan Wilayah</h4><p>MPD login dan membuka menu Laporan atau Rekap. Sistem otomatis hanya menampilkan laporan Notaris dari seluruh wilayah yang ditugaskan kepadanya.</p></div>
+        </article>
+        <article class="panduan-report-step">
+          <div class="panduan-report-node"><i class="icofont-refresh" aria-hidden="true"></i><span>6</span></div>
+          <div class="panduan-report-content"><h4>Perbarui Penugasan</h4><p>Jika susunan MPD atau wilayah berubah, Admin memperbarui Data MPD. Saat role dicabut atau data dihapus, hubungan wilayah dilepas dan akun terkait dinonaktifkan.</p></div>
+        </article>
+      </div>
+
+      <div class="panduan-note" data-aos="fade-up">
+        <i class="icofont-lock"></i>
+        <div><strong>Batas akses MPD:</strong> MPD tidak mengunggah data atas nama Notaris dan tidak dapat melihat kabupaten/kota di luar penugasannya. Admin dan Kanwil tetap dapat melihat seluruh wilayah.</div>
+      </div>
+
+      <div class="section-title text-start panduan-section-gap" data-aos="fade-up">
         <span class="eyebrow"><i class="icofont-question-circle"></i> FAQ</span>
         <h2>Pertanyaan yang Sering Diajukan</h2>
       </div>
@@ -188,8 +226,8 @@
           <div id="faq3" class="accordion-collapse collapse" data-bs-parent="#faqAccordion"><div class="accordion-body">Itu adalah perilaku yang benar. Akun User/Notaris hanya dapat melihat dan mengelola laporan miliknya. MPD hanya melihat wilayah penugasan, sedangkan Admin dan Kanwil dapat melihat seluruh laporan.</div></div>
         </div>
         <div class="accordion-item">
-          <h3 class="accordion-header"><button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#faq4">Apakah Rekap Laporan merupakan data atau unggahan terpisah?</button></h3>
-          <div id="faq4" class="accordion-collapse collapse" data-bs-parent="#faqAccordion"><div class="accordion-body">Tidak. Rekap Laporan adalah tampilan pemantauan dari sumber laporan yang sama. Dokumen pada Laporan dan Rekap merujuk ke berkas yang sama.</div></div>
+          <h3 class="accordion-header"><button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#faq4">Apakah Rekap Layanan merupakan data atau unggahan terpisah?</button></h3>
+          <div id="faq4" class="accordion-collapse collapse" data-bs-parent="#faqAccordion"><div class="accordion-body">Tidak. Rekap Layanan adalah tampilan pemantauan hanya-baca yang menggabungkan seluruh jenis layanan dari sumber data aslinya. Perubahan data tetap dilakukan melalui menu Laporan.</div></div>
         </div>
         <div class="accordion-item">
           <h3 class="accordion-header"><button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#faq5">Dokumen sudah dipilih tetapi tidak dapat dibuka, apa yang harus diperiksa?</button></h3>

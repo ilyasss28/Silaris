@@ -123,13 +123,8 @@ class MY_Controller extends CI_Controller {
     */
     public function valid_number($str)
     {
-       $this->form_validation->set_message('valid_number','The %s field may only contain number characters.');
-
-       if (preg_match("/[0-9]/", $str)) {
-        return true;
-       }
-
-       return false;
+		$this->form_validation->set_message('valid_number', 'The %s field may only contain number characters.');
+		return $str === '' || ctype_digit((string) $str);
     }
 
     /**
@@ -178,14 +173,45 @@ class MY_Controller extends CI_Controller {
     */
     public function valid_date($str)
     {
-       $this->form_validation->set_message('valid_date','The %s field may only contain date.');
-
-       if ($ret = preg_match("[(\d{4})\-(\d{2})\-(\d{2})]", $str)) {
-        return true;
-       }
-
-       return false;
+		$this->form_validation->set_message('valid_date', 'The %s field must use a valid YYYY-MM-DD date.');
+		if ($str === '') {
+			return true;
+		}
+		$date = DateTime::createFromFormat('!Y-m-d', (string) $str);
+		$errors = DateTime::getLastErrors();
+		return $date !== false
+			&& ($errors === false || ($errors['warning_count'] === 0 && $errors['error_count'] === 0))
+			&& $date->format('Y-m-d') === $str;
     }
+
+	public function valid_not_future_date($str)
+	{
+		$this->form_validation->set_message('valid_not_future_date', 'The %s field cannot be later than today.');
+		return $str === '' || ($this->valid_date($str) && $str <= date('Y-m-d'));
+	}
+
+	public function valid_indonesian_phone($str)
+	{
+		$this->form_validation->set_message('valid_indonesian_phone', 'The %s field must be an Indonesian mobile number (08xxxxxxxxxx).');
+		if (trim((string) $str) === '') {
+			return true;
+		}
+		$phone = function_exists('format_phone_number') ? format_phone_number($str) : preg_replace('/\D+/', '', (string) $str);
+		return (bool) preg_match('/^08[0-9]{8,11}$/', $phone);
+	}
+
+	public function valid_npwp($str)
+	{
+		$digits = preg_replace('/\D+/', '', (string) $str);
+		$this->form_validation->set_message('valid_npwp', 'The %s field must contain 15 or 16 digits.');
+		return $digits === '' || in_array(strlen($digits), array(15, 16), true);
+	}
+
+	public function valid_region_code($str)
+	{
+		$this->form_validation->set_message('valid_region_code', 'The selected %s is not registered.');
+		return $str !== '' && $this->db->where('kd_wilayah', (string) $str)->count_all_results('wilayah') === 1;
+	}
 
     /**
     * Group validation
@@ -533,6 +559,45 @@ class Admin extends MY_Controller
 
     }
 
+	/** True only for ordinary Notary accounts, not supervisory/admin roles. */
+	protected function is_notary_account($user_id = null)
+	{
+		if (!$this->aauth->is_loggedin()) return false;
+		$user_id = $user_id ?: (int) $this->aauth->get_user()->id;
+		$names = array_map(function ($group) { return strtolower(trim((string) $group->name)); }, (array) $this->aauth->get_user_groups($user_id));
+		return in_array('user', $names, true)
+			&& !array_intersect($names, array('admin', 'kanwil', 'mpd', 'pimpinan'));
+	}
+
+	/**
+	 * Prevent partially registered Notaries from creating service reports.
+	 * Existing records remain readable/editable so no historical data is lost.
+	 */
+	protected function require_complete_notary_profile($json = false)
+	{
+		if (!$this->is_notary_account()) return true;
+		$user = $this->aauth->get_user();
+		$this->load->model('model_data_notaris');
+		$profile = $this->model_data_notaris->find_for_user($user);
+		$status = $this->model_data_notaris->profile_completeness($profile, $user);
+		if ($status['complete']) return true;
+
+		$message = $profile
+			? 'Lengkapi profil Notaris terlebih dahulu sebelum menambahkan laporan. Data yang belum lengkap: '.implode(', ', $status['missing']).'.'
+			: 'Akun Anda belum terhubung dengan Data Notaris. Hubungi administrator sebelum menambahkan laporan.';
+		if ($json) {
+			$this->output->set_content_type('application/json')->set_output(json_encode(array(
+				'success' => false,
+				'message' => $message,
+				'redirect' => site_url('administrator/profile/edit'),
+			)));
+			return false;
+		}
+		set_message($message, 'warning');
+		redirect('administrator/profile/edit');
+		exit;
+	}
+
     /**
     * Upload Files tmp
     * 
@@ -559,9 +624,14 @@ class Admin extends MY_Controller
             }
         }
 
+		$uuid = (string) $default['uuid'];
+		if ($uuid !== '' && (!preg_match('/^[A-Za-z0-9_-]{1,100}$/', $uuid) || basename($uuid) !== $uuid)) {
+			return json_encode(array('success' => false, 'error' => 'Identitas unggahan tidak valid.'));
+		}
+
         $dir = FCPATH . $default['upload_path'] . $default['uuid'];
-        if (!is_dir($dir)) {
-            mkdir($dir);
+        if (!is_dir($dir) && !mkdir($dir, 0755, true)) {
+			return json_encode(array('success' => false, 'error' => 'Direktori unggahan tidak dapat dibuat.'));
         }
 
         if (empty($default['file_name'])) {
@@ -631,25 +701,29 @@ class Admin extends MY_Controller
 
             if ($default['delete_by'] == 'id') {
                 $row = $this->db->get_where($default['table_name'], [$default['primary_key'] => $default['uuid']])->row();
-                if ($row) {
-                    $path = FCPATH . $default['upload_path'] . $row->{$default['field_name']};
-                }
 
-                if (isset($default['uuid'])) {
-                    if (is_file($path)) {
-                        $delete_file = unlink($path);
-                        $this->db->where($default['primary_key'], $default['uuid']);
-                        $this->db->update($default['table_name'], [$default['field_name'] => '']);
+                if ($row && isset($row->{$default['field_name']})) {
+                    $filename = basename((string) $row->{$default['field_name']});
+                    $updated = $this->db
+                        ->where($default['primary_key'], $default['uuid'])
+                        ->update($default['table_name'], [$default['field_name'] => '']);
+                    if ($updated) {
+                        $this->load->library('storage_manager');
+                        if ($this->storage_manager->supports($default['upload_path'])) {
+                            $delete_file = $this->storage_manager->delete_if_unreferenced($default['upload_path'], $filename);
+                        } else {
+                            $directory = realpath(FCPATH . trim($default['upload_path'], '/\\'));
+                            $path = $directory === false ? null : $directory . DIRECTORY_SEPARATOR . $filename;
+                            $delete_file = !$path || !is_file($path) || @unlink($path);
+                        }
                     }
                 }
             } else {
-                $path = FCPATH . $default['upload_path_tmp'] . $default['uuid'] . '/';
+                $safe_uuid = basename((string) $default['uuid']);
+                $path = FCPATH . $default['upload_path_tmp'] . $safe_uuid . '/';
                 $delete_file = delete_files($path, true);
-            }
-
-            if (isset($default['uuid'])) {
                 if (is_dir($path)) {
-                    rmdir($path);
+                    @rmdir($path);
                 }
             }
 
@@ -731,6 +805,72 @@ class Admin extends MY_Controller
                 return json_encode($result);
             }
         }
+    }
+
+    /**
+     * Stream a private document inline or as an attachment.
+     *
+     * The calling controller must first load the database record through its
+     * scoped model. This keeps report ownership/MPD-region rules in effect.
+     */
+    protected function serve_document($directory, $filename, $download = false)
+    {
+        $filename = basename(trim((string) $filename));
+        $directory = trim(str_replace('\\', '/', (string) $directory), '/');
+        $root = realpath(FCPATH . $directory);
+        $path = $root === false || $filename === '' ? false : realpath($root . DIRECTORY_SEPARATOR . $filename);
+        if ($path === false || !is_file($path) || strpos($path, $root . DIRECTORY_SEPARATOR) !== 0) {
+            show_404();
+            return;
+        }
+
+        $size = filesize($path);
+        $start = 0;
+        $end = $size - 1;
+        $status = 200;
+        $range = isset($_SERVER['HTTP_RANGE']) ? trim((string) $_SERVER['HTTP_RANGE']) : '';
+        if ($range !== '' && preg_match('/^bytes=(\d*)-(\d*)$/', $range, $matches)) {
+            if ($matches[1] === '' && $matches[2] !== '') {
+                $suffix = min((int) $matches[2], $size);
+                $start = $size - $suffix;
+            } else {
+                $start = (int) $matches[1];
+                if ($matches[2] !== '') $end = min((int) $matches[2], $end);
+            }
+            if ($start > $end || $start >= $size) {
+                header('Content-Range: bytes */' . $size, true, 416);
+                exit;
+            }
+            $status = 206;
+        }
+
+        while (ob_get_level() > 0) ob_end_clean();
+        $mime = strtolower(pathinfo($filename, PATHINFO_EXTENSION)) === 'pdf'
+            ? 'application/pdf'
+            : (function_exists('mime_content_type') ? mime_content_type($path) : 'application/octet-stream');
+        $disposition = $download ? 'attachment' : 'inline';
+        $safe_name = str_replace(array('"', "\r", "\n"), '', $filename);
+        header('Content-Type: ' . $mime);
+        header('Content-Disposition: ' . $disposition . '; filename="' . $safe_name . '"; filename*=UTF-8\'\'' . rawurlencode($filename));
+        header('Accept-Ranges: bytes');
+        header('X-Content-Type-Options: nosniff');
+        header('Cache-Control: private, max-age=0, must-revalidate');
+        if ($status === 206) header('Content-Range: bytes ' . $start . '-' . $end . '/' . $size, true, 206);
+        else http_response_code(200);
+        header('Content-Length: ' . (($end - $start) + 1));
+
+        $handle = fopen($path, 'rb');
+        if ($handle === false) show_error('Dokumen tidak dapat dibaca.', 500);
+        fseek($handle, $start);
+        $remaining = ($end - $start) + 1;
+        while ($remaining > 0 && !feof($handle)) {
+            $chunk = fread($handle, min(8192, $remaining));
+            if ($chunk === false) break;
+            echo $chunk;
+            $remaining -= strlen($chunk);
+        }
+        fclose($handle);
+        exit;
     }
 }
 

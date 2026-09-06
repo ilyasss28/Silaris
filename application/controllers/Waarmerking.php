@@ -54,6 +54,7 @@ class Waarmerking extends Admin
 	public function add()
 	{
 		$this->is_allowed('waarmerking_add');
+		$this->require_complete_notary_profile();
 
 		$this->template->title('Waarmerking New');
 		$this->render('modul/waarmerking/waarmerking_add', $this->data);
@@ -74,6 +75,7 @@ class Waarmerking extends Admin
 			exit;
 		}
 
+		if (!$this->require_complete_notary_profile(true)) return;
 		$this->form_validation->set_rules('nomor_akta', 'Nomor Akta', 'trim|required|max_length[10]');
 		$this->form_validation->set_rules('tanggal_akta', 'Tanggal Akta', 'trim|required');
 		$this->form_validation->set_rules('sifat_akta', 'Sifat Akta', 'trim|required|max_length[100]');
@@ -83,12 +85,13 @@ class Waarmerking extends Admin
 		if ($this->form_validation->run()) {
 		
 			$save_data = [
-				'nama_notaris' => get_user_data('full_name'),
+				'nama_notaris' => format_person_name(get_user_data('full_name')),
 				'username' => get_user_data('username'),
-					'nomor_akta' => $this->input->post('nomor_akta'),
-				'tanggal_akta' => $this->input->post('tanggal_akta'),
-				'sifat_akta' => $this->input->post('sifat_akta'),
-				'penghadap' => $this->input->post('penghadap'),
+					'nomor_akta' => $this->input->post('nomor_akta', true),
+				'tanggal_akta' => $this->input->post('tanggal_akta', true),
+				'sifat_akta' => $this->input->post('sifat_akta', true),
+				'penghadap' => $this->input->post('penghadap', true),
+				'owner_user_id' => (int) get_user_data('id'),
 			];
 
 			
@@ -139,7 +142,10 @@ class Waarmerking extends Admin
 	{
 		$this->is_allowed('waarmerking_update');
 
-		$this->data['waarmerking'] = $this->model_waarmerking->find($id);
+		$this->data['waarmerking'] = $this->model_waarmerking->filter_avaiable()->find($id);
+		if (!$this->data['waarmerking']) {
+			show_404();
+		}
 
 		$this->template->title('Waarmerking Update');
 		$this->render('modul/waarmerking/waarmerking_update', $this->data);
@@ -159,6 +165,9 @@ class Waarmerking extends Admin
 				]);
 			exit;
 		}
+		if (!$this->model_waarmerking->filter_avaiable()->find($id)) {
+			return $this->response(array('success' => false, 'message' => 'Data tidak ditemukan atau tidak dapat diakses.'));
+		}
 		
 		$this->form_validation->set_rules('nomor_akta', 'Nomor Akta', 'trim|required|max_length[10]');
 		$this->form_validation->set_rules('tanggal_akta', 'Tanggal Akta', 'trim|required');
@@ -168,12 +177,10 @@ class Waarmerking extends Admin
 		if ($this->form_validation->run()) {
 		
 			$save_data = [
-				'nama_notaris' => $this->input->post('nama_notaris'),
-				'username' => get_user_data('username'),
-				'nomor_akta' => $this->input->post('nomor_akta'),
-				'tanggal_akta' => $this->input->post('tanggal_akta'),
-				'sifat_akta' => $this->input->post('sifat_akta'),
-				'penghadap' => $this->input->post('penghadap'),
+				'nomor_akta' => $this->input->post('nomor_akta', true),
+				'tanggal_akta' => $this->input->post('tanggal_akta', true),
+				'sifat_akta' => $this->input->post('sifat_akta', true),
+				'penghadap' => $this->input->post('penghadap', true),
 			];
 
 			
@@ -217,21 +224,18 @@ class Waarmerking extends Admin
 	*
 	* @var $id String
 	*/
-	public function delete($id = null)
+	public function delete()
 	{
 		$this->is_allowed('waarmerking_delete');
-
+		if (strtoupper($this->input->method()) !== 'POST') {
+			show_error('Method Not Allowed', 405);
+		}
 		$this->load->helper('file');
 
-		$arr_id = $this->input->get('id');
-		$remove = false;
-
-		if (!empty($id)) {
-			$remove = $this->_remove($id);
-		} elseif (count($arr_id) >0) {
-			foreach ($arr_id as $id) {
-				$remove = $this->_remove($id);
-			}
+		$arr_id = array_values(array_unique(array_filter(array_map('intval', (array) $this->input->post('id')))));
+		$remove = !empty($arr_id);
+		foreach ($arr_id as $id) {
+			$remove = $this->_remove($id) && $remove;
 		}
 
 		if ($remove) {
@@ -253,6 +257,9 @@ class Waarmerking extends Admin
 		$this->is_allowed('waarmerking_view');
 
 		$this->data['waarmerking'] = $this->model_waarmerking->join_avaiable()->filter_avaiable()->find($id);
+		if (!$this->data['waarmerking']) {
+			show_404();
+		}
 
 		$this->template->title('Waarmerking Detail');
 		$this->render('modul/waarmerking/waarmerking_view', $this->data);
@@ -265,7 +272,10 @@ class Waarmerking extends Admin
 	*/
 	private function _remove($id)
 	{
-		$waarmerking = $this->model_waarmerking->find($id);
+		$waarmerking = $this->model_waarmerking->filter_avaiable()->find($id);
+		if (!$waarmerking) {
+			return false;
+		}
 
 		
 		

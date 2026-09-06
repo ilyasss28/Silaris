@@ -1465,3 +1465,28 @@ a[class*="btn"]:active {
   box-shadow: none !important;
   -webkit-box-shadow: none !important;
 }
+
+/* Keep formatted dates intact inside public tables. */
+.table-date,
+.table-date-cell {
+  white-space: nowrap !important;
+  word-break: normal !important;
+  overflow-wrap: normal !important;
+  hyphens: none !important;
+}
+.table-date-cell {
+  width: 132px !important;
+  min-width: 132px !important;
+}
+.table-date {
+  width: max-content;
+  max-width: none;
+  display: inline-block;
+}
+.table-number-cell {
+  width: 1% !important;
+  min-width: max-content;
+  white-space: nowrap !important;
+  word-break: normal !important;
+  overflow-wrap: normal !important;
+}

@@ -16,6 +16,15 @@
                      'method'  => 'POST'
                      ]); ?>
 
+         <?php $custom_module_protected = is_file(FCPATH . 'application/views/modul/' . $crud->table_name . '/.tmc-preserve'); ?>
+         <?php if ($custom_module_protected): ?>
+         <div class="alert alert-warning" role="status" style="margin:0 0 18px">
+            <i class="fa fa-shield"></i>
+            <strong>Modul dengan tampilan khusus.</strong>
+            Konfigurasi field tetap disimpan, tetapi TMC CRUD tidak akan menimpa view, controller, atau model. Penambahan field ke halaman modul ini perlu diselaraskan pada kode khususnya.
+         </div>
+         <?php endif; ?>
+
          <input type="hidden" name="table_name" id="table_name" value="<?= _ent($crud->table_name); ?>">
          <input type="hidden" class="primary_key" name="primary_key" id="primary_key" value="<?= _ent($crud->primary_key); ?>">
 

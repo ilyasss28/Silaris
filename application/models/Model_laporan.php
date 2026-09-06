@@ -13,101 +13,78 @@ class Model_laporan extends MY_Model {
 			'primary_key' 	=> $this->primary_key,
 		 	'table_name' 	=> $this->table_name,
 		 	'field_search' 	=> $this->field_search,
+			'report_scoped' => true,
 		 );
 
 		parent::__construct($config);
-		$this->load->library('report_access');
 	}
 
 	public function count_all($q = null, $field = null)
 	{
-		$this->join_avaiable()->filter_avaiable();
-		$this->report_access->apply_scope($this->db, $this->table_name);
-		return $this->count_search_results($this->table_name, $this->field_search, $q, $field);
-	}
-	public function get($q = null, $field = null, $limit = 0, $offset = 0, $select_field = [])
-	{
-        if (is_array($select_field) AND count($select_field)) {
-			$this->db->select($select_field);
+		$iterasi = 1;
+        $num = count($this->field_search);
+        $where = NULL;
+        $q = $this->scurity($q);
+		$field = $this->scurity($field);
+
+        if (empty($field)) {
+	        foreach ($this->field_search as $field) {
+	            if ($iterasi == 1) {
+	                $where .= "laporan.".$field . " LIKE '%" . $q . "%' ";
+	            } else {
+	                $where .= "OR " . "laporan.".$field . " LIKE '%" . $q . "%' ";
+	            }
+	            $iterasi++;
+	        }
+
+	        $where = '('.$where.')';
         } else {
-			$this->select_with_notaris_fallback();
+        	$where .= "(" . "laporan.".$field . " LIKE '%" . $q . "%' )";
         }
 
 		$this->join_avaiable()->filter_avaiable();
-		$this->report_access->apply_scope($this->db, $this->table_name);
-		$this->apply_search_conditions($this->table_name, $this->field_search, $q, $field);
-        $this->db->limit(max(0, (int) $limit), max(0, (int) $offset));
+		$this->apply_report_scope($this->table_name);
+        $this->db->where($where);
+		$query = $this->db->get($this->table_name);
+
+		return $query->num_rows();
+	}
+
+	public function get($q = null, $field = null, $limit = 0, $offset = 0, $select_field = [])
+	{
+		$iterasi = 1;
+        $num = count($this->field_search);
+        $where = NULL;
+        $q = $this->scurity($q);
+		$field = $this->scurity($field);
+
+        if (empty($field)) {
+	        foreach ($this->field_search as $field) {
+	            if ($iterasi == 1) {
+	                $where .= "laporan.".$field . " LIKE '%" . $q . "%' ";
+	            } else {
+	                $where .= "OR " . "laporan.".$field . " LIKE '%" . $q . "%' ";
+	            }
+	            $iterasi++;
+	        }
+
+	        $where = '('.$where.')';
+        } else {
+        	$where .= "(" . "laporan.".$field . " LIKE '%" . $q . "%' )";
+        }
+
+        if (is_array($select_field) AND count($select_field)) {
+        	$this->db->select($select_field);
+        }
+		
+		$this->join_avaiable()->filter_avaiable();
+		$this->apply_report_scope($this->table_name);
+        $this->db->where($where);
+        $this->db->limit($limit, $offset);
         $this->db->order_by('laporan.'.$this->primary_key, "DESC");
 		$query = $this->db->get($this->table_name);
 
-		return $query->result();
-	}
-
-	/**
-	 * Many legacy records were imported without laporan.nama_notaris. Fall
-	 * back to the owning account's full name so the display never shows a
-	 * blank notary name.
-	 */
-	private function select_with_notaris_fallback()
-	{
-		$this->db->select(
-			"laporan.*, COALESCE(NULLIF(TRIM(laporan.nama_notaris), ''), notaris_owner.full_name, laporan.username) AS nama_notaris",
-			false
-		);
-		$this->db->join('aauth_users AS notaris_owner', 'notaris_owner.id = laporan.owner_user_id', 'left');
-	}
-
-	/**
-	 * The Laporan module is an owner workspace. Aggregate access belongs to
-	 * Rekap Laporan, so every record-level operation is scoped server-side.
-	 */
-	private function apply_access_scope()
-	{
-		$this->report_access->apply_scope($this->db, $this->table_name);
-	}
-
-	public function find($id = null, $select_field = [])
-	{
-		if (is_array($select_field) && count($select_field)) {
-			$this->db->select($select_field);
-		} else {
-			$this->select_with_notaris_fallback();
-		}
-
-		$this->db->where('laporan.' . $this->primary_key, $id);
-		$this->apply_access_scope();
-		$query = $this->db->get($this->table_name);
-
-		return $query->num_rows() > 0 ? $query->row() : false;
-	}
-
-	public function change($id = null, $data = [])
-	{
-		$this->db->where($this->primary_key, $id);
-		$this->apply_access_scope();
-		$this->db->update($this->table_name, $data);
-
-		return $this->db->affected_rows();
-	}
-
-	public function remove($id = null)
-	{
-		$this->db->where($this->primary_key, $id);
-		$this->apply_access_scope();
-
-		return $this->db->delete($this->table_name);
-	}
-
-	public function export_scoped($subject = 'laporan')
-	{
-		$this->apply_access_scope();
-		return parent::export($this->table_name, $subject);
-	}
-
-	public function pdf_scoped($title = 'Laporan')
-	{
-		$this->apply_access_scope();
-		return parent::pdf($this->table_name, $title);
+		return $this->attach_owner_display_names($query->result());
 	}
 
     public function join_avaiable() {

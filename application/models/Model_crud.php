@@ -21,28 +21,7 @@ class Model_crud extends MY_Model {
 
 	public function count_all($q = '', $field = '')
 	{
-		$iterasi = 1;
-        $num = count($this->field_search);
-        $where = NULL;
-        $q = $this->scurity($q);
-		$field = $this->scurity($field);
-
-        if (empty($field)) {
-	        foreach ($this->field_search as $field) {
-	            if ($iterasi == 1) {
-	                $where .= "(" . $field . " LIKE '%" . $q . "%' ";
-	            } else if ($iterasi == $num) {
-	                $where .= "OR " . $field . " LIKE '%" . $q . "%') ";
-	            } else {
-	                $where .= "OR " . $field . " LIKE '%" . $q . "%' ";
-	            }
-	            $iterasi++;
-	        }
-        } else {
-        	$where .= "(" . $field . " LIKE '%" . $q . "%' )";
-        }
-
-        $this->db->where($where);
+		$this->apply_search($q, $field);
 		$query = $this->db->get($this->table_name);
 
 		return $query->num_rows();
@@ -50,33 +29,38 @@ class Model_crud extends MY_Model {
 
 	public function get($q = '', $field = '', $limit = 0, $offset = 0)
 	{
-		$iterasi = 1;
-        $num = count($this->field_search);
-        $where = NULL;
-        $q = $this->scurity($q);
-		$field = $this->scurity($field);
-
-        if (empty($field)) {
-	        foreach ($this->field_search as $field) {
-	            if ($iterasi == 1) {
-	                $where .= "(" . $field . " LIKE '%" . $q . "%' ";
-	            } else if ($iterasi == $num) {
-	                $where .= "OR " . $field . " LIKE '%" . $q . "%') ";
-	            } else {
-	                $where .= "OR " . $field . " LIKE '%" . $q . "%' ";
-	            }
-	            $iterasi++;
-	        }
-        } else {
-        	$where .= "(" . $field . " LIKE '%" . $q . "%' )";
-        }
-
-        $this->db->where($where);
+		$this->apply_search($q, $field);
         $this->db->limit($limit, $offset);
         $this->db->order_by($this->primary_key, "DESC");
 		$query = $this->db->get($this->table_name);
 
 		return $query->result();
+	}
+
+	/**
+	 * Apply a whitelisted search using Query Builder escaping.
+	 */
+	private function apply_search($q = '', $field = '')
+	{
+		$q = trim((string) $q);
+		$field = trim((string) $field);
+		if ($q === '') {
+			return;
+		}
+
+		$fields = in_array($field, $this->field_search, true)
+			? array($field)
+			: $this->field_search;
+
+		$this->db->group_start();
+		foreach ($fields as $index => $search_field) {
+			if ($index === 0) {
+				$this->db->like($search_field, $q);
+			} else {
+				$this->db->or_like($search_field, $q);
+			}
+		}
+		$this->db->group_end();
 	}
 
 	public function get_input_type()

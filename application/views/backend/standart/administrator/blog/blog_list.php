@@ -115,7 +115,7 @@ jQuery(document).ready(domo);
                            <td><?= _ent($blog->category_name); ?></td>
                            <td><?= _ent($blog->status); ?></td> 
                            <td><?= _ent($blog->author); ?></td> 
-                           <td><?= _ent($blog->created_at); ?></td>
+                           <td class="table-date-cell"><?= _ent(format_date_id($blog->created_at)); ?></td>
                            <td width="200">
                               <?php is_allowed('blog_view', function() use ($blog){?>
                               <a href="<?= site_url('administrator/blog/view/' . $blog->id); ?>" class="label-default"><i class="fa fa-newspaper-o"></i> <?= cclang('view_button'); ?></a>

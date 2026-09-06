@@ -76,7 +76,15 @@ class Crud_builder
 
 		foreach ($this->crud as $contains)
 		{
+			if (!is_array($contains) || count($contains) !== 1) {
+				$this->errors[] = 'Invalid CRUD field structure.';
+				return $this;
+			}
 			$field_name = array_keys($contains)[0];
+			if (!preg_match('/^[A-Za-z][A-Za-z0-9_]*$/', (string) $field_name)) {
+				$this->errors[] = 'Invalid CRUD field name.';
+				return $this;
+			}
 			if (!isset($contains[$field_name]['input_type'])) {
 				$this->errors[] = 'The '.ucwords(clean_snake_case($field_name)).' input type must be selected.';
 				return $this;
@@ -121,11 +129,16 @@ class Crud_builder
 
 			$input_type = $contains[$field_name]['input_type'];
 
-			if (in_array($input_type, $list_all_field_custom_value_type)) {
+			if (in_array($input_type, $list_all_field_custom_value_type, true)) {
+				if (empty($contains[$field_name]['custom_option']) || !is_array($contains[$field_name]['custom_option'])) {
+					$this->errors[] = 'The '.ucwords(clean_snake_case($field_name)).' option must contain at least one item.';
+					return $this;
+				}
+				$error = false;
 				foreach ($contains[$field_name]['custom_option'] as $idx => $field_option) {
-					$error = false;
-					if (empty( $field_option['value']) 
-					OR empty( $field_option['label'])  )
+					if (!is_array($field_option) || !array_key_exists('value', $field_option)
+						OR !array_key_exists('label', $field_option)
+						OR trim((string) $field_option['label']) === '')
 					{
 						$error = true;
 					}
@@ -138,7 +151,7 @@ class Crud_builder
 			if (empty($input_type)) {
 				$this->errors[] = 'The '.ucwords(clean_snake_case($field_name)).' input type can\'t be empty.';
 			}
-			if (in_array($input_type, $list_relation_type)) {
+			if (in_array($input_type, $list_relation_type, true)) {
 				if (empty($contains[$field_name]['relation_table']) 
 					OR empty($contains[$field_name]['relation_value']) 
 					OR empty($contains[$field_name]['relation_label']) )

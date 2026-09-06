@@ -16,7 +16,8 @@ class HtmlPdf extends HTML2PDF
 	var $langue 		= 'fr';
 	var $unicode 		= TRUE;
 	var $encoding 		= 'UTF-8';
-	var $marges 		= array(5, 5, 5, 8);
+	// Default fisik untuk seluruh dokumen resmi: margin 20 mm pada kertas A4.
+	var $marges 		= array(20, 20, 20, 20);
 
 	public function __construct($config = array())
 	{

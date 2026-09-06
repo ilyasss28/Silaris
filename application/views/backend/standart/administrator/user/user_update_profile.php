@@ -29,36 +29,19 @@
    jQuery(document).ready(domo);
 </script>
 <?php $this->load->view('core_template/fine_upload'); ?>
-<!-- Content Header (Page header) -->
-<section class="content-header">
-   <h1>
-      User
-      <small>Edit Profil Saya</small>
-   </h1>
-   <ol class="breadcrumb">
-      <li><a href="#"><i class="fa fa-dashboard"></i> Home</a></li>
-      <li class=""><a href="<?= site_url('administrator/profile'); ?>">Profil Saya</a></li>
-      <li class="active">Edit Profil</li>
-   </ol>
-</section>
-<!-- Main content -->
-<section class="content">
+<section class="content profile-edit-page">
    <div class="row" >
       <div class="col-md-12">
          <div class="box box-warning">
             <div class="box-body ">
-               <!-- Widget: user widget style 1 -->
                <div class="box box-widget widget-user-2">
-                  <!-- Add the bg color to the header using any of the bg-* classes -->
-                  <div class="widget-user-header ">
-                     <div class="widget-user-image">
-                        <img class="img-circle" src="<?= BASE_ASSET; ?>/img/add2.png" alt="User Avatar">
-                     </div>
-                     <!-- /.widget-user-image -->
-                     <h3 class="widget-user-username">User</h3>
-                     <h5 class="widget-user-desc"><?= cclang('update', 'Profile'); ?></h5>
-                     <hr>
-                  </div>
+                  <header class="profile-edit-page__header">
+                    <div class="profile-edit-page__heading">
+                      <span class="profile-page-header__icon"><i class="fa fa-pencil"></i></span>
+                      <div><span class="profile-page-header__eyebrow">PENGATURAN PROFIL</span><h1>Edit Profil Saya</h1><p><?= !empty($is_mpd_profile) ? 'Perbarui identitas, kontak, foto, dan keamanan akun MPD.' : 'Perbarui informasi akun dan Data Notaris secara terstruktur.'; ?></p></div>
+                    </div>
+                    <a href="<?= site_url('administrator/profile'); ?>" class="btn profile-btn profile-btn--secondary"><i class="fa fa-arrow-left"></i> Kembali ke Profil</a>
+                  </header>
                   <?= form_open(base_url('administrator/profile/save'), [
                     'name'    => 'form_user', 
                     'class'   => 'form-horizontal', 
@@ -67,12 +50,30 @@
                     'method'  => 'POST'
                   ]); ?>
 
+                    <?php if (!empty($is_notary_profile) && !empty($notary_profile)): ?>
+                    <div class="notary-profile-form__notice"><i class="fa fa-info-circle"></i><div><strong>Lengkapi Data Notaris</strong><span>Isi setiap grup data wajib. Surat pindah dan pemegang protokol hanya diisi apabila sesuai kondisi Anda.</span></div></div>
+                    <nav class="profile-section-nav profile-section-nav--edit" aria-label="Navigasi edit profil" role="tablist">
+                      <button type="button" class="profile-section-nav__item is-active" role="tab" aria-selected="true" data-profile-edit-tab="account"><i class="fa fa-user"></i><span>Akun &amp; Foto</span></button>
+                      <button type="button" class="profile-section-nav__item" role="tab" aria-selected="false" data-profile-edit-tab="identity"><i class="fa fa-info-circle"></i><span>Identitas</span></button>
+                      <button type="button" class="profile-section-nav__item" role="tab" aria-selected="false" data-profile-edit-tab="contact"><i class="fa fa-map-marker"></i><span>Alamat &amp; Lokasi</span></button>
+                      <button type="button" class="profile-section-nav__item" role="tab" aria-selected="false" data-profile-edit-tab="documents"><i class="fa fa-file-text-o"></i><span>Dokumen</span></button>
+                      <button type="button" class="profile-section-nav__item" role="tab" aria-selected="false" data-profile-edit-tab="status"><i class="fa fa-briefcase"></i><span>Status</span></button>
+                    </nav>
+                    <?php endif; ?>
+
+                    <?php if (!empty($is_mpd_profile)): ?>
+                    <div class="notary-profile-form__notice"><i class="fa fa-info-circle"></i><div><strong>Profil Akun MPD</strong><span>Nama, email, nomor telepon, foto, dan kata sandi dapat diperbarui di sini. Wilayah pengawasan, jabatan, periode, dan SK tetap dikelola administrator melalui Data MPD.</span></div></div>
+                    <?php endif; ?>
+
+                    <section class="profile-edit-tab-panel is-active" data-profile-edit-panel="account">
+                      <header class="profile-edit-panel-heading"><i class="fa fa-user"></i><div><h4>Informasi Akun dan Foto</h4><p>Identitas masuk, kontak utama, wilayah kerja, serta keamanan akun.</p></div></header>
+
                    <div class="form-group ">
                         <label for="username" class="col-sm-2 control-label">Username <i class="required">*</i></label>
 
                         <div class="col-sm-8">
                           <input type="text" class="form-control" name="username" id="username" placeholder="Username" value="<?= set_value('username', $user->username); ?>" disabled>
-                          <small class="info help-block">The username of user.</small>
+                          <small class="info help-block">Username digunakan untuk masuk dan tidak dapat diubah dari profil.</small>
                         </div>
                     </div>
 
@@ -80,68 +81,131 @@
                         <label for="email" class="col-sm-2 control-label">Email <i class="required">*</i></label>
 
                         <div class="col-sm-8">
-                          <input type="text" class="form-control" name="email" id="email" placeholder="Email" value="<?= set_value('email', $user->email); ?>">
-                          <small class="info help-block">The email of user.</small>
+                          <input type="email" class="form-control" name="email" id="email" maxlength="100" autocomplete="email" required placeholder="nama@contoh.go.id" value="<?= set_value('email', $user->email); ?>">
+                          <small class="info help-block">Gunakan alamat email aktif yang dapat dihubungi.</small>
                         </div>
                     </div>
 
                     <div class="form-group ">
-                        <label for="full_name" class="col-sm-2 control-label">Full Name <i class="required">*</i></label>
+                        <label for="full_name" class="col-sm-2 control-label">Nama Lengkap <i class="required">*</i></label>
 
                         <div class="col-sm-8">
-                          <input type="text" class="form-control" name="full_name" id="full_name" placeholder="Full Name" value="<?= set_value('full_name', $user->full_name); ?>">
-                          <small class="info help-block">The full name of user.</small>
+                          <input type="text" class="form-control" name="full_name" id="full_name" maxlength="200" required placeholder="Nama lengkap beserta gelar" value="<?= set_value('full_name', $user->full_name); ?>">
+                          <small class="info help-block">Nama akan diselaraskan dengan Data Notaris.</small>
                         </div>
                     </div>
 
                     <div class="form-group ">
-                            <label for="kd_wilayah" class="col-sm-2 control-label">wilayah 
+                        <label for="phone_number" class="col-sm-2 control-label">Nomor Telepon</label>
+
+                        <div class="col-sm-8">
+                          <input type="tel" class="form-control" name="phone_number" id="phone_number" inputmode="numeric" minlength="10" maxlength="13" pattern="08[0-9]{8,11}" autocomplete="tel" required placeholder="Contoh: 081234567890" value="<?= _ent(set_value('phone_number', format_phone_number(isset($user->phone_number) ? $user->phone_number : ''))); ?>">
+                          <small class="info help-block">Nomor telepon yang dapat digunakan untuk menghubungi pemilik akun.</small>
+                        </div>
+                    </div>
+
+                    <div class="form-group ">
+                            <label for="kd_wilayah" class="col-sm-2 control-label">Wilayah Kerja
                             <i class="required">*</i>
                             </label>
                             <div class="col-sm-8">
-                                <input type="text" class="form-control" value="<?= _ent($this->model_user->get_region_name($user->kd_wilayah) ?: $user->kd_wilayah); ?>" readonly>
-                                <small class="info help-block">Wilayah resmi hanya dapat diubah oleh administrator melalui Manajemen User.</small>
+                                <?php
+                                  $profile_mpd_regions = isset($mpd_region_names) && is_array($mpd_region_names) ? $mpd_region_names : array();
+                                  $profile_region = !empty($profile_mpd_regions)
+                                    ? implode(', ', $profile_mpd_regions)
+                                    : ($this->model_user->get_region_name($user->kd_wilayah) ?: $user->kd_wilayah);
+                                ?>
+                                <input type="text" class="form-control" value="<?= _ent($profile_region); ?>" readonly>
+                                <small class="info help-block">Wilayah resmi dikelola administrator melalui Data Notaris atau Data MPD.</small>
                             </div>
                         </div>
                    
 
                     <div class="form-group ">
-                        <label for="username" class="col-sm-2 control-label">Avatar </label>
+                        <label for="user_avatar_galery" class="col-sm-2 control-label">Foto Profil</label>
 
                         <div class="col-sm-8">
                             <div id="user_avatar_galery" src="<?= BASE_URL . 'uploads/user/' . $user->avatar; ?>" ></div>
                             <input name="user_avatar_uuid" id="user_avatar_uuid" type="hidden" value="<?= set_value('user_avatar_uuid'); ?>">
                             <input name="user_avatar_name" id="user_avatar_name" type="hidden" value="<?= set_value('user_avatar_name', $user->avatar); ?>">
                             <small class="info help-block">
-                              Format file must PNG, JPEG.
+                              Gunakan foto berformat PNG atau JPEG, maksimal 5 MB.
                             </small>
                         </div>
                     </div>
 
                     <?php is_allowed('user_update_password', function(){?>
                     <div class="form-group ">
-                        <label for="password" class="col-sm-2 control-label">Password </label>
+                        <label for="password" class="col-sm-2 control-label">Password Baru</label>
 
                         <div class="col-sm-6">
                           <div class="input-group col-md-8 input-password">
-                          <input type="password" class="form-control password" name="password" id="password" placeholder="Password" value="<?= set_value('password'); ?>">
+                          <input type="password" class="form-control password" name="password" id="password" minlength="8" maxlength="72" autocomplete="new-password" placeholder="Minimal 8 karakter" value="<?= set_value('password'); ?>">
                             <span class="input-group-btn">
                               <button type="button" class="btn btn-flat show-password"><i class="fa fa-eye eye"></i></button>
                             </span>
                           </div>
                            <small class="info help-block">
-                            <?= cclang('do_not_be_fill_if_you_do_not_want_to_change_the_password'); ?>, <br>The password character must 6 or more.
+                            <?= cclang('do_not_be_fill_if_you_do_not_want_to_change_the_password'); ?> Gunakan 8-72 karakter.
                           </small>
                         </div>
                     </div>
                     <?php }) ?>
-                    
+                    </section>
+
+                    <?php if (!empty($is_notary_profile)): ?>
+                      <?php if (!empty($notary_profile)): $np = $notary_profile; ?>
+                      <div class="notary-profile-form">
+                        <section class="notary-profile-form__group profile-edit-tab-panel" data-profile-edit-panel="identity" hidden>
+                          <header><i class="fa fa-info-circle"></i><div><h4>Identitas Pribadi</h4><p>Data kelahiran dan identitas kependudukan.</p></div></header>
+                          <div class="notary-profile-form__grid">
+                            <label>Tempat Lahir *<input class="form-control" name="tempat_lahir" maxlength="100" required value="<?= _ent(set_value('tempat_lahir', $np->tempat_lahir)); ?>"></label>
+                            <label>Tanggal Lahir *<input type="date" class="form-control" name="tanggal_lahir" max="<?= date('Y-m-d'); ?>" required value="<?= _ent(set_value('tanggal_lahir', $np->tanggal_lahir)); ?>"></label>
+                            <label>Jenis Kelamin *<select class="form-control" name="jenis_kelamin" required><option value="">Pilih jenis kelamin</option><option value="Laki-laki" <?= set_select('jenis_kelamin', 'Laki-laki', $np->jenis_kelamin === 'Laki-laki'); ?>>Laki-laki</option><option value="Perempuan" <?= set_select('jenis_kelamin', 'Perempuan', $np->jenis_kelamin === 'Perempuan'); ?>>Perempuan</option></select></label>
+                            <label>NIK *<input class="form-control" name="nomor_ktp" inputmode="numeric" pattern="[0-9]{16}" minlength="16" maxlength="16" required value="<?= _ent(set_value('nomor_ktp', $np->nomor_ktp)); ?>"></label>
+                            <label class="is-full">NPWP *<input class="form-control" name="npwp" inputmode="numeric" pattern="[0-9]{15,16}" minlength="15" maxlength="16" required value="<?= _ent(set_value('npwp', $np->npwp)); ?>"><small>Masukkan 15 atau 16 digit tanpa tanda baca.</small></label>
+                          </div>
+                        </section>
+
+                        <section class="notary-profile-form__group profile-edit-tab-panel" data-profile-edit-panel="contact" hidden>
+                          <header><i class="fa fa-map-marker"></i><div><h4>Alamat dan Lokasi Kantor</h4><p>Wilayah ditetapkan administrator; titik koordinat dapat disalin dari peta.</p></div></header>
+                          <div class="notary-profile-form__grid">
+                            <label class="is-full">Alamat Rumah *<textarea class="form-control" name="alamat_rumah" maxlength="100" rows="2" required><?= _ent(set_value('alamat_rumah', $np->alamat_rumah)); ?></textarea></label>
+                            <label class="is-full">Alamat Kantor *<textarea class="form-control" name="alamat_kantor" maxlength="1000" rows="3" required><?= _ent(set_value('alamat_kantor', $np->alamat_kantor)); ?></textarea></label>
+                            <label>Latitude Kantor *<input type="number" step="any" min="-90" max="90" class="form-control" name="lat" required value="<?= _ent(set_value('lat', $np->lat)); ?>"></label>
+                            <label>Longitude Kantor *<input type="number" step="any" min="-180" max="180" class="form-control" name="long" required value="<?= _ent(set_value('long', $np->long)); ?>"></label>
+                          </div>
+                        </section>
+
+                        <section class="notary-profile-form__group profile-edit-tab-panel" data-profile-edit-panel="documents" hidden>
+                          <header><i class="fa fa-file-text-o"></i><div><h4>Pengangkatan dan Berita Acara</h4><p>Nomor dokumen dicantumkan lengkap sesuai dokumen resmi.</p></div></header>
+                          <div class="notary-profile-form__grid">
+                            <label>Surat Keputusan *<input class="form-control" name="surat_keputusan" maxlength="100" required value="<?= _ent(set_value('surat_keputusan', $np->surat_keputusan)); ?>"></label>
+                            <label>Surat Pindah <span class="optional">Opsional</span><input class="form-control" name="surat_pindah" maxlength="100" value="<?= _ent(set_value('surat_pindah', $np->surat_pindah)); ?>"></label>
+                            <label>Nomor BAP *<input class="form-control" name="nomor_bap" maxlength="150" required value="<?= _ent(set_value('nomor_bap', $np->nomor_bap)); ?>"></label>
+                            <label>Tanggal BAP *<input type="date" class="form-control" name="tanggal_bap" max="<?= date('Y-m-d'); ?>" required value="<?= _ent(set_value('tanggal_bap', $np->tanggal_bap)); ?>"></label>
+                          </div>
+                        </section>
+
+                        <section class="notary-profile-form__group profile-edit-tab-panel" data-profile-edit-panel="status" hidden>
+                          <header><i class="fa fa-briefcase"></i><div><h4>Status</h4><p>Status jabatan ditetapkan administrator dan tidak dapat diubah dari profil.</p></div></header>
+                          <div class="notary-profile-form__grid">
+                            <label class="is-full">Status Notaris<input class="form-control" readonly value="<?= _ent($np->status_notaris); ?>"><small>Status hanya dapat diubah oleh administrator.</small></label>
+                            <label class="is-full">Pemegang Protokol <span class="optional">Opsional</span><input class="form-control" name="pemegang_protokol" maxlength="150" value="<?= _ent(set_value('pemegang_protokol', $np->pemegang_protokol)); ?>"><small>Isi apabila Anda memegang protokol Notaris lain.</small></label>
+                          </div>
+                        </section>
+                      </div>
+                      <?php else: ?>
+                        <div class="alert alert-warning"><strong>Data Notaris belum terhubung.</strong> Hubungi administrator agar akun Anda dihubungkan ke Data Notaris.</div>
+                      <?php endif; ?>
+                    <?php endif; ?>
+
                     <div class="message">
                       
                     </div>
                      <div class="row-fluid col-md-7">
-                        <button class="btn btn-flat btn-primary btn_save btn_action" id="btn_save" data-stype='stay' title="save (Ctrl+s)"><i class="fa fa-save" ></i> <?= cclang('save_button'); ?></button>
-                     <a class="btn btn-flat btn-info btn_save btn_action btn_save_back" id="btn_save" data-stype='back' title="<?= cclang('save_and_go_the_list_button'); ?> (Ctrl+d)"><i class="fa fa-list"></i> <?= cclang('save_and_go_the_list_button'); ?></a>
+                        <button class="btn btn-flat btn-primary btn_save btn_action" id="btn_save" data-stype='stay' title="Simpan perubahan (Ctrl+s)"><i class="fa fa-save" ></i> Simpan Perubahan</button>
+                     <a class="btn btn-flat btn-info btn_save btn_action btn_save_back" id="btn_save_back" data-stype='back' title="Simpan dan kembali ke profil (Ctrl+d)"><i class="fa fa-check"></i> Simpan &amp; Kembali</a>
                      <a href="<?= site_url('administrator/profile'); ?>" class="btn btn-flat btn-default btn_action" id="btn_cancel" title="Kembali ke profil (Ctrl+x)"><i class="fa fa-undo"></i> Batal</a>
                      <span class="loading loading-hide"><img src="<?= BASE_ASSET; ?>/img/loading-spin-primary.svg"> <i><?= cclang('loading_saving_data'); ?></i></span>
                      </div>
@@ -160,10 +224,45 @@
 
 <script>
    $(document).ready(function() {
+    var editTabs = $('[data-profile-edit-tab]');
+    var editPanels = $('[data-profile-edit-panel]');
+
+    function activateEditTab(name, focusTab) {
+        if (!editTabs.filter('[data-profile-edit-tab="' + name + '"]').length) name = 'account';
+        editTabs.each(function() {
+            var active = $(this).data('profile-edit-tab') === name;
+            $(this).toggleClass('is-active', active).attr({'aria-selected': active ? 'true' : 'false', 'tabindex': active ? '0' : '-1'});
+        });
+        editPanels.each(function() {
+            var active = $(this).data('profile-edit-panel') === name;
+            $(this).prop('hidden', !active).toggleClass('is-active', active);
+        });
+        $('.notary-profile-form').prop('hidden', name === 'account');
+        if (focusTab) editTabs.filter('[data-profile-edit-tab="' + name + '"]').focus();
+    }
+
+    editTabs.each(function(index) {
+        $(this).on('click', function() { activateEditTab($(this).data('profile-edit-tab'), false); });
+        $(this).on('keydown', function(event) {
+            if (event.key !== 'ArrowRight' && event.key !== 'ArrowLeft') return;
+            event.preventDefault();
+            var next = (index + (event.key === 'ArrowRight' ? 1 : -1) + editTabs.length) % editTabs.length;
+            activateEditTab(editTabs.eq(next).data('profile-edit-tab'), true);
+        });
+    });
+    if (editTabs.length) activateEditTab('account', false);
+
     $('.btn_save').click(function() {
         $('.message').fadeOut();
 
         var form_user = $('#form_user');
+        var invalidField = form_user[0].querySelector(':invalid');
+        if (invalidField) {
+            var invalidPanel = $(invalidField).closest('[data-profile-edit-panel]').data('profile-edit-panel') || 'account';
+            activateEditTab(invalidPanel, false);
+            invalidField.reportValidity();
+            return false;
+        }
         var data_post = form_user.serializeArray();
         var save_type = $(this).attr('data-stype');
 

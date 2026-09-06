@@ -71,8 +71,8 @@ jQuery(document).ready(domo);
                            <th>
                             <input type="checkbox" class="flat-red toltip" id="check_all" name="check_all" title="check all">
                            </th>
-                           <th style="text-align:center">Username</th>
-                           <th style="text-align:center">Tanggal Laporan</th>
+                           <th style="text-align:center">Nama Notaris</th>
+                           <th class="table-date-cell" style="text-align:center">Tanggal Laporan</th>
                            <th style="text-align:center">File Laporan</th>
                            <th style="text-align:center" width="7%">Action</th>
                         </tr>
@@ -84,11 +84,11 @@ jQuery(document).ready(domo);
                               <input type="checkbox" class="flat-red check" name="id[]" value="<?= $laporan_bulanan->id_laporan_bulanan; ?>">
                            </td>
                            
-                           <td><?= _ent($laporan_bulanan->username); ?></td> 
-                           <td><?= _ent(format_date_id($laporan_bulanan->tanggal_laporan)); ?></td> 
+                           <td><?= _ent($laporan_bulanan->nama_notaris); ?></td>
+                           <td class="table-date-cell"><?= _ent(format_date_id($laporan_bulanan->tanggal_laporan)); ?></td>
                            <td>
                               <?php if (!empty($laporan_bulanan->file_laporan)): ?>
-                                <?php $document_viewer_url = document_preview_url(BASE_URL . 'uploads/laporan_bulanan/' . rawurlencode($laporan_bulanan->file_laporan)); ?>
+                                <?php $document_viewer_url = site_url('laporan_bulanan/document/' . $laporan_bulanan->id_laporan_bulanan . '/preview'); ?>
                                 <?php if (is_image($laporan_bulanan->file_laporan)): ?>
                                 <a href="<?= _ent($document_viewer_url); ?>" target="_blank" rel="noopener noreferrer" title="Buka di tab baru">
                                   <img src="<?= BASE_URL . 'uploads/laporan_bulanan/' . $laporan_bulanan->file_laporan; ?>" class="image-responsive" alt="image laporan_bulanan" title="file_laporan laporan_bulanan" width="40px">
@@ -144,7 +144,7 @@ jQuery(document).ready(domo);
                      <div class="col-sm-3 padd-left-0 " >
                         <select type="text" class="form-control chosen chosen-select" name="f" id="field" >
                            <option value=""><?= cclang('all'); ?></option>
-                            <option <?= $this->input->get('f') == 'username' ? 'selected' :''; ?> value="username">Username</option>
+                            <option <?= $this->input->get('f') == 'nama_notaris' ? 'selected' :''; ?> value="nama_notaris">Nama Notaris</option>
                            <option <?= $this->input->get('f') == 'tanggal_laporan' ? 'selected' :''; ?> value="tanggal_laporan">Tanggal Laporan</option>
                            <option <?= $this->input->get('f') == 'file_laporan' ? 'selected' :''; ?> value="file_laporan">File Laporan</option>
                           </select>

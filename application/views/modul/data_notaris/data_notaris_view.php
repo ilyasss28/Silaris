@@ -59,17 +59,10 @@ jQuery(document).ready(domo);
 
                         <div class="col-sm-8">
                            <div class="notaris-name-cell">
-                             <?php if (!empty($data_notaris->foto)): ?>
-                               <?php if (is_image($data_notaris->foto)): ?>
-                               <a class="fancybox" rel="group" href="<?= BASE_URL . 'uploads/data_notaris/' . $data_notaris->foto; ?>">
-                                 <img src="<?= BASE_URL . 'uploads/data_notaris/' . $data_notaris->foto; ?>" class="notaris-name-cell__photo" alt="Foto <?= _ent($data_notaris->nama_notaris); ?>" title="foto data_notaris">
-                               </a>
-                               <?php else: ?>
-                               <a href="<?= BASE_URL . 'administrator/file/download/data_notaris/' . $data_notaris->foto; ?>">
-                                 <img src="<?= get_icon_file($data_notaris->foto); ?>" class="notaris-name-cell__photo" alt="Foto <?= _ent($data_notaris->nama_notaris); ?>" title="foto <?= $data_notaris->foto; ?>">
-                               </a>
-                               <?php endif; ?>
-                             <?php endif; ?>
+                             <?php $notary_photo = $data_notaris->photo_url ?? notary_photo_url($data_notaris->account_avatar ?? '', $data_notaris->foto ?? ''); ?>
+                             <a class="fancybox" rel="group" href="<?= _ent($notary_photo); ?>">
+                               <img src="<?= _ent($notary_photo); ?>" class="notaris-name-cell__photo" alt="Foto <?= _ent($data_notaris->nama_notaris); ?>" title="Foto <?= _ent($data_notaris->nama_notaris); ?>">
+                             </a>
                              <span><?= _ent($data_notaris->nama_notaris); ?></span>
                            </div>
                         </div>
@@ -111,7 +104,7 @@ jQuery(document).ready(domo);
                         <label for="content" class="col-sm-2 control-label">Wilayah </label>
 
                         <div class="col-sm-8">
-                           <?= _ent($data_notaris->nama_wilayah); ?>
+                           <?= _ent(format_title_case($data_notaris->region_name ?? $data_notaris->wilayah)); ?>
                         </div>
                     </div>
                                          
@@ -148,18 +141,10 @@ jQuery(document).ready(domo);
                     </div>
                                          
                     <div class="form-group ">
-                        <label for="content" class="col-sm-2 control-label">Password </label>
-
-                        <div class="col-sm-8">
-                           <?= _ent($data_notaris->password); ?>
-                        </div>
-                    </div>
-                                         
-                    <div class="form-group ">
                         <label for="content" class="col-sm-2 control-label">Kode Wilayah </label>
 
                         <div class="col-sm-8">
-                           <?= _ent($data_notaris->nama); ?>
+                           <?= _ent($data_notaris->kode_wilayah ?? $data_notaris->region_code ?? '-'); ?>
                         </div>
                     </div>
                                          
@@ -184,6 +169,54 @@ jQuery(document).ready(domo);
 
                         <div class="col-sm-8">
                            <?= _ent($data_notaris->long); ?>
+                        </div>
+                    </div>
+                                         
+                    <div class="form-group ">
+                        <label for="content" class="col-sm-2 control-label">NPWP </label>
+
+                        <div class="col-sm-8">
+                           <?= _ent($data_notaris->npwp); ?>
+                        </div>
+                    </div>
+                                         
+                    <div class="form-group ">
+                        <label for="content" class="col-sm-2 control-label">Nomor KTP </label>
+
+                        <div class="col-sm-8">
+                           <?= _ent($data_notaris->nomor_ktp); ?>
+                        </div>
+                    </div>
+                                         
+                    <div class="form-group ">
+                        <label for="content" class="col-sm-2 control-label">Nomor BAP </label>
+
+                        <div class="col-sm-8">
+                           <?= _ent($data_notaris->nomor_bap); ?>
+                        </div>
+                    </div>
+                                         
+                    <div class="form-group ">
+                        <label for="content" class="col-sm-2 control-label">Tanggal BAP </label>
+
+                        <div class="col-sm-8">
+                           <?= _ent(format_date_id($data_notaris->tanggal_bap)); ?>
+                        </div>
+                    </div>
+                                         
+                    <div class="form-group ">
+                        <label for="content" class="col-sm-2 control-label">Pemegang Protokol </label>
+
+                        <div class="col-sm-8">
+                           <?= _ent($data_notaris->pemegang_protokol); ?>
+                        </div>
+                    </div>
+                                         
+                    <div class="form-group ">
+                        <label for="content" class="col-sm-2 control-label">Status Notaris </label>
+
+                        <div class="col-sm-8">
+                           <?= _ent($data_notaris->status_notaris); ?>
                         </div>
                     </div>
                                         

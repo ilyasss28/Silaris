@@ -90,17 +90,9 @@ if (!function_exists('format_person_name')) {
 			return '';
 		}
 
+		$name = preg_replace('/,\s*\./u', ',', $name);
+		$name = preg_replace('/([[:alpha:]]{3,})\.\s*,/u', '$1,', $name);
 		$name = preg_replace('/\s*,\s*/u', ', ', $name);
-
-		if (function_exists('mb_convert_case') && function_exists('mb_strtolower')) {
-			$formatted_name = mb_convert_case(
-				mb_strtolower($name, 'UTF-8'),
-				MB_CASE_TITLE,
-				'UTF-8'
-			);
-		} else {
-			$formatted_name = ucwords(strtolower($name));
-		}
 
 		$academic_titles = array(
 			'amd' => 'A.Md.',
@@ -108,12 +100,15 @@ if (!function_exists('format_person_name')) {
 			'se' => 'S.E.',
 			'sh' => 'S.H.',
 			'shi' => 'S.H.I.',
+			'shum' => 'S.Hum.',
 			'skom' => 'S.Kom.',
 			'spd' => 'S.Pd.',
 			'ssos' => 'S.Sos.',
 			'st' => 'S.T.',
+			'llm' => 'LL.M.',
 			'mag' => 'M.Ag.',
 			'mh' => 'M.H.',
+			'mhum' => 'M.Hum.',
 			'mkom' => 'M.Kom.',
 			'mkn' => 'M.Kn.',
 			'mm' => 'M.M.',
@@ -121,28 +116,122 @@ if (!function_exists('format_person_name')) {
 			'msi' => 'M.Si.',
 			'mt' => 'M.T.',
 			'phd' => 'Ph.D.',
+			'spn' => 'Sp.N.',
 		);
-		$name_parts = array_map('trim', explode(',', $formatted_name));
+		$title_pattern = '/(?<![[:alpha:]])(?:'
+			. 'S\W*H\W*U\W*M|M\W*H\W*U\W*M|S\W*K\W*O\W*M|M\W*K\W*O\W*M|'
+			. 'S\W*S\W*O\W*S|S\W*H\W*I|P\W*H\W*D|A\W*M\W*D|S\W*A\W*G|'
+			. 'S\W*P\W*D|M\W*A\W*G|M\W*K\W*N|M\W*P\W*D|M\W*S\W*I|'
+			. 'L\W*L\W*M|S\W*P\W*N|S\W*E|S\W*H|S\W*T|M\W*H|M\W*M|M\W*T'
+			. ')(?![[:alpha:]])/iu';
 
-		foreach ($name_parts as $index => $name_part) {
-			if ($index === 0) {
-				continue;
-			}
-
-			$title_key = strtolower(preg_replace('/[^a-z]/i', '', $name_part));
-			if (isset($academic_titles[$title_key])) {
-				$name_parts[$index] = $academic_titles[$title_key];
+		$degree_offset = null;
+		if (preg_match_all($title_pattern, $name, $degree_candidates, PREG_OFFSET_CAPTURE)) {
+			foreach ($degree_candidates[0] as $degree_candidate) {
+				$candidate_offset = $degree_candidate[1];
+				$candidate_base = trim(substr($name, 0, $candidate_offset), " \t\n\r\0\x0B,");
+				if ($candidate_offset > 0 && preg_match('/[[:alpha:]]{2}/u', $candidate_base)) {
+					$degree_offset = $candidate_offset;
+					break;
+				}
 			}
 		}
 
-		return implode(', ', $name_parts);
+		$name_base = $degree_offset === null ? $name : substr($name, 0, $degree_offset);
+		$name_base = trim($name_base, " \t\n\r\0\x0B,");
+		if ($degree_offset !== null) {
+			$name_base = preg_replace('/([[:alpha:]]{3,})\.$/u', '$1', $name_base);
+		}
+
+		if (function_exists('mb_convert_case') && function_exists('mb_strtolower')) {
+			$formatted_name = mb_convert_case(
+				mb_strtolower($name_base, 'UTF-8'),
+				MB_CASE_TITLE,
+				'UTF-8'
+			);
+		} else {
+			$formatted_name = ucwords(strtolower($name_base));
+		}
+
+		if ($degree_offset !== null) {
+			$degree_text = substr($name, $degree_offset);
+			preg_match_all($title_pattern, $degree_text, $degree_matches);
+			$formatted_titles = array();
+			foreach ($degree_matches[0] as $degree_match) {
+				$title_key = strtolower(preg_replace('/[^a-z]/i', '', $degree_match));
+				if (isset($academic_titles[$title_key])) {
+					$formatted_titles[] = $academic_titles[$title_key];
+				}
+			}
+			$formatted_titles = array_values(array_unique($formatted_titles));
+			if ($formatted_titles) {
+				$formatted_name .= ', ' . implode(', ', $formatted_titles);
+			}
+
+			if (preg_match('/\([^)]*\)\s*$/u', $degree_text, $suffix_note)) {
+				$formatted_name .= ' ' . format_title_case($suffix_note[0]);
+			}
+		}
+
+		return $formatted_name;
+	}
+}
+
+if (!function_exists('format_title_case')) {
+	/**
+	 * Format labels such as region names in title case without changing storage.
+	 */
+	function format_title_case($value = '') {
+		$value = trim(preg_replace('/\s+/u', ' ', (string) $value));
+
+		if ($value === '') {
+			return '';
+		}
+
+		if (function_exists('mb_convert_case') && function_exists('mb_strtolower')) {
+			return mb_convert_case(mb_strtolower($value, 'UTF-8'), MB_CASE_TITLE, 'UTF-8');
+		}
+
+		return ucwords(strtolower($value));
+	}
+}
+
+if (!function_exists('person_name_identity_base')) {
+	/**
+	 * Return the name portion used to link a Notary account to Data Notaris.
+	 * Academic degrees and common honorifics are intentionally ignored.
+	 */
+	function person_name_identity_base($name = '') {
+		$formatted_name = format_person_name($name);
+		$name_base = trim(explode(',', $formatted_name, 2)[0]);
+		return preg_replace('/^(?:(?:Dr|Hj|H)\.\s*)+/iu', '', $name_base);
+	}
+}
+
+if (!function_exists('person_name_identity_key')) {
+	function person_name_identity_key($name = '') {
+		return strtolower(preg_replace('/[^\pL\pN]+/u', '', person_name_identity_base($name)));
+	}
+}
+
+if (!function_exists('person_name_initial_key')) {
+	function person_name_initial_key($name = '') {
+		$tokens = preg_split('/[^\pL\pN]+/u', strtolower(person_name_identity_base($name)), -1, PREG_SPLIT_NO_EMPTY);
+		if (count($tokens) < 2) {
+			return '';
+		}
+
+		$tokens[0] = function_exists('mb_substr')
+			? mb_substr($tokens[0], 0, 1, 'UTF-8')
+			: substr($tokens[0], 0, 1);
+		return implode('', $tokens);
 	}
 }
 
 if (!function_exists('format_date_id')) {
 	/**
-	 * Format a date as "10-Agu-2026" for consistent display across the
-	 * admin side. Returns the original value unchanged when it can't be
+	 * Format a date as "8-Jul-2026" for consistent display across the
+	 * application. Returns the original value unchanged when it can't be
 	 * parsed as a date (empty, zero-date, or invalid).
 	 */
 	function format_date_id($value = '') {
@@ -153,12 +242,38 @@ if (!function_exists('format_date_id')) {
 			return $value;
 		}
 
-		$months = array(
-			1 => 'Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun',
-			'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des',
-		);
+		return date('j-M-Y', $timestamp);
+	}
+}
 
-		return date('d', $timestamp) . '-' . $months[(int) date('n', $timestamp)] . '-' . date('Y', $timestamp);
+if (!function_exists('format_phone_number')) {
+	/**
+	 * Store Indonesian mobile numbers consistently in local 08 format.
+	 */
+	function format_phone_number($phone_number = '') {
+		$raw = trim((string) $phone_number);
+		$has_plus = strpos($raw, '+') === 0;
+		$digits = preg_replace('/\D+/', '', $raw);
+		if ($digits === '') {
+			return '';
+		}
+		if (($has_plus && strpos($digits, '62') === 0) || (strpos($digits, '62') === 0 && strlen($digits) >= 11)) {
+			$digits = '0'.substr($digits, 2);
+		} elseif (strpos($digits, '8') === 0) {
+			$digits = '0'.$digits;
+		}
+		return $digits;
+	}
+}
+
+if (!function_exists('format_gelar')) {
+	/**
+	 * Backward-compatible alias used by older pages. Keep the actual formatting
+	 * rules in format_person_name() so names cannot be formatted differently
+	 * between tables, filters, profiles, and exports.
+	 */
+	function format_gelar($nama = '') {
+		return format_person_name($nama);
 	}
 }
 
@@ -1173,5 +1288,30 @@ if (!function_exists('document_preview_url')) {
 	 */
 	function document_preview_url($document_url = '') {
 		return trim((string) $document_url);
+	}
+}
+
+if (!function_exists('notary_photo_url')) {
+	/** Resolve the same existing Notary photo in admin and public pages. */
+	function notary_photo_url($account_avatar = '', $registry_photo = '') {
+		$candidates = array(
+			array($account_avatar, 'uploads/user/', true),
+			array($registry_photo, 'uploads/user/', false),
+			array($registry_photo, 'uploads/data_notaris/', false),
+			array($registry_photo, 'assets/uploads/foto_profil/', false),
+			array($registry_photo, 'assets/uploads/foto_user/', false),
+		);
+
+		foreach ($candidates as $candidate) {
+			$name = basename(trim((string) $candidate[0]));
+			if ($name === '' || ($candidate[2] && strtolower($name) === 'default.png')) {
+				continue;
+			}
+			if (is_file(FCPATH . $candidate[1] . $name)) {
+				return base_url($candidate[1] . rawurlencode($name));
+			}
+		}
+
+		return base_url('uploads/user/default.png');
 	}
 }

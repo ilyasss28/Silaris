@@ -52,6 +52,7 @@ class Detail extends CI_Controller {
 		$data['no_telepon']=$detail->no_telepon;
 		$data['email']=$detail->email;
 		$data['foto']=$detail->foto;
+		$data['photo_url']=$detail->photo_url;
 		$data['alamat_kantor']=$detail->alamat_kantor;
 		$data['lat']=$detail->lat;
 		$this->load->view('include/head');

@@ -17,6 +17,7 @@ class Laporan extends Admin
 		parent::__construct();
 
 		$this->load->model('model_laporan');
+		$this->load->library('storage_manager');
 	}
 
 	/**
@@ -54,6 +55,7 @@ class Laporan extends Admin
 	public function add()
 	{
 		$this->is_allowed('laporan_add');
+		$this->require_complete_notary_profile();
 
 		$this->template->title('Laporan New');
 		$this->render('modul/laporan/laporan_add', $this->data);
@@ -73,35 +75,27 @@ class Laporan extends Admin
 				]);
 			exit;
 		}
+		if (!$this->require_complete_notary_profile(true)) return;
 
-		$this->form_validation->set_rules('Tanggal_Laporan', 'Tanggal Laporan', 'trim|required');
-		$this->form_validation->set_rules('laporan_Laporan_name', 'Laporan', 'trim|required');
+		$this->form_validation->set_rules('Tanggal_Laporan', 'Tanggal Laporan', 'trim|required|callback_valid_date|callback_valid_not_future_date');
+		$this->form_validation->set_rules('laporan_Laporan_name', 'Laporan', 'trim|required|max_length[255]|callback_valid_report_document');
 		
 
 		if ($this->form_validation->run()) {
-			$laporan_Laporan_uuid = $this->input->post('laporan_Laporan_uuid');
-			$laporan_Laporan_name = $this->input->post('laporan_Laporan_name');
+			$laporan_Laporan_uuid = basename((string) $this->input->post('laporan_Laporan_uuid', true));
+			$laporan_Laporan_name = basename((string) $this->input->post('laporan_Laporan_name', true));
 		
 			$save_data = [
-				'nama_notaris' => get_user_data('full_name'),
+				'nama_notaris' => format_person_name(get_user_data('full_name')),
 				'username' => get_user_data('username'),
-					'Tanggal_Laporan' => $this->input->post('Tanggal_Laporan'),
+				'Tanggal_Laporan' => $this->input->post('Tanggal_Laporan'),
+				'owner_user_id' => (int) get_user_data('id'),
 			];
-			if ($this->db->field_exists('owner_user_id', 'laporan')) {
-				$save_data['owner_user_id'] = (int) get_user_data('id');
-			}
 
-			if (!is_dir(FCPATH . '/uploads/laporan/')) {
-				mkdir(FCPATH . '/uploads/laporan/');
-			}
-
+			$new_document = null;
 			if (!empty($laporan_Laporan_name)) {
-				$laporan_Laporan_name_copy = date('YmdHis') . '-' . $laporan_Laporan_name;
-
-				rename(FCPATH . 'uploads/tmp/' . $laporan_Laporan_uuid . '/' . $laporan_Laporan_name, 
-						FCPATH . 'uploads/laporan/' . $laporan_Laporan_name_copy);
-
-				if (!is_file(FCPATH . '/uploads/laporan/' . $laporan_Laporan_name_copy)) {
+				$new_document = $this->storage_manager->move_from_temp($laporan_Laporan_uuid, $laporan_Laporan_name, 'uploads/laporan/');
+				if (!$new_document) {
 					echo json_encode([
 						'success' => false,
 						'message' => 'Error uploading file'
@@ -109,11 +103,14 @@ class Laporan extends Admin
 					exit;
 				}
 
-				$save_data['Laporan'] = $laporan_Laporan_name_copy;
+				$save_data['Laporan'] = $new_document;
 			}
 		
 			
 			$save_laporan = $this->model_laporan->store($save_data);
+			if (!$save_laporan && $new_document) {
+				$this->storage_manager->delete_if_unreferenced('uploads/laporan/', $new_document);
+			}
 
 			if ($save_laporan) {
 				if ($this->input->post('save_type') == 'stay') {
@@ -161,9 +158,6 @@ class Laporan extends Admin
 		$this->is_allowed('laporan_update');
 
 		$this->data['laporan'] = $this->model_laporan->find($id);
-		if (!$this->data['laporan']) {
-			show_404();
-		}
 
 		$this->template->title('Laporan Update');
 		$this->render('modul/laporan/laporan_update', $this->data);
@@ -183,42 +177,26 @@ class Laporan extends Admin
 				]);
 			exit;
 		}
-
-		if (!$this->model_laporan->find($id)) {
-			return $this->output
-				->set_status_header(404)
-				->set_content_type('application/json')
-				->set_output(json_encode([
-					'success' => false,
-					'message' => 'Laporan tidak ditemukan atau bukan milik akun Anda.',
-				]));
-		}
 		
-		$this->form_validation->set_rules('Tanggal_Laporan', 'Tanggal Laporan', 'trim|required');
-		$this->form_validation->set_rules('laporan_Laporan_name', 'Laporan', 'trim|required');
+		$existing_laporan = $this->model_laporan->find($id);
+		if (!$existing_laporan) {
+			show_404();
+		}
+		$this->form_validation->set_rules('Tanggal_Laporan', 'Tanggal Laporan', 'trim|required|callback_valid_date|callback_valid_not_future_date');
+		$this->form_validation->set_rules('laporan_Laporan_name', 'Laporan', 'trim|required|max_length[255]|callback_valid_report_document');
 		
 		if ($this->form_validation->run()) {
-			$laporan_Laporan_uuid = $this->input->post('laporan_Laporan_uuid');
-			$laporan_Laporan_name = $this->input->post('laporan_Laporan_name');
+			$laporan_Laporan_uuid = basename((string) $this->input->post('laporan_Laporan_uuid', true));
+			$laporan_Laporan_name = basename((string) $this->input->post('laporan_Laporan_name', true));
 		
-			// Ownership is immutable during an edit. This prevents an Admin,
-			// Kanwil, or MPD account from accidentally taking over a
-			// notary's report merely by correcting its date or document.
 			$save_data = [
 				'Tanggal_Laporan' => $this->input->post('Tanggal_Laporan'),
 			];
 
-			if (!is_dir(FCPATH . '/uploads/laporan/')) {
-				mkdir(FCPATH . '/uploads/laporan/');
-			}
-
+			$new_document = null;
 			if (!empty($laporan_Laporan_uuid)) {
-				$laporan_Laporan_name_copy = date('YmdHis') . '-' . $laporan_Laporan_name;
-
-				rename(FCPATH . 'uploads/tmp/' . $laporan_Laporan_uuid . '/' . $laporan_Laporan_name, 
-						FCPATH . 'uploads/laporan/' . $laporan_Laporan_name_copy);
-
-				if (!is_file(FCPATH . '/uploads/laporan/' . $laporan_Laporan_name_copy)) {
+				$new_document = $this->storage_manager->move_from_temp($laporan_Laporan_uuid, $laporan_Laporan_name, 'uploads/laporan/');
+				if (!$new_document) {
 					echo json_encode([
 						'success' => false,
 						'message' => 'Error uploading file'
@@ -226,11 +204,16 @@ class Laporan extends Admin
 					exit;
 				}
 
-				$save_data['Laporan'] = $laporan_Laporan_name_copy;
+				$save_data['Laporan'] = $new_document;
 			}
 		
 			
 			$save_laporan = $this->model_laporan->change($id, $save_data);
+			if ($save_laporan && $new_document && $new_document !== $existing_laporan->Laporan) {
+				$this->storage_manager->delete_if_unreferenced('uploads/laporan/', $existing_laporan->Laporan);
+			} elseif (!$save_laporan && $new_document) {
+				$this->storage_manager->delete_if_unreferenced('uploads/laporan/', $new_document);
+			}
 
 			if ($save_laporan) {
 				if ($this->input->post('save_type') == 'stay') {
@@ -281,7 +264,7 @@ class Laporan extends Admin
 
 		if (!empty($id)) {
 			$remove = $this->_remove($id);
-		} elseif (is_array($arr_id) && count($arr_id) > 0) {
+		} elseif (count($arr_id) >0) {
 			foreach ($arr_id as $id) {
 				$remove = $this->_remove($id);
 			}
@@ -306,12 +289,17 @@ class Laporan extends Admin
 		$this->is_allowed('laporan_view');
 
 		$this->data['laporan'] = $this->model_laporan->join_avaiable()->filter_avaiable()->find($id);
-		if (!$this->data['laporan']) {
-			show_404();
-		}
 
 		$this->template->title('Laporan Detail');
 		$this->render('modul/laporan/laporan_view', $this->data);
+	}
+
+	public function document($id, $mode = 'preview')
+	{
+		$this->is_allowed('laporan_view');
+		$laporan = $this->model_laporan->find((int) $id);
+		if (!$laporan || empty($laporan->Laporan)) show_404();
+		$this->serve_document('uploads/laporan', $laporan->Laporan, $mode === 'download');
 	}
 	
 	/**
@@ -322,17 +310,14 @@ class Laporan extends Admin
 	private function _remove($id)
 	{
 		$laporan = $this->model_laporan->find($id);
-
-		if ($laporan && !empty($laporan->Laporan)) {
-			$path = FCPATH . '/uploads/laporan/' . $laporan->Laporan;
-
-			if (is_file($path)) {
-				$delete_file = unlink($path);
-			}
+		if (!$laporan) {
+			return false;
 		}
-		
-		
-		return $laporan ? $this->model_laporan->remove($id) : false;
+		$removed = $this->model_laporan->remove($id);
+		if ($removed && !empty($laporan->Laporan)) {
+			$this->storage_manager->delete_if_unreferenced('uploads/laporan/', $laporan->Laporan);
+		}
+		return $removed;
 	}
 	
 	/**
@@ -354,9 +339,20 @@ class Laporan extends Admin
 		echo $this->upload_file([
 			'uuid' 		 	=> $uuid,
 			'table_name' 	=> 'laporan',
-			'allowed_types' => 'pdf|doc|docx|xls|xlsx|ppt|pptx|jpg|jpeg|png',
+			'allowed_types' => 'pdf|doc|docx|xls|xlsx|jpg|jpeg|png',
 			'max_size' 	 	=> 10000,
 		]);
+	}
+
+	public function valid_report_document($filename)
+	{
+		$allowed = array('pdf', 'doc', 'docx', 'xls', 'xlsx', 'jpg', 'jpeg', 'png');
+		$extension = strtolower(pathinfo(basename((string) $filename), PATHINFO_EXTENSION));
+		if (in_array($extension, $allowed, true)) {
+			return true;
+		}
+		$this->form_validation->set_message(__FUNCTION__, 'Dokumen laporan harus berupa PDF, Word, Excel, JPG, atau PNG.');
+		return false;
 	}
 
 	/**
@@ -371,16 +367,6 @@ class Laporan extends Admin
 				'error' => cclang('sorry_you_do_not_have_permission_to_access')
 				]);
 			exit;
-		}
-
-		if ($this->input->get('by') === 'id' && (!$this->model_laporan->find($uuid))) {
-			return $this->output
-				->set_status_header(404)
-				->set_content_type('application/json')
-				->set_output(json_encode([
-					'success' => false,
-					'error' => 'Laporan tidak ditemukan atau bukan milik akun Anda.',
-				]));
 		}
 
 		echo $this->delete_file([
@@ -409,15 +395,6 @@ class Laporan extends Admin
 		}
 
 		$laporan = $this->model_laporan->find($id);
-		if (!$laporan) {
-			return $this->output
-				->set_status_header(404)
-				->set_content_type('application/json')
-				->set_output(json_encode([
-					'success' => false,
-					'message' => 'Laporan tidak ditemukan atau bukan milik akun Anda.',
-				]));
-		}
 
 		echo $this->get_file([
             'uuid'              => $id, 
@@ -440,7 +417,7 @@ class Laporan extends Admin
 	{
 		$this->is_allowed('laporan_export');
 
-		$this->model_laporan->export_scoped('laporan');
+		$this->model_laporan->export('laporan', 'laporan');
 	}
 
 	/**
@@ -452,7 +429,7 @@ class Laporan extends Admin
 	{
 		$this->is_allowed('laporan_export');
 
-		$this->model_laporan->pdf_scoped('Laporan');
+		$this->model_laporan->pdf('laporan', 'laporan');
 	}
 }
 

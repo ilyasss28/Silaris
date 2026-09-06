@@ -88,7 +88,7 @@ class <?= ucwords($table_name); ?> extends Admin
 						if (in_array($rule, $non_input_able_validation)) {
 							$rules_arr[] = $call_back.$rule;
 						} else {
-							$rules_arr[] = $call_back.$rule.'['.$val.']';
+							$rules_arr[] = $call_back.$rule.'['.addslashes((string) $val).']';
 						}
 					}
 				}
@@ -117,8 +117,8 @@ class <?= ucwords($table_name); ?> extends Admin
 		foreach ($this->crud_builder->getFieldFile() as $file):
 			if (in_array($file, $show_in_add_form)) {
 		?>
-	${table_name}_<?= $file; ?>_uuid = $this->input->post('{table_name}_<?= $file; ?>_uuid');
-			${table_name}_<?= $file; ?>_name = $this->input->post('{table_name}_<?= $file; ?>_name');
+	${table_name}_<?= $file; ?>_uuid = basename((string) $this->input->post('{table_name}_<?= $file; ?>_uuid', true));
+			${table_name}_<?= $file; ?>_name = basename((string) $this->input->post('{table_name}_<?= $file; ?>_name', true));
 		<?php 
 			}
 		endforeach; 
@@ -129,7 +129,7 @@ class <?= ucwords($table_name); ?> extends Admin
 			foreach ($this->crud_builder->getFieldShowInAddForm(true, true) as $input => $option):
 				if (in_array($option['input_type'], $this->crud_builder->getInputMultiple())) { 
 				?>
-	'<?= $input; ?>' => implode(',', (array) $this->input->post('<?= $input; ?>')),
+	'<?= $input; ?>' => implode(',', (array) $this->input->post('<?= $input; ?>', true)),
 <?php } elseif ($option['input_type'] == 'timestamp') { ?>
 	'<?= $input; ?>' => date('Y-m-d H:i:s'),
 <?php } elseif ($option['input_type'] == 'current_user_username') { ?>
@@ -140,14 +140,14 @@ class <?= ucwords($table_name); ?> extends Admin
 	'<?= $input; ?>' => get_user_data('id'),<?php 
 	} elseif ($option['input_type'] == 'file_multiple') { continue; } 
 	else { ?>
-	'<?= $input; ?>' => $this->input->post('<?= $input; ?>'),
+	'<?= $input; ?>' => $this->input->post('<?= $input; ?>', true),
 <?php } ?>
 			<?php endforeach; ?>];
 
 			<?php 
 			if ($this->crud_builder->getFieldFile() or $this->crud_builder->getFieldFileMultiple()) { 
-				?>if (!is_dir(FCPATH . '/uploads/{table_name}/')) {
-				mkdir(FCPATH . '/uploads/{table_name}/');
+				?>if (!is_dir(FCPATH . '/uploads/{table_name}/') && !mkdir(FCPATH . '/uploads/{table_name}/', 0755, true)) {
+				return $this->response(array('success' => false, 'message' => 'Folder upload tidak dapat dibuat.'));
 			}
 
 			<?php	
@@ -156,6 +156,9 @@ class <?= ucwords($table_name); ?> extends Admin
 				if (in_array($file, $show_in_add_form)) {
 			?>
 if (!empty(${table_name}_<?= $file; ?>_name)) {
+				if (!preg_match('/^[A-Za-z0-9-]+$/', ${table_name}_<?= $file; ?>_uuid)) {
+					return $this->response(array('success' => false, 'message' => 'Upload identifier tidak valid.'));
+				}
 				${table_name}_<?= $file; ?>_name_copy = date('YmdHis') . '-' . ${table_name}_<?= $file; ?>_name;
 
 				rename(FCPATH . 'uploads/tmp/' . ${table_name}_<?= $file; ?>_uuid . '/' . ${table_name}_<?= $file; ?>_name, 
@@ -178,11 +181,18 @@ if (!empty(${table_name}_<?= $file; ?>_name)) {
 			foreach ($this->crud_builder->getFieldFileMultiple() as $file):
 				if (in_array($file, $show_in_add_form)) {
 					$listed_image = [];
-			?>if (count((array) $this->input->post('{table_name}_<?= $file; ?>_name'))) {
-				foreach ((array) $_POST['{table_name}_<?= $file; ?>_name'] as $idx => $file_name) {
+			?>${table_name}_<?= $file; ?>_names = (array) $this->input->post('{table_name}_<?= $file; ?>_name', true);
+			${table_name}_<?= $file; ?>_uuids = (array) $this->input->post('{table_name}_<?= $file; ?>_uuid', true);
+			if (count(${table_name}_<?= $file; ?>_names)) {
+				foreach (${table_name}_<?= $file; ?>_names as $idx => $file_name) {
+					$file_name = basename((string) $file_name);
+					$file_uuid = isset(${table_name}_<?= $file; ?>_uuids[$idx]) ? basename((string) ${table_name}_<?= $file; ?>_uuids[$idx]) : '';
+					if (!preg_match('/^[A-Za-z0-9-]+$/', $file_uuid)) {
+						return $this->response(array('success' => false, 'message' => 'Upload identifier tidak valid.'));
+					}
 					${table_name}_<?= $file; ?>_name_copy = date('YmdHis') . '-' . $file_name;
 
-					rename(FCPATH . 'uploads/tmp/' . $_POST['{table_name}_<?= $file; ?>_uuid'][$idx] . '/' .  $file_name, 
+					rename(FCPATH . 'uploads/tmp/' . $file_uuid . '/' .  $file_name,
 							FCPATH . 'uploads/{table_name}/' . ${table_name}_<?= $file; ?>_name_copy);
 
 					$listed_image[] = ${table_name}_<?= $file; ?>_name_copy;
@@ -253,7 +263,10 @@ if (!empty(${table_name}_<?= $file; ?>_name)) {
 	{
 		$this->is_allowed('{table_name}_update');
 
-		$this->data['{table_name}'] = $this->model_{table_name}->find($id);
+		$this->data['{table_name}'] = $this->model_{table_name}->filter_avaiable()->find($id);
+		if (!$this->data['{table_name}']) {
+			show_404();
+		}
 
 		$this->template->title('<?= ucwords(clean_snake_case($title)); ?> Update');
 		$this->render('modul/{table_name}/{table_name}_update', $this->data);
@@ -273,6 +286,9 @@ if (!empty(${table_name}_<?= $file; ?>_name)) {
 				]);
 			exit;
 		}
+		if (!$this->model_{table_name}->filter_avaiable()->find($id)) {
+			return $this->response(array('success' => false, 'message' => 'Data tidak ditemukan atau tidak dapat diakses.'));
+		}
 		
 		<?php foreach ($this->crud_builder->getFieldValidation() as $input => $rules):
 		$option = $this->crud_builder->getFieldAndOptios($input); 
@@ -288,7 +304,7 @@ if (!empty(${table_name}_<?= $file; ?>_name)) {
 						if (in_array($rule, $non_input_able_validation)) {
 							$rules_arr[] = $call_back.$rule;
 						} else {
-							$rules_arr[] = $call_back.$rule.'['.$val.']';
+							$rules_arr[] = $call_back.$rule.'['.addslashes((string) $val).']';
 						}
 					}
 				}
@@ -316,8 +332,8 @@ if (!empty(${table_name}_<?= $file; ?>_name)) {
 		foreach ($this->crud_builder->getFieldFile() as $file):
 			if (in_array($file, $show_in_add_form)) {
 		?>
-	${table_name}_<?= $file; ?>_uuid = $this->input->post('{table_name}_<?= $file; ?>_uuid');
-			${table_name}_<?= $file; ?>_name = $this->input->post('{table_name}_<?= $file; ?>_name');
+	${table_name}_<?= $file; ?>_uuid = basename((string) $this->input->post('{table_name}_<?= $file; ?>_uuid', true));
+			${table_name}_<?= $file; ?>_name = basename((string) $this->input->post('{table_name}_<?= $file; ?>_name', true));
 		<?php 
 			}
 		endforeach; 
@@ -327,7 +343,7 @@ if (!empty(${table_name}_<?= $file; ?>_name)) {
 			<?php foreach ($this->crud_builder->getFieldShowInUpdateForm(true, true) as $input => $option):
 				if (in_array($option['input_type'], $this->crud_builder->getInputMultiple())) { 
 				?>
-	'<?= $input; ?>' => implode(',', (array) $this->input->post('<?= $input; ?>')),
+	'<?= $input; ?>' => implode(',', (array) $this->input->post('<?= $input; ?>', true)),
 <?php } elseif ($option['input_type'] == 'timestamp') { ?>
 	'<?= $input; ?>' => date('Y-m-d H:i:s'),
 <?php } elseif ($option['input_type'] == 'current_user_username') { ?>
@@ -336,14 +352,14 @@ if (!empty(${table_name}_<?= $file; ?>_name)) {
 	'<?= $input; ?>' => get_user_data('id'),<?php 
 	} elseif ($option['input_type'] == 'file_multiple') { continue; ?>
 <?php } else { ?>
-	'<?= $input; ?>' => $this->input->post('<?= $input; ?>'),
+	'<?= $input; ?>' => $this->input->post('<?= $input; ?>', true),
 <?php } ?>
 			<?php endforeach; ?>];
 
 			<?php 
 			if ($this->crud_builder->getFieldFile()) { 
-				?>if (!is_dir(FCPATH . '/uploads/{table_name}/')) {
-				mkdir(FCPATH . '/uploads/{table_name}/');
+				?>if (!is_dir(FCPATH . '/uploads/{table_name}/') && !mkdir(FCPATH . '/uploads/{table_name}/', 0755, true)) {
+				return $this->response(array('success' => false, 'message' => 'Folder upload tidak dapat dibuat.'));
 			}
 
 			<?php	
@@ -352,6 +368,9 @@ if (!empty(${table_name}_<?= $file; ?>_name)) {
 				if (in_array($file, $show_in_add_form)) {
 			?>
 if (!empty(${table_name}_<?= $file; ?>_uuid)) {
+				if (!preg_match('/^[A-Za-z0-9-]+$/', ${table_name}_<?= $file; ?>_uuid)) {
+					return $this->response(array('success' => false, 'message' => 'Upload identifier tidak valid.'));
+				}
 				${table_name}_<?= $file; ?>_name_copy = date('YmdHis') . '-' . ${table_name}_<?= $file; ?>_name;
 
 				rename(FCPATH . 'uploads/tmp/' . ${table_name}_<?= $file; ?>_uuid . '/' . ${table_name}_<?= $file; ?>_name, 
@@ -375,12 +394,19 @@ if (!empty(${table_name}_<?= $file; ?>_uuid)) {
 				if (in_array($file, $show_in_add_form)) {
 					$listed_image = [];
 			?>$listed_image = [];
-			if (count((array) $this->input->post('{table_name}_<?= $file; ?>_name'))) {
-				foreach ((array) $_POST['{table_name}_<?= $file; ?>_name'] as $idx => $file_name) {
-					if (isset($_POST['{table_name}_<?= $file; ?>_uuid'][$idx]) AND !empty($_POST['{table_name}_<?= $file; ?>_uuid'][$idx])) {
+			${table_name}_<?= $file; ?>_names = (array) $this->input->post('{table_name}_<?= $file; ?>_name', true);
+			${table_name}_<?= $file; ?>_uuids = (array) $this->input->post('{table_name}_<?= $file; ?>_uuid', true);
+			if (count(${table_name}_<?= $file; ?>_names)) {
+				foreach (${table_name}_<?= $file; ?>_names as $idx => $file_name) {
+					$file_name = basename((string) $file_name);
+					$file_uuid = isset(${table_name}_<?= $file; ?>_uuids[$idx]) ? basename((string) ${table_name}_<?= $file; ?>_uuids[$idx]) : '';
+					if ($file_uuid !== '') {
+						if (!preg_match('/^[A-Za-z0-9-]+$/', $file_uuid)) {
+							return $this->response(array('success' => false, 'message' => 'Upload identifier tidak valid.'));
+						}
 						${table_name}_<?= $file; ?>_name_copy = date('YmdHis') . '-' . $file_name;
 
-						rename(FCPATH . 'uploads/tmp/' . $_POST['{table_name}_<?= $file; ?>_uuid'][$idx] . '/' .  $file_name, 
+						rename(FCPATH . 'uploads/tmp/' . $file_uuid . '/' .  $file_name,
 								FCPATH . 'uploads/{table_name}/' . ${table_name}_<?= $file; ?>_name_copy);
 
 						$listed_image[] = ${table_name}_<?= $file; ?>_name_copy;
@@ -446,21 +472,19 @@ if (!empty(${table_name}_<?= $file; ?>_uuid)) {
 	*
 	* @var $id String
 	*/
-	public function delete($id = null)
+	public function delete()
 	{
 		$this->is_allowed('{table_name}_delete');
+		if (strtoupper($this->input->method()) !== 'POST') {
+			show_error('Method Not Allowed', 405);
+		}
 
 		$this->load->helper('file');
 
-		$arr_id = $this->input->get('id');
-		$remove = false;
-
-		if (!empty($id)) {
-			$remove = $this->_remove($id);
-		} elseif (count($arr_id) >0) {
-			foreach ($arr_id as $id) {
-				$remove = $this->_remove($id);
-			}
+		$arr_id = array_values(array_unique(array_filter(array_map('intval', (array) $this->input->post('id')))));
+		$remove = !empty($arr_id);
+		foreach ($arr_id as $id) {
+			$remove = $this->_remove($id) && $remove;
 		}
 
 		if ($remove) {
@@ -483,6 +507,9 @@ if (!empty(${table_name}_<?= $file; ?>_uuid)) {
 		$this->is_allowed('{table_name}_view');
 
 		$this->data['{table_name}'] = $this->model_{table_name}->join_avaiable()->filter_avaiable()->find($id);
+		if (!$this->data['{table_name}']) {
+			show_404();
+		}
 
 		$this->template->title('<?= ucwords(clean_snake_case($title)); ?> Detail');
 		$this->render('modul/{table_name}/{table_name}_view', $this->data);
@@ -496,11 +523,14 @@ if (!empty(${table_name}_<?= $file; ?>_uuid)) {
 	*/
 	private function _remove($id)
 	{
-		${table_name} = $this->model_{table_name}->find($id);
+		${table_name} = $this->model_{table_name}->filter_avaiable()->find($id);
+		if (!${table_name}) {
+			return false;
+		}
 
 		<?php foreach ($files = $this->crud_builder->getFieldFile() as $file): 
 		?>if (!empty(${table_name}-><?= $file; ?>)) {
-			$path = FCPATH . '/uploads/{table_name}/' . ${table_name}-><?= $file; ?>;
+			$path = FCPATH . '/uploads/{table_name}/' . basename((string) ${table_name}-><?= $file; ?>);
 
 			if (is_file($path)) {
 				$delete_file = unlink($path);
@@ -511,7 +541,7 @@ if (!empty(${table_name}_<?= $file; ?>_uuid)) {
 		<?php foreach ($files = $this->crud_builder->getFieldFileMultiple() as $file): 
 		?>if (!empty(${table_name}-><?= $file; ?>)) {
 			foreach ((array) explode(',', ${table_name}-><?= $file; ?>) as $filename) {
-				$path = FCPATH . '/uploads/{table_name}/' . $filename;
+				$path = FCPATH . '/uploads/{table_name}/' . basename((string) $filename);
 
 				if (is_file($path)) {
 					$delete_file = unlink($path);
@@ -537,7 +567,7 @@ if (!empty(${table_name}_<?= $file; ?>_uuid)) {
 	*/
 	public function upload_<?= $file; ?>_file()
 	{
-		if (!$this->is_allowed('{table_name}_add', false)) {
+		if (!$this->is_allowed('{table_name}_add', false) && !$this->is_allowed('{table_name}_update', false)) {
 			echo json_encode([
 				'success' => false,
 				'message' => cclang('sorry_you_do_not_have_permission_to_access')
@@ -545,7 +575,10 @@ if (!empty(${table_name}_<?= $file; ?>_uuid)) {
 			exit;
 		}
 
-		$uuid = $this->input->post('qquuid');
+		$uuid = basename((string) $this->input->post('qquuid', true));
+		if (!preg_match('/^[A-Za-z0-9-]+$/', $uuid)) {
+			return $this->response(array('success' => false, 'message' => 'Upload identifier tidak valid.'));
+		}
 
 		echo $this->upload_file([
 			'uuid' 		 	=> $uuid,
@@ -582,10 +615,15 @@ if (!empty(${table_name}_<?= $file; ?>_uuid)) {
 				]);
 			exit;
 		}
+		$uuid = basename((string) $uuid);
+		$delete_by = $this->input->get('by', true);
+		if ($delete_by === 'id' && !$this->model_{table_name}->filter_avaiable()->find($uuid)) {
+			return $this->response(array('success' => false, 'message' => 'File tidak dapat diakses.'));
+		}
 
 		echo $this->delete_file([
-            'uuid'              => $uuid, 
-            'delete_by'         => $this->input->get('by'), 
+			'uuid'              => $uuid,
+			'delete_by'         => $delete_by,
             'field_name'        => '<?= $file; ?>', 
             'upload_path_tmp'   => './uploads/tmp/',
             'table_name'        => '{table_name}',
@@ -609,7 +647,10 @@ if (!empty(${table_name}_<?= $file; ?>_uuid)) {
 			exit;
 		}
 
-		${table_name} = $this->model_{table_name}->find($id);
+		${table_name} = $this->model_{table_name}->filter_avaiable()->find($id);
+		if (!${table_name}) {
+			return $this->response(array('success' => false, 'message' => 'File tidak dapat diakses.'));
+		}
 
 		echo $this->get_file([
             'uuid'              => $id, 
@@ -638,7 +679,7 @@ if (!empty(${table_name}_<?= $file; ?>_uuid)) {
 	*/
 	public function upload_<?= $file; ?>_file()
 	{
-		if (!$this->is_allowed('{table_name}_add', false)) {
+		if (!$this->is_allowed('{table_name}_add', false) && !$this->is_allowed('{table_name}_update', false)) {
 			echo json_encode([
 				'success' => false,
 				'message' => cclang('sorry_you_do_not_have_permission_to_access')
@@ -646,7 +687,10 @@ if (!empty(${table_name}_<?= $file; ?>_uuid)) {
 			exit;
 		}
 
-		$uuid = $this->input->post('qquuid');
+		$uuid = basename((string) $this->input->post('qquuid', true));
+		if (!preg_match('/^[A-Za-z0-9-]+$/', $uuid)) {
+			return $this->response(array('success' => false, 'message' => 'Upload identifier tidak valid.'));
+		}
 
 		echo $this->upload_file([
 			'uuid' 		 	=> $uuid,
@@ -683,10 +727,15 @@ if (!empty(${table_name}_<?= $file; ?>_uuid)) {
 				]);
 			exit;
 		}
+		$uuid = basename((string) $uuid);
+		$delete_by = $this->input->get('by', true);
+		if ($delete_by === 'id' && !$this->model_{table_name}->filter_avaiable()->find($uuid)) {
+			return $this->response(array('success' => false, 'message' => 'File tidak dapat diakses.'));
+		}
 
 		echo $this->delete_file([
-            'uuid'              => $uuid, 
-            'delete_by'         => $this->input->get('by'), 
+			'uuid'              => $uuid,
+			'delete_by'         => $delete_by,
             'field_name'        => '<?= $file; ?>', 
             'upload_path_tmp'   => './uploads/tmp/',
             'table_name'        => '{table_name}',
@@ -710,7 +759,10 @@ if (!empty(${table_name}_<?= $file; ?>_uuid)) {
 			exit;
 		}
 
-		${table_name} = $this->model_{table_name}->find($id);
+		${table_name} = $this->model_{table_name}->filter_avaiable()->find($id);
+		if (!${table_name}) {
+			return $this->response(array('success' => false, 'message' => 'File tidak dapat diakses.'));
+		}
 
 		echo $this->get_file([
             'uuid'              => $id, 

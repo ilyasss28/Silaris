@@ -146,7 +146,7 @@ jQuery(document).ready(domo);
                         <label for="content" class="col-sm-2 control-label">Created At </label>
 
                         <div class="col-sm-8">
-                           <?= _ent($blog->created_at); ?>
+                           <?= _ent(format_date_id($blog->created_at)); ?>
                         </div>
                     </div>
                                          
@@ -154,7 +154,7 @@ jQuery(document).ready(domo);
                         <label for="content" class="col-sm-2 control-label">Updated At </label>
 
                         <div class="col-sm-8">
-                           <?= _ent($blog->updated_at); ?>
+                           <?= _ent(format_date_id($blog->updated_at)); ?>
                         </div>
                     </div>
                                         

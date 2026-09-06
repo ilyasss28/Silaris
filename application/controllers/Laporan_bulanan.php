@@ -9,14 +9,16 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 *| Laporan Bulanan site
 *|
 */
-class Laporan_bulanan extends Admin	
+class Laporan_bulanan extends Admin
 {
+	private $monthly_report_edit_id = 0;
 	
 	public function __construct()
 	{
 		parent::__construct();
 
 		$this->load->model('model_laporan_bulanan');
+		$this->load->library('storage_manager');
 	}
 
 	/**
@@ -54,6 +56,7 @@ class Laporan_bulanan extends Admin
 	public function add()
 	{
 		$this->is_allowed('laporan_bulanan_add');
+		$this->require_complete_notary_profile();
 
 		$this->template->title('Laporan Bulanan New');
 		$this->render('modul/laporan_bulanan/laporan_bulanan_add', $this->data);
@@ -73,30 +76,26 @@ class Laporan_bulanan extends Admin
 				]);
 			exit;
 		}
+		if (!$this->require_complete_notary_profile(true)) return;
 
-		
+		$this->set_monthly_report_validation_rules();
 
 		if ($this->form_validation->run()) {
-			$laporan_bulanan_file_laporan_uuid = $this->input->post('laporan_bulanan_file_laporan_uuid');
-			$laporan_bulanan_file_laporan_name = $this->input->post('laporan_bulanan_file_laporan_name');
+			$laporan_bulanan_file_laporan_uuid = basename((string) $this->input->post('laporan_bulanan_file_laporan_uuid', true));
+			$laporan_bulanan_file_laporan_name = basename((string) $this->input->post('laporan_bulanan_file_laporan_name', true));
 		
 			$save_data = [
 				'username' => get_user_data('username'),
+				'nama_notaris' => format_person_name(get_user_data('full_name')),
+				'owner_user_id' => (int) get_user_data('id'),
 				'tanggal_laporan' => $this->input->post('tanggal_laporan'),
 				'kd_wilayah' => $this->input->post('kd_wilayah'),
 			];
 
-			if (!is_dir(FCPATH . '/uploads/laporan_bulanan/')) {
-				mkdir(FCPATH . '/uploads/laporan_bulanan/');
-			}
-
+			$new_document = null;
 			if (!empty($laporan_bulanan_file_laporan_name)) {
-				$laporan_bulanan_file_laporan_name_copy = date('YmdHis') . '-' . $laporan_bulanan_file_laporan_name;
-
-				rename(FCPATH . 'uploads/tmp/' . $laporan_bulanan_file_laporan_uuid . '/' . $laporan_bulanan_file_laporan_name, 
-						FCPATH . 'uploads/laporan_bulanan/' . $laporan_bulanan_file_laporan_name_copy);
-
-				if (!is_file(FCPATH . '/uploads/laporan_bulanan/' . $laporan_bulanan_file_laporan_name_copy)) {
+				$new_document = $this->storage_manager->move_from_temp($laporan_bulanan_file_laporan_uuid, $laporan_bulanan_file_laporan_name, 'uploads/laporan_bulanan/');
+				if (!$new_document) {
 					echo json_encode([
 						'success' => false,
 						'message' => 'Error uploading file'
@@ -104,11 +103,14 @@ class Laporan_bulanan extends Admin
 					exit;
 				}
 
-				$save_data['file_laporan'] = $laporan_bulanan_file_laporan_name_copy;
+				$save_data['file_laporan'] = $new_document;
 			}
 		
 			
 			$save_laporan_bulanan = $this->model_laporan_bulanan->store($save_data);
+			if (!$save_laporan_bulanan && $new_document) {
+				$this->storage_manager->delete_if_unreferenced('uploads/laporan_bulanan/', $new_document);
+			}
 
 			if ($save_laporan_bulanan) {
 				if ($this->input->post('save_type') == 'stay') {
@@ -175,29 +177,27 @@ class Laporan_bulanan extends Admin
 				]);
 			exit;
 		}
-		
-		
+
+		$existing_laporan = $this->model_laporan_bulanan->find($id);
+		if (!$existing_laporan) {
+			show_404();
+		}
+		$this->monthly_report_edit_id = (int) $id;
+		$this->set_monthly_report_validation_rules();
+
 		if ($this->form_validation->run()) {
-			$laporan_bulanan_file_laporan_uuid = $this->input->post('laporan_bulanan_file_laporan_uuid');
-			$laporan_bulanan_file_laporan_name = $this->input->post('laporan_bulanan_file_laporan_name');
+			$laporan_bulanan_file_laporan_uuid = basename((string) $this->input->post('laporan_bulanan_file_laporan_uuid', true));
+			$laporan_bulanan_file_laporan_name = basename((string) $this->input->post('laporan_bulanan_file_laporan_name', true));
 		
 			$save_data = [
-				'username' => get_user_data('username'),
 				'tanggal_laporan' => $this->input->post('tanggal_laporan'),
 				'kd_wilayah' => $this->input->post('kd_wilayah'),
 			];
 
-			if (!is_dir(FCPATH . '/uploads/laporan_bulanan/')) {
-				mkdir(FCPATH . '/uploads/laporan_bulanan/');
-			}
-
+			$new_document = null;
 			if (!empty($laporan_bulanan_file_laporan_uuid)) {
-				$laporan_bulanan_file_laporan_name_copy = date('YmdHis') . '-' . $laporan_bulanan_file_laporan_name;
-
-				rename(FCPATH . 'uploads/tmp/' . $laporan_bulanan_file_laporan_uuid . '/' . $laporan_bulanan_file_laporan_name, 
-						FCPATH . 'uploads/laporan_bulanan/' . $laporan_bulanan_file_laporan_name_copy);
-
-				if (!is_file(FCPATH . '/uploads/laporan_bulanan/' . $laporan_bulanan_file_laporan_name_copy)) {
+				$new_document = $this->storage_manager->move_from_temp($laporan_bulanan_file_laporan_uuid, $laporan_bulanan_file_laporan_name, 'uploads/laporan_bulanan/');
+				if (!$new_document) {
 					echo json_encode([
 						'success' => false,
 						'message' => 'Error uploading file'
@@ -205,11 +205,16 @@ class Laporan_bulanan extends Admin
 					exit;
 				}
 
-				$save_data['file_laporan'] = $laporan_bulanan_file_laporan_name_copy;
+				$save_data['file_laporan'] = $new_document;
 			}
 		
 			
 			$save_laporan_bulanan = $this->model_laporan_bulanan->change($id, $save_data);
+			if ($save_laporan_bulanan && $new_document && $new_document !== $existing_laporan->file_laporan) {
+				$this->storage_manager->delete_if_unreferenced('uploads/laporan_bulanan/', $existing_laporan->file_laporan);
+			} elseif (!$save_laporan_bulanan && $new_document) {
+				$this->storage_manager->delete_if_unreferenced('uploads/laporan_bulanan/', $new_document);
+			}
 
 			if ($save_laporan_bulanan) {
 				if ($this->input->post('save_type') == 'stay') {
@@ -289,6 +294,14 @@ class Laporan_bulanan extends Admin
 		$this->template->title('Laporan Bulanan Detail');
 		$this->render('modul/laporan_bulanan/laporan_bulanan_view', $this->data);
 	}
+
+	public function document($id, $mode = 'preview')
+	{
+		$this->is_allowed('laporan_bulanan_view');
+		$laporan = $this->model_laporan_bulanan->find((int) $id);
+		if (!$laporan || empty($laporan->file_laporan)) show_404();
+		$this->serve_document('uploads/laporan_bulanan', $laporan->file_laporan, $mode === 'download');
+	}
 	
 	/**
 	* delete Laporan Bulanans
@@ -298,17 +311,14 @@ class Laporan_bulanan extends Admin
 	private function _remove($id)
 	{
 		$laporan_bulanan = $this->model_laporan_bulanan->find($id);
-
-		if (!empty($laporan_bulanan->file_laporan)) {
-			$path = FCPATH . '/uploads/laporan_bulanan/' . $laporan_bulanan->file_laporan;
-
-			if (is_file($path)) {
-				$delete_file = unlink($path);
-			}
+		if (!$laporan_bulanan) {
+			return false;
 		}
-		
-		
-		return $this->model_laporan_bulanan->remove($id);
+		$removed = $this->model_laporan_bulanan->remove($id);
+		if ($removed && !empty($laporan_bulanan->file_laporan)) {
+			$this->storage_manager->delete_if_unreferenced('uploads/laporan_bulanan/', $laporan_bulanan->file_laporan);
+		}
+		return $removed;
 	}
 	
 	/**
@@ -330,9 +340,92 @@ class Laporan_bulanan extends Admin
 		echo $this->upload_file([
 			'uuid' 		 	=> $uuid,
 			'table_name' 	=> 'laporan_bulanan',
-			'allowed_types' => 'pdf|doc|docx|xls|xlsx|ppt|pptx|jpg|jpeg|png',
+			'allowed_types' => 'pdf|doc|docx|xls|xlsx|jpg|jpeg|png',
 			'max_size'      => 10000,
 		]);
+	}
+
+	private function set_monthly_report_validation_rules()
+	{
+		$this->form_validation->set_rules(
+			'tanggal_laporan',
+			'Tanggal Laporan',
+			'trim|required|callback_valid_date|callback_valid_not_future_date|callback_unique_monthly_period'
+		);
+		$this->form_validation->set_rules(
+			'kd_wilayah',
+			'Wilayah',
+			'trim|required|integer|callback_valid_monthly_region'
+		);
+		$this->form_validation->set_rules(
+			'laporan_bulanan_file_laporan_name',
+			'File Laporan',
+			'trim|required|max_length[255]|callback_valid_monthly_report_document'
+		);
+	}
+
+	public function valid_monthly_region($region_id)
+	{
+		$valid = ctype_digit((string) $region_id)
+			&& (int) $region_id > 0
+			&& $this->db->where('id', (int) $region_id)->count_all_results('wil') === 1;
+		if (!$valid) {
+			$this->form_validation->set_message(__FUNCTION__, 'Wilayah yang dipilih tidak terdaftar.');
+		}
+		return $valid;
+	}
+
+	public function valid_monthly_report_document($filename)
+	{
+		$allowed = array('pdf', 'doc', 'docx', 'xls', 'xlsx', 'jpg', 'jpeg', 'png');
+		$extension = strtolower(pathinfo(basename((string) $filename), PATHINFO_EXTENSION));
+		if (in_array($extension, $allowed, true)) {
+			return true;
+		}
+		$this->form_validation->set_message(
+			__FUNCTION__,
+			'Dokumen laporan harus berupa PDF, Word, Excel, JPG, JPEG, atau PNG.'
+		);
+		return false;
+	}
+
+	public function unique_monthly_period($report_date)
+	{
+		$date = DateTime::createFromFormat('!Y-m-d', (string) $report_date);
+		if (!$date || $date->format('Y-m-d') !== $report_date) {
+			return true;
+		}
+
+		$period_start = $date->format('Y-m-01');
+		$period_end = (clone $date)->modify('first day of next month')->format('Y-m-d');
+		$user_id = (int) get_user_data('id');
+		$username = (string) get_user_data('username');
+
+		$this->db
+			->from('laporan_bulanan')
+			->where('tanggal_laporan >=', $period_start)
+			->where('tanggal_laporan <', $period_end)
+			->group_start()
+				->where('owner_user_id', $user_id)
+				->or_group_start()
+					->where('owner_user_id IS NULL', null, false)
+					->where('username', $username)
+				->group_end()
+			->group_end();
+
+		if ($this->monthly_report_edit_id > 0) {
+			$this->db->where('id_laporan_bulanan !=', $this->monthly_report_edit_id);
+		}
+
+		if ($this->db->count_all_results() === 0) {
+			return true;
+		}
+
+		$this->form_validation->set_message(
+			__FUNCTION__,
+			'Laporan Bulanan untuk periode tersebut sudah pernah dibuat.'
+		);
+		return false;
 	}
 
 	/**

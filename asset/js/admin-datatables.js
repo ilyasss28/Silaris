@@ -98,8 +98,10 @@
       url.pathname = action.pathname.replace(/\/+$/, '') + '/' + offset;
       url.searchParams.set('q', request.search && request.search.value ? request.search.value : '');
       url.searchParams.set('length', String(length));
-      var groupFilter = form.querySelector('[name="group"]');
-      if (groupFilter && groupFilter.value) url.searchParams.set('group', groupFilter.value);
+      ['group', 'account_status'].forEach(function (filterName) {
+        var filter = form.querySelector('[name="' + filterName + '"]');
+        if (filter && filter.value) url.searchParams.set(filterName, filter.value);
+      });
 
       fetch(url.href, {
         credentials: 'same-origin',
@@ -354,11 +356,11 @@
       return '<tr>' + row.map(function (value) { return '<td>' + escapeHtml(value) + '</td>'; }).join('') + '</tr>';
     }).join('');
     var html = '<!doctype html><html><head><meta charset="utf-8"><title>' + escapeHtml(title) + '</title>' +
-      '<style>@page{size:A4 portrait;margin:12mm}*{box-sizing:border-box}body{margin:0;color:#24324a;font-family:Arial,sans-serif;font-size:9px}' +
+      '<style>@page{size:A4 landscape;margin:20mm}*{box-sizing:border-box}body{margin:0;color:#24324a;font-family:Arial,sans-serif;font-size:10pt}' +
       '.brand{display:flex;justify-content:space-between;align-items:flex-end;padding-bottom:10px;margin-bottom:16px;border-bottom:3px solid #08064d}' +
-      '.brand strong{color:#08064d;font-size:18px}.brand span{color:#667085;font-size:9px}h1{margin:0 0 5px;text-align:center;font-size:17px;color:#101828}' +
-      '.meta{margin:0 0 15px;text-align:center;color:#667085;font-size:8px}table{width:100%;border-collapse:collapse;table-layout:auto}' +
-      'th{padding:7px 5px;border:1px solid #08064d;background:#08064d!important;color:#fff!important;text-align:left;font-size:8px}' +
+      '.brand strong{color:#08064d;font-size:18px}.brand span{color:#667085;font-size:10pt}h1{margin:0 0 5px;text-align:center;font-size:17px;color:#101828}' +
+      '.meta{margin:0 0 15px;text-align:center;color:#667085;font-size:11pt}table{width:100%;border-collapse:collapse;table-layout:fixed}' +
+      'th{padding:7px 5px;border:1px solid #08064d;background:#08064d!important;color:#fff!important;text-align:left;font-size:11pt}' +
       'td{padding:6px 5px;border:1px solid #d8e0ea;vertical-align:top;overflow-wrap:anywhere;word-break:break-word}' +
       'tbody tr:nth-child(even) td{background:#f5f7fb!important}thead{display:table-header-group}tr{page-break-inside:avoid}</style></head><body>' +
       '<div class="brand"><strong>SILARIS</strong><span>Kantor Wilayah Kementerian Hukum Sulawesi Tenggara</span></div>' +
@@ -440,6 +442,134 @@
     };
   }
 
+  function excelElement(documentNode, name, attributes, text) {
+    var node = documentNode.createElementNS(documentNode.documentElement.namespaceURI, name);
+    Object.keys(attributes || {}).forEach(function (key) { node.setAttribute(key, attributes[key]); });
+    if (typeof text !== 'undefined') node.textContent = text;
+    return node;
+  }
+
+  function addExcelStyle(styles, options) {
+    var fonts = styles.getElementsByTagName('fonts')[0];
+    var fills = styles.getElementsByTagName('fills')[0];
+    var borders = styles.getElementsByTagName('borders')[0];
+    var cellXfs = styles.getElementsByTagName('cellXfs')[0];
+
+    var font = excelElement(styles, 'font');
+    font.appendChild(excelElement(styles, 'sz', { val: String(options.size || 10) }));
+    font.appendChild(excelElement(styles, 'color', { rgb: options.fontColor || 'FF24324A' }));
+    font.appendChild(excelElement(styles, 'name', { val: 'Calibri' }));
+    if (options.bold) font.appendChild(excelElement(styles, 'b'));
+    fonts.appendChild(font);
+    fonts.setAttribute('count', fonts.children.length);
+    var fontId = fonts.children.length - 1;
+
+    var fill = excelElement(styles, 'fill');
+    var pattern = excelElement(styles, 'patternFill', { patternType: options.fillColor ? 'solid' : 'none' });
+    if (options.fillColor) {
+      pattern.appendChild(excelElement(styles, 'fgColor', { rgb: options.fillColor }));
+      pattern.appendChild(excelElement(styles, 'bgColor', { indexed: '64' }));
+    }
+    fill.appendChild(pattern);
+    fills.appendChild(fill);
+    fills.setAttribute('count', fills.children.length);
+    var fillId = fills.children.length - 1;
+
+    var border = excelElement(styles, 'border');
+    ['left', 'right', 'top', 'bottom'].forEach(function (side) {
+      var edge = excelElement(styles, side, options.border ? { style: 'thin' } : {});
+      if (options.border) edge.appendChild(excelElement(styles, 'color', { rgb: 'FFDFE5EE' }));
+      border.appendChild(edge);
+    });
+    border.appendChild(excelElement(styles, 'diagonal'));
+    borders.appendChild(border);
+    borders.setAttribute('count', borders.children.length);
+    var borderId = borders.children.length - 1;
+
+    var xf = excelElement(styles, 'xf', {
+      numFmtId: '0', fontId: String(fontId), fillId: String(fillId), borderId: String(borderId), xfId: '0',
+      applyFont: '1', applyFill: '1', applyBorder: '1', applyAlignment: '1'
+    });
+    xf.appendChild(excelElement(styles, 'alignment', {
+      horizontal: options.horizontal || 'left', vertical: options.vertical || 'top',
+      wrapText: options.wrap === false ? '0' : '1'
+    }));
+    cellXfs.appendChild(xf);
+    cellXfs.setAttribute('count', cellXfs.children.length);
+    return cellXfs.children.length - 1;
+  }
+
+  function styleExcelWorkbook(xlsx) {
+    var sheet = xlsx.xl.worksheets['sheet1.xml'];
+    var styles = xlsx.xl['styles.xml'];
+    var titleStyle = addExcelStyle(styles, { size: 16, bold: true, fontColor: 'FFFFFFFF', fillColor: 'FF07064F', horizontal: 'center', vertical: 'center', wrap: false });
+    var subtitleStyle = addExcelStyle(styles, { size: 10, bold: true, fontColor: 'FF725B00', fillColor: 'FFFFF7D8', horizontal: 'center', vertical: 'center', wrap: false });
+    var headerStyle = addExcelStyle(styles, { size: 10, bold: true, fontColor: 'FFFFFFFF', fillColor: 'FF07064F', horizontal: 'center', vertical: 'center', border: true });
+    var bodyStyle = addExcelStyle(styles, { size: 10, fontColor: 'FF24324A', vertical: 'top', border: true });
+    var alternateStyle = addExcelStyle(styles, { size: 10, fontColor: 'FF24324A', fillColor: 'FFF7F9FC', vertical: 'top', border: true });
+    var rows = $('sheetData row', sheet);
+
+    rows.eq(0).attr('ht', '30').attr('customHeight', '1').find('c').attr('s', titleStyle);
+    rows.eq(1).attr('ht', '22').attr('customHeight', '1').find('c').attr('s', subtitleStyle);
+    rows.eq(2).attr('ht', '30').attr('customHeight', '1').find('c').attr('s', headerStyle);
+    rows.slice(3).each(function (index) {
+      $(this).attr('ht', '21').attr('customHeight', '1').find('c').attr('s', index % 2 ? alternateStyle : bodyStyle);
+    });
+
+    var sharedStrings = xlsx.xl['sharedStrings.xml'];
+    var identifierColumns = {};
+    rows.eq(2).find('c').each(function () {
+      var cell = $(this);
+      var reference = cell.attr('r') || '';
+      var column = reference.replace(/\d+/g, '');
+      var text = '';
+      if (cell.attr('t') === 's' && sharedStrings) {
+        text = $('si', sharedStrings).eq(Number(cell.find('v').text())).text();
+      } else {
+        text = cell.find('t').text() || cell.find('v').text();
+      }
+      if (/(nomor|telepon|phone|nik|npwp|kode|username|email)/i.test(text)) identifierColumns[column] = true;
+    });
+    rows.slice(3).find('c[t="n"]').each(function () {
+      var cell = $(this);
+      var column = (cell.attr('r') || '').replace(/\d+/g, '');
+      if (!identifierColumns[column]) return;
+      var value = cell.find('v').text();
+      cell.empty().attr('t', 'inlineStr');
+      var inline = excelElement(sheet, 'is');
+      inline.appendChild(excelElement(sheet, 't', {}, value));
+      this.appendChild(inline);
+    });
+    $('cols col', sheet).each(function (index) {
+      var width = parseFloat($(this).attr('width')) || 12;
+      if (index === 0) width = Math.min(width, 8);
+      $(this).attr('width', Math.min(Math.max(width, index === 0 ? 7 : 12), 45)).attr('customWidth', '1');
+    });
+
+    var sheetView = sheet.getElementsByTagName('sheetView')[0];
+    if (sheetView && !sheetView.getElementsByTagName('pane').length) {
+      var pane = excelElement(sheet, 'pane', { ySplit: '3', topLeftCell: 'A4', activePane: 'bottomLeft', state: 'frozen' });
+      var selection = sheetView.getElementsByTagName('selection')[0];
+      sheetView.insertBefore(pane, selection || null);
+    }
+    var sheetPr = sheet.getElementsByTagName('sheetPr')[0];
+    if (!sheetPr) {
+      sheetPr = excelElement(sheet, 'sheetPr');
+      sheet.documentElement.insertBefore(sheetPr, sheet.documentElement.firstChild);
+    }
+    sheetPr.appendChild(excelElement(sheet, 'pageSetUpPr', { fitToPage: '1', autoPageBreaks: '0' }));
+    ['printOptions', 'pageMargins', 'pageSetup', 'headerFooter'].forEach(function (name) {
+      Array.from(sheet.getElementsByTagName(name)).forEach(function (node) { node.parentNode.removeChild(node); });
+    });
+    sheet.documentElement.appendChild(excelElement(sheet, 'printOptions', { horizontalCentered: '1', gridLines: '0', headings: '0' }));
+    sheet.documentElement.appendChild(excelElement(sheet, 'pageMargins', { left: '0.35', right: '0.35', top: '0.5', bottom: '0.55', header: '0.2', footer: '0.25' }));
+    sheet.documentElement.appendChild(excelElement(sheet, 'pageSetup', { paperSize: '9', orientation: rows.eq(2).find('c').length > 5 ? 'landscape' : 'portrait', fitToWidth: '1', fitToHeight: '0' }));
+    var headerFooter = excelElement(sheet, 'headerFooter');
+    headerFooter.appendChild(excelElement(sheet, 'oddHeader', {}, '&LSILARIS&RData Administrasi'));
+    headerFooter.appendChild(excelElement(sheet, 'oddFooter', {}, '&LKantor Wilayah Kementerian Hukum Sulawesi Tenggara&RHalaman &P dari &N'));
+    sheet.documentElement.appendChild(headerFooter);
+  }
+
   function buttonDefinitions(title, table) {
     var filename = exportFilename(title);
     var metadata = function () { return 'Dicetak dari SILARIS pada ' + exportDate(); };
@@ -474,16 +604,7 @@
         footer: false,
         exportOptions: exportOptions(),
         customize: function (xlsx) {
-          var sheet = xlsx.xl.worksheets['sheet1.xml'];
-          var rows = $('sheetData row', sheet);
-          rows.eq(0).attr('ht', '28').attr('customHeight', '1').find('c').attr('s', '2');
-          rows.eq(1).attr('ht', '20').attr('customHeight', '1').find('c').attr('s', '3');
-          rows.eq(2).attr('ht', '22').attr('customHeight', '1').find('c').attr('s', '22');
-          rows.slice(3).attr('ht', '19').attr('customHeight', '1');
-          $('cols col', sheet).each(function () {
-            var width = parseFloat($(this).attr('width')) || 12;
-            $(this).attr('width', Math.min(Math.max(width, 12), 42));
-          });
+          styleExcelWorkbook(xlsx);
         }
       },
       {
@@ -492,35 +613,36 @@
         title: title,
         filename: filename,
         messageTop: metadata,
-        orientation: 'portrait',
+        orientation: 'landscape',
         pageSize: 'A4',
         footer: false,
         exportOptions: exportOptions(),
         customize: function (document) {
-          document.pageMargins = [24, 50, 24, 42];
-          document.defaultStyle.fontSize = 7;
+          var table = document.content.find(function (item) { return item.table; });
+          var body = table && table.table ? (table.table.body || []) : [];
+          var columnCount = body[0] ? body[0].length : 0;
+          document.pageOrientation = 'landscape';
+          // pdfmake uses PostScript points: 20 mm = 56.69 pt.
+          document.pageMargins = [56.7, 56.7, 56.7, 56.7];
+          document.defaultStyle.fontSize = 10;
           document.defaultStyle.color = '#24324a';
           document.styles.title = {
             alignment: 'center', bold: true, color: '#08064d', fontSize: 16,
             margin: [0, 0, 0, 8]
           };
           document.styles.message = {
-            alignment: 'center', color: '#667085', fontSize: 8,
+            alignment: 'center', color: '#667085', fontSize: 11,
             margin: [0, 0, 0, 14]
           };
           document.styles.tableHeader = {
             bold: true, color: '#ffffff', fillColor: '#08064d',
-            alignment: 'left', fontSize: 8, margin: [3, 5, 3, 5]
+            alignment: 'left', fontSize: 11, margin: [3, 5, 3, 5]
           };
 
-          var table = document.content.find(function (item) { return item.table; });
           if (table) {
-            var body = table.table.body || [];
-            var columnCount = body[0] ? body[0].length : 0;
             var weights = [];
-            // A4 portrait = 595pt. Sisakan ruang untuk margin, padding sel,
-            // dan garis tabel agar tidak terpotong di sisi kanan kertas.
-            var usableWidth = Math.max(120, 547 - (columnCount * 11));
+            var pageWidth = document.pageOrientation === 'landscape' ? 841.89 : 595.28;
+            var usableWidth = Math.max(120, pageWidth - 113.4 - (columnCount * 10));
 
             for (var column = 0; column < columnCount; column += 1) {
               var longestValue = 0;
@@ -536,7 +658,7 @@
             table.table.widths = weights.map(function (weight) {
               return Math.floor((weight / totalWeight) * usableWidth);
             });
-            table.table.dontBreakRows = true;
+            table.table.dontBreakRows = false;
             table.table.keepWithHeaderRows = 1;
             table.layout = {
               fillColor: function (row) { return row > 0 && row % 2 === 0 ? '#f5f7fb' : null; },
@@ -552,11 +674,18 @@
           }
 
           document.header = {
-            columns: [
-              { text: 'SILARIS', bold: true, color: '#08064d', fontSize: 10 },
-              { text: 'Kantor Wilayah Kementerian Hukum Sulawesi Tenggara', alignment: 'right', color: '#667085', fontSize: 7 }
+            stack: [
+              {
+                columns: [
+                  { text: 'SILARIS', bold: true, color: '#08064d', fontSize: 12 },
+                  { text: 'Kantor Wilayah Kementerian Hukum Sulawesi Tenggara', alignment: 'right', color: '#667085', fontSize: 10 }
+                ]
+              },
+              {
+                canvas: [{ type: 'line', x1: 0, y1: 5, x2: pageWidth - 113.4, y2: 5, lineWidth: 2, lineColor: '#ffcf00' }]
+              }
             ],
-            margin: [28, 18, 28, 0]
+            margin: [56.7, 22, 56.7, 0]
           };
           document.footer = function (page, pages) {
             return {
@@ -564,7 +693,7 @@
                 { text: 'Dokumen administrasi SILARIS', color: '#667085', fontSize: 7 },
                 { text: 'Halaman ' + page + ' dari ' + pages, alignment: 'right', color: '#667085', fontSize: 7 }
               ],
-              margin: [28, 10, 28, 0]
+              margin: [56.7, 10, 56.7, 0]
             };
           };
         }
@@ -580,18 +709,17 @@
           var printDocument = printWindow.document;
           printDocument.title = title;
           $(printDocument.body).addClass('silaris-datatable-print');
-
           var style = printDocument.createElement('style');
           style.textContent = [
-            '@page { size: A4 portrait; margin: 12mm; }',
-            'body { color:#24324a; font-family:Arial,sans-serif; font-size:10px; }',
+            '@page { size: A4 landscape; margin: 20mm; }',
+            'body { color:#24324a; font-family:Arial,sans-serif; font-size:10pt; }',
             '.silaris-print-brand { display:flex; justify-content:space-between; align-items:flex-end; padding-bottom:12px; margin-bottom:18px; border-bottom:3px solid #08064d; }',
             '.silaris-print-brand strong { color:#08064d; font-size:18px; }',
-            '.silaris-print-brand span { color:#667085; font-size:10px; }',
+            '.silaris-print-brand span { color:#667085; font-size:10pt; }',
             'h1 { margin:0 0 5px; color:#101828; font-size:17px; text-align:center; }',
-            'h1 + div, h1 + p { margin:0 0 16px; color:#667085; font-size:9px; text-align:center; }',
-            'table { width:100% !important; table-layout:auto !important; border-collapse:collapse !important; font-size:8px !important; }',
-            'thead th { padding:7px 6px !important; border:1px solid #08064d !important; background:#08064d !important; color:#fff !important; font-size:8px; text-align:left; overflow-wrap:anywhere; word-break:break-word; }',
+            'h1 + div, h1 + p { margin:0 0 16px; color:#667085; font-size:11pt; text-align:center; }',
+            'table { width:100% !important; table-layout:fixed !important; border-collapse:collapse !important; font-size:10pt !important; }',
+            'thead th { padding:7px 6px !important; border:1px solid #08064d !important; background:#08064d !important; color:#fff !important; font-size:11pt; text-align:left; overflow-wrap:anywhere; word-break:break-word; }',
             'tbody td { padding:6px !important; border:1px solid #d8e0ea !important; vertical-align:top; overflow-wrap:anywhere; word-break:break-word; }',
             'tbody tr:nth-child(even) td { background:#f5f7fb !important; }',
             'img, button, input, .btn { display:none !important; }'
@@ -649,11 +777,11 @@
     if (hiddenColumns.length) columnDefinitions.push({ visible: false, searchable: false, targets: hiddenColumns });
     if (table.dataset.tableKind === 'users' && columnCount >= 6) {
       columnDefinitions.push(
-        { className: 'user-table__identity', width: '35%', targets: 1 },
-        { className: 'user-table__username', width: '19%', targets: 2 },
-        { className: 'user-table__group', width: '17%', targets: 3 },
-        { className: 'user-table__status', width: '15%', targets: 4 },
-        { className: 'user-table__actions', width: '14%', targets: 5 }
+        { className: 'user-table__identity', targets: 1 },
+        { className: 'user-table__username', width: '170px', targets: 2 },
+        { className: 'user-table__group', targets: 3 },
+        { className: 'user-table__status', width: '150px', targets: 4 },
+        { className: 'user-table__actions', width: '142px', targets: 5 }
       );
     }
     var options = {
@@ -662,7 +790,10 @@
       pageLength: 25,
       lengthMenu: [10, 25, 50, 100],
       order: [],
-      stateSave: true,
+      // User filters can reduce the result set drastically. Restoring an old
+      // page offset (for example row 201) would make a valid one-row result
+      // appear empty, so the user table must always start from its first page.
+      stateSave: table.dataset.tableKind !== 'users',
       layout: {
         topStart: [
           { pageLength: { menu: [10, 25, 50, 100] } },

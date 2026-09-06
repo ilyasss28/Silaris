@@ -161,7 +161,7 @@ class Aauth {
 				return FALSE;
 			}
 			$db_identifier = 'username';
- 		}else{
+		}else{
 			$this->CI->load->helper('email');
 			if( !valid_email($identifier) OR strlen($pass) < $this->config_vars['min'] OR strlen($pass) > $this->config_vars['max'] )
 			{
@@ -169,7 +169,23 @@ class Aauth {
 				return FALSE;
 			}
 			$db_identifier = 'email';
- 		}
+		}
+
+		// Data Notaris is the authoritative roster for accounts whose role is
+		// exclusively User/Notaris. This guard also covers API and OAuth logins.
+		$this->CI->load->model('model_user');
+		$roster_status = $this->CI->model_user->enforce_notary_roster_by_identifier($identifier);
+		if ($roster_status['is_notary'] && !$roster_status['listed']) {
+			$this->error('Akun Notaris tidak aktif karena tidak terdaftar pada Data Notaris.');
+			return FALSE;
+		}
+		$mpd_status = $this->CI->model_user->enforce_mpd_registry_by_identifier($identifier);
+		if (!empty($mpd_status['is_mpd']) && empty($mpd_status['eligible'])) {
+			$this->error(!empty($mpd_status['listed'])
+				? 'Akun MPD tidak aktif karena Data MPD belum diverifikasi.'
+				: 'Akun MPD tidak aktif karena belum terdaftar pada Data MPD.');
+			return FALSE;
+		}
 
 		// if user is not verified
 		$query = null;

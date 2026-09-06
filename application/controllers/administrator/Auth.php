@@ -14,6 +14,7 @@ class Auth extends Admin
 	public function __construct()
 	{
 		parent::__construct();
+		$this->load->model('model_user');
 	}
 
 	/**
@@ -36,18 +37,28 @@ class Auth extends Admin
 		$this->form_validation->set_rules('captcha', 'Captcha', 'trim|required|callback_valid_captcha');
 
 		if ($this->form_validation->run()) {
-			if ($this->aauth->login($this->input->post('username'), $this->input->post('password'), 0)) {
-				$selected_group = $this->input->post('group', true);
-				$user_id = (int) $this->session->userdata('id');
-
-				if ($this->aauth->is_member($selected_group, $user_id)) {
-					redirect('administrator/dashboard');
-				}
-
-				$this->aauth->logout();
-				$data['error'] = 'Group/Role yang dipilih tidak sesuai dengan akun Anda.';
+			$roster_status = $this->model_user->enforce_notary_roster_by_identifier($this->input->post('username'));
+			if ($roster_status['is_notary'] && !$roster_status['listed']) {
+				$data['error'] = 'Akun Notaris tidak aktif karena tidak terdaftar pada Data Notaris.';
 			} else {
-				$data['error'] = 'Username, password, atau Group/Role tidak sesuai.';
+				$mpd_status = $this->model_user->enforce_mpd_registry_by_identifier($this->input->post('username'));
+				if (!empty($mpd_status['is_mpd']) && empty($mpd_status['eligible'])) {
+					$data['error'] = !empty($mpd_status['listed'])
+						? 'Akun MPD tidak aktif karena Data MPD belum diverifikasi.'
+						: 'Akun MPD tidak aktif karena belum terdaftar pada Data MPD.';
+				} elseif ($this->aauth->login($this->input->post('username'), $this->input->post('password'), 0)) {
+					$selected_group = $this->input->post('group', true);
+					$user_id = (int) $this->session->userdata('id');
+
+					if ($this->aauth->is_member($selected_group, $user_id)) {
+						redirect('administrator/dashboard');
+					}
+
+					$this->aauth->logout();
+					$data['error'] = 'Group/Role yang dipilih tidak sesuai dengan akun Anda.';
+				} else {
+					$data['error'] = 'Username, password, atau Group/Role tidak sesuai.';
+				}
 			}
 		} else {
 			$data['error'] = validation_errors();

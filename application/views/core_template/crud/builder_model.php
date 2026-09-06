@@ -21,29 +21,8 @@ private $primary_key 	= '{primary_key}';
 
 	public function count_all($q = null, $field = null)
 	{
-		$iterasi = 1;
-        $num = count($this->field_search);
-        $where = NULL;
-        $q = $this->scurity($q);
-		$field = $this->scurity($field);
-
-        if (empty($field)) {
-	        foreach ($this->field_search as $field) {
-	            if ($iterasi == 1) {
-	                $where .= "{table_name}.".$field . " LIKE '%" . $q . "%' ";
-	            } else {
-	                $where .= "OR " . "{table_name}.".$field . " LIKE '%" . $q . "%' ";
-	            }
-	            $iterasi++;
-	        }
-
-	        $where = '('.$where.')';
-        } else {
-        	$where .= "(" . "{table_name}.".$field . " LIKE '%" . $q . "%' )";
-        }
-
 		$this->join_avaiable()->filter_avaiable();
-        $this->db->where($where);
+		$this->apply_search($q, $field);
 		$query = $this->db->get($this->table_name);
 
 		return $query->num_rows();
@@ -51,38 +30,36 @@ private $primary_key 	= '{primary_key}';
 
 	public function get($q = null, $field = null, $limit = 0, $offset = 0, $select_field = [])
 	{
-		$iterasi = 1;
-        $num = count($this->field_search);
-        $where = NULL;
-        $q = $this->scurity($q);
-		$field = $this->scurity($field);
-
-        if (empty($field)) {
-	        foreach ($this->field_search as $field) {
-	            if ($iterasi == 1) {
-	                $where .= "{table_name}.".$field . " LIKE '%" . $q . "%' ";
-	            } else {
-	                $where .= "OR " . "{table_name}.".$field . " LIKE '%" . $q . "%' ";
-	            }
-	            $iterasi++;
-	        }
-
-	        $where = '('.$where.')';
-        } else {
-        	$where .= "(" . "{table_name}.".$field . " LIKE '%" . $q . "%' )";
-        }
-
         if (is_array($select_field) AND count($select_field)) {
         	$this->db->select($select_field);
         }
 		
 		$this->join_avaiable()->filter_avaiable();
-        $this->db->where($where);
+		$this->apply_search($q, $field);
         $this->db->limit($limit, $offset);
         $this->db->order_by('{table_name}.'.$this->primary_key, "DESC");
 		$query = $this->db->get($this->table_name);
 
 		return $query->result();
+	}
+
+	private function apply_search($q, $field)
+	{
+		$q = trim((string) $q);
+		$field = trim((string) $field);
+		if ($q === '' || empty($this->field_search)) {
+			return;
+		}
+
+		$fields = in_array($field, $this->field_search, true) ? array($field) : $this->field_search;
+		$this->db->group_start();
+		foreach ($fields as $index => $search_field) {
+			$qualified_field = '{table_name}.'.$search_field;
+			$index === 0
+				? $this->db->like($qualified_field, $q)
+				: $this->db->or_like($qualified_field, $q);
+		}
+		$this->db->group_end();
 	}
 
     public function join_avaiable() {

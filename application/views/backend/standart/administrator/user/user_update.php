@@ -253,7 +253,7 @@
                         <label for="username" class="col-sm-2 control-label"><?= cclang('username'); ?> <i class="required">*</i></label>
 
                         <div class="col-sm-8">
-                          <input type="text" class="form-control" name="username" id="username" placeholder="Username" value="<?= set_value('username', $user->username); ?>">
+                          <input type="text" class="form-control" name="username" id="username" minlength="3" maxlength="100" pattern="[A-Za-z0-9._-]+" autocomplete="username" required placeholder="Contoh: nama.pengguna" value="<?= set_value('username', $user->username); ?>">
                           <small class="info help-block">Nama unik yang digunakan untuk masuk ke sistem.</small>
                         </div>
                     </div>
@@ -262,7 +262,7 @@
                         <label for="email" class="col-sm-2 control-label"><?= cclang('email'); ?> <i class="required">*</i></label>
 
                         <div class="col-sm-8">
-                          <input type="text" class="form-control" name="email" id="email" placeholder="Email" value="<?= set_value('email', $user->email); ?>">
+                          <input type="email" class="form-control" name="email" id="email" maxlength="100" autocomplete="email" required placeholder="nama@contoh.go.id" value="<?= set_value('email', $user->email); ?>">
                           <small class="info help-block">Alamat email aktif pengguna.</small>
                         </div>
                     </div>
@@ -271,8 +271,16 @@
                         <label for="full_name" class="col-sm-2 control-label"><?= cclang('full_name'); ?> <i class="required">*</i></label>
 
                         <div class="col-sm-8">
-                          <input type="text" class="form-control" name="full_name" id="full_name" placeholder="Full Name" value="<?= set_value('full_name', $user->full_name); ?>">
+                          <input type="text" class="form-control" name="full_name" id="full_name" maxlength="200" required placeholder="Nama lengkap beserta gelar" value="<?= set_value('full_name', $user->full_name); ?>">
                           <small class="info help-block">Nama lengkap yang tampil pada aplikasi.</small>
+                        </div>
+                    </div>
+                    <div class="form-group ">
+                        <label for="phone_number" class="col-sm-2 control-label">Nomor Telepon <i class="required">*</i></label>
+
+                        <div class="col-sm-8">
+                          <input type="tel" class="form-control" name="phone_number" id="phone_number" inputmode="numeric" minlength="10" maxlength="13" pattern="08[0-9]{8,11}" autocomplete="tel" required placeholder="Contoh: 081234567890" value="<?= _ent(set_value('phone_number', format_phone_number(isset($user->phone_number) ? $user->phone_number : ''))); ?>">
+                          <small class="info help-block">Nomor telepon aktif pengguna.</small>
                         </div>
                     </div>
                     <div class="form-group ">
@@ -283,7 +291,7 @@
                                 <?php  $a = db_get_all_data('wilayah');
                                 
                               ?>
-                                <select  class="form-control chosen chosen-select-deselect" name="kd_wilayah" id="kd_wilayah" data-placeholder="Select Kd Wilayah" >
+                                <select class="form-control chosen chosen-select-deselect" name="kd_wilayah" id="kd_wilayah" data-placeholder="Pilih wilayah kerja" required>
                                     <option value=""></option>
                                     <?php foreach ($a as $row): ?>
                                     <option <?=  $row->kd_wilayah ==  $user->kd_wilayah ? 'selected' : ''; ?> value="<?= $row->kd_wilayah ?>"><?= $row->nama; ?></option>
@@ -296,7 +304,7 @@
                         <label for="content" class="col-sm-2 control-label"><?= cclang('groups'); ?> <i class="required">*</i></label>
 
                         <div class="col-sm-8">
-                           <select  class="form-control chosen-select" name="group[]" id="group" multiple placeholder="Select groups">
+                           <select class="form-control chosen-select" name="group[]" id="group" multiple required data-placeholder="Pilih kelompok akses">
                             <?php foreach (get_application_groups() as $row): ?>
                             <option <?= array_search($row->id, $group_user) !== false? 'selected="selected"' : ''; ?> value="<?= $row->id; ?>"  ><?= ucwords($row->name); ?></option>
                             <?php endforeach; ?>  
@@ -308,16 +316,11 @@
                     </div>
 
                     <div class="form-group user-edit-wide" id="mpd-region-field">
-                        <label for="mpd_wilayah" class="col-sm-2 control-label">Wilayah Kerja MPD</label>
+                        <label class="col-sm-2 control-label">Data MPD</label>
                         <div class="col-sm-8">
-                            <select class="form-control chosen-select" name="mpd_wilayah[]" id="mpd_wilayah" multiple data-placeholder="Pilih satu atau beberapa wilayah kerja MPD">
-                                <?php foreach (db_get_all_data('wilayah') as $row): ?>
-                                    <?php if (trim((string) $row->kd_wilayah) !== ''): ?>
-                                    <option value="<?= _ent($row->kd_wilayah); ?>" <?= in_array((string) $row->kd_wilayah, (array) $mpd_regions, true) ? 'selected' : ''; ?>><?= _ent($row->nama); ?></option>
-                                    <?php endif; ?>
-                                <?php endforeach; ?>
-                            </select>
-                            <small class="info help-block">Digunakan hanya jika akun memiliki role MPD. Perubahan dapat dilakukan kapan saja setelah data MPD resmi tersedia.</small>
+                            <div class="alert alert-info" style="margin-bottom:0">
+                                Identitas, status verifikasi, dan wilayah pengawasan MPD dikelola terpusat melalui menu <strong>SETUP &rarr; Data MPD</strong>. Satu MPD dapat ditugaskan ke beberapa kabupaten/kota.
+                            </div>
                         </div>
                     </div>
 
@@ -339,13 +342,13 @@
 
                         <div class="col-sm-6">
                           <div class="input-group col-md-8 input-password">
-                          <input type="password" class="form-control password" name="password" id="password" placeholder="Password" value="<?= set_value('password'); ?>">
+                          <input type="password" class="form-control password" name="password" id="password" minlength="8" maxlength="72" autocomplete="new-password" placeholder="Minimal 8 karakter" value="<?= set_value('password'); ?>">
                             <span class="input-group-btn">
                               <button type="button" class="btn btn-flat show-password"><i class="fa fa-eye eye"></i></button>
                             </span>
                           </div>
                            <small class="info help-block">
-                            Kosongkan jika tidak ingin mengganti kata sandi. Gunakan minimal 6 karakter.
+                            Kosongkan jika tidak ingin mengganti kata sandi. Gunakan 8-72 karakter.
                           </small>
                         </div>
                     </div>

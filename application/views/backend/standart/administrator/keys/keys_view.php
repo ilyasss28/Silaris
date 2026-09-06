@@ -96,7 +96,7 @@ jQuery(document).ready(domo);
                         <label for="content" class="col-sm-2 control-label">Date Created </label>
 
                         <div class="col-sm-8">
-                           <?= _ent($keys->date_created); ?>
+                           <?= _ent(format_date_id($keys->date_created)); ?>
                         </div>
                     </div>
                                         

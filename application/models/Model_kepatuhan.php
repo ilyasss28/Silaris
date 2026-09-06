@@ -14,21 +14,23 @@ class Model_kepatuhan extends CI_Model
             . ' AND reports.Tanggal_Laporan >= ' . $this->db->escape($start)
             . ' AND reports.Tanggal_Laporan <= ' . $this->db->escape($end);
 
-        $this->db->select("users.id, users.username, users.full_name, users.kd_wilayah,
+        $this->db->select("users.id, users.username, users.full_name, notary_profiles.kode_wilayah AS kd_wilayah,
             COUNT(DISTINCT reports.id) AS jumlah_laporan,
             MAX(reports.Tanggal_Laporan) AS laporan_terakhir", false);
-        $this->db->from('aauth_users users');
+        $this->db->from('data_notaris notary_profiles');
+        $this->db->join('aauth_users users', 'users.id = notary_profiles.user_id', 'inner');
         $this->db->join('aauth_user_to_group memberships', 'memberships.user_id = users.id');
         $this->db->join('aauth_groups groups_table', "groups_table.id = memberships.group_id AND groups_table.name = 'User'");
         $this->db->join('laporan reports', $owner_join, 'left', false);
         $this->db->where('users.banned', 0);
+        $this->db->where("UPPER(TRIM(notary_profiles.status_notaris)) = 'NOTARIS AKTIF'", null, false);
         if (!empty($q)) {
             $this->db->group_start();
             $this->db->like('users.full_name', $q);
             $this->db->or_like('users.username', $q);
             $this->db->group_end();
         }
-        $this->db->group_by(array('users.id', 'users.username', 'users.full_name', 'users.kd_wilayah'));
+        $this->db->group_by(array('users.id', 'users.username', 'users.full_name', 'notary_profiles.kode_wilayah'));
         $this->db->order_by('jumlah_laporan', 'DESC');
         $this->db->order_by('users.full_name', 'ASC');
 
@@ -50,10 +52,12 @@ class Model_kepatuhan extends CI_Model
         $owner_join = $this->report_owner_join('reports', 'users');
 
         $total_akun = $this->db->select('COUNT(DISTINCT users.id) AS c', false)
-            ->from('aauth_users users')
+            ->from('data_notaris notary_profiles')
+            ->join('aauth_users users', 'users.id = notary_profiles.user_id', 'inner')
             ->join('aauth_user_to_group memberships', 'memberships.user_id = users.id')
             ->join('aauth_groups groups_table', "groups_table.id = memberships.group_id AND groups_table.name = 'User'")
             ->where('users.banned', 0)
+            ->where("UPPER(TRIM(notary_profiles.status_notaris)) = 'NOTARIS AKTIF'", null, false)
             ->get()->row()->c ?? 0;
 
         $total_laporan = $this->db->select('COUNT(DISTINCT reports.id) AS c', false)
@@ -61,7 +65,9 @@ class Model_kepatuhan extends CI_Model
             ->join('aauth_users users', $owner_join, 'inner', false)
             ->join('aauth_user_to_group memberships', 'memberships.user_id = users.id')
             ->join('aauth_groups groups_table', "groups_table.id = memberships.group_id AND groups_table.name = 'User'")
+            ->join('data_notaris notary_profiles', 'notary_profiles.user_id = users.id', 'inner')
             ->where('users.banned', 0)
+            ->where("UPPER(TRIM(notary_profiles.status_notaris)) = 'NOTARIS AKTIF'", null, false)
             ->where('reports.Tanggal_Laporan >=', $start)
             ->where('reports.Tanggal_Laporan <=', $end)
             ->get()->row()->c ?? 0;
@@ -71,7 +77,9 @@ class Model_kepatuhan extends CI_Model
             ->join('aauth_users users', $owner_join, 'inner', false)
             ->join('aauth_user_to_group memberships', 'memberships.user_id = users.id')
             ->join('aauth_groups groups_table', "groups_table.id = memberships.group_id AND groups_table.name = 'User'")
+            ->join('data_notaris notary_profiles', 'notary_profiles.user_id = users.id', 'inner')
             ->where('users.banned', 0)
+            ->where("UPPER(TRIM(notary_profiles.status_notaris)) = 'NOTARIS AKTIF'", null, false)
             ->where('reports.Tanggal_Laporan >=', $start)
             ->where('reports.Tanggal_Laporan <=', $end)
             ->get()->row()->c ?? 0;
@@ -81,7 +89,9 @@ class Model_kepatuhan extends CI_Model
             ->join('aauth_users users', $owner_join, 'inner', false)
             ->join('aauth_user_to_group memberships', 'memberships.user_id = users.id')
             ->join('aauth_groups groups_table', "groups_table.id = memberships.group_id AND groups_table.name = 'User'")
+            ->join('data_notaris notary_profiles', 'notary_profiles.user_id = users.id', 'inner')
             ->where('users.banned', 0)
+            ->where("UPPER(TRIM(notary_profiles.status_notaris)) = 'NOTARIS AKTIF'", null, false)
             ->where('reports.Tanggal_Laporan >=', $start)
             ->where('reports.Tanggal_Laporan <=', $end)
             ->get()->row();
@@ -100,7 +110,7 @@ class Model_kepatuhan extends CI_Model
     {
         if ($this->db->field_exists('owner_user_id', 'laporan')) {
             return '(' . $report_alias . '.owner_user_id = ' . $user_alias . '.id'
-                . ' OR (' . $report_alias . '.owner_user_id IS NULL AND LOWER('
+                . ' OR ((' . $report_alias . '.owner_user_id IS NULL OR ' . $report_alias . '.owner_user_id = 0) AND LOWER('
                 . $report_alias . '.username) = LOWER(' . $user_alias . '.username)))';
         }
 
