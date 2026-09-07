@@ -82,6 +82,7 @@ jQuery(document).ready(domo);
                            <option value="">Semua Status</option>
                            <option value="active" <?= $status_filter === 'active' ? 'selected' : ''; ?>>Aktif</option>
                            <option value="inactive" <?= $status_filter === 'inactive' ? 'selected' : ''; ?>>Nonaktif</option>
+                           <option value="pending" <?= $status_filter === 'pending' ? 'selected' : ''; ?>>Menunggu Verifikasi</option>
                         </select>
                         <?php if ($group_filter !== '' || $status_filter !== ''): ?>
                         <a href="<?= site_url('administrator/user'); ?>" class="user-group-filterbar__reset" title="Hapus filter pengguna"><i class="fa fa-times"></i><span>Reset</span></a>
@@ -142,11 +143,12 @@ jQuery(document).ready(domo);
                               </div>
                            </td>
                            <td>
+                              <?php $pending_verification = isset($user->is_verified) && !(int) $user->is_verified; ?>
                               <?php $roster_locked = !empty($user->notary_roster_locked); ?>
                               <?php $roster_reason = isset($user->roster_lock_reason) ? $user->roster_lock_reason : ''; ?>
-                              <div class="user-status-control <?= $user->banned ? 'is-inactive' : 'is-active'; ?><?= $roster_locked ? ' is-roster-locked' : ''; ?>"<?= $roster_locked ? ' title="Status dikunci: ' . _ent($roster_reason) . '"' : ''; ?>>
+                              <div class="user-status-control <?= $pending_verification ? 'is-pending' : ($user->banned ? 'is-inactive' : 'is-active'); ?><?= $roster_locked ? ' is-roster-locked' : ''; ?>"<?= $roster_locked ? ' title="Status dikunci: ' . _ent($roster_reason) . '"' : ''; ?>>
                                  <input type="checkbox" data-user-id="<?= (int) $user->id; ?>" class="switch-button" <?= $user->banned ? '' : 'checked'; ?> <?= $roster_locked ? 'disabled' : ''; ?> aria-label="Status <?= _ent($user->full_name); ?><?= $roster_locked ? ' dikunci. ' . _ent($roster_reason) : ''; ?>">
-                                 <span class="user-status-badge"><i class="fa fa-circle"></i><span class="user-status-text"><?= $user->banned ? 'Nonaktif' : 'Aktif'; ?></span><?= $roster_locked ? '<i class="fa fa-lock user-status-lock-icon" aria-hidden="true"></i>' : ''; ?></span>
+                                 <span class="user-status-badge"><i class="fa fa-circle"></i><span class="user-status-text"><?= $pending_verification ? 'Menunggu Verifikasi' : ($user->banned ? 'Nonaktif' : 'Aktif'); ?></span><?= $roster_locked ? '<i class="fa fa-lock user-status-lock-icon" aria-hidden="true"></i>' : ''; ?></span>
                               </div>
                            </td>
                            <td width="200">
@@ -259,25 +261,26 @@ jQuery(document).ready(domo);
         var isActive = $input.prop('checked');
         var previousState = !isActive;
         var $control = $input.closest('.user-status-control');
+        var wasPending = $control.hasClass('is-pending');
         var data = [];
 
         if (isActive) {
             status = 'active';
         }
 
-        function renderStatus(active) {
-            $control.toggleClass('is-active', active).toggleClass('is-inactive', !active);
-            $control.find('.user-status-text').text(active ? 'Aktif' : 'Nonaktif');
+        function renderStatus(active, pending) {
+            $control.toggleClass('is-pending', !!pending).toggleClass('is-active', active && !pending).toggleClass('is-inactive', !active && !pending);
+            $control.find('.user-status-text').text(pending ? 'Menunggu Verifikasi' : (active ? 'Aktif' : 'Nonaktif'));
         }
 
         function rollbackStatus() {
             $input.data('status-syncing', true);
             $input.switchButton('option', 'checked', previousState);
             $input.data('status-syncing', false);
-            renderStatus(previousState);
+            renderStatus(previousState, wasPending);
         }
 
-        renderStatus(isActive);
+        renderStatus(isActive, false);
         $control.addClass('is-loading');
         $input.prop('disabled', true);
 

@@ -187,6 +187,16 @@ class Aauth {
 			return FALSE;
 		}
 
+		if ($this->aauth_db->field_exists('is_verified', $this->config_vars['users'])) {
+			$pending = $this->aauth_db->where($db_identifier, $identifier)
+				->where('is_verified', 0)
+				->count_all_results($this->config_vars['users']);
+			if ($pending > 0) {
+				$this->error('Akun Anda sedang menunggu verifikasi dan aktivasi admin.');
+				return FALSE;
+			}
+		}
+
 		// if user is not verified
 		$query = null;
 		$query = $this->aauth_db->where($db_identifier, $identifier);
@@ -483,86 +493,100 @@ class Aauth {
 	 * @return bool Remind fails/succeeds
 	 */
 	public function remind_password($email){
-
-		$query = $this->aauth_db->where( 'email', $email );
+		$email = strtolower(trim((string) $email));
+		$query = $this->aauth_db->where('LOWER(email) =', $email);
 		$query = $this->aauth_db->get( $this->config_vars['users'] );
 
 		if ($query->num_rows() > 0){
 			$row = $query->row();
-
-			$ver_code = sha1(strtotime("now"));
-
-			$data['verification_code'] = $ver_code;
-
-			$this->aauth_db->where('email', $email);
-			$this->aauth_db->update($this->config_vars['users'], $data);
-
-			$this->CI->load->library('email');
-			$this->CI->load->helper('url');
-
-			if(isset($this->config_vars['email_config']) && is_array($this->config_vars['email_config'])){
-				$this->CI->email->initialize($this->config_vars['email_config']);
+			try {
+				$ver_code = bin2hex(random_bytes(32));
+			} catch (Exception $e) {
+				$ver_code = hash('sha256', uniqid((string) mt_rand(), true));
 			}
 
-			$this->CI->email->from( $this->config_vars['email'], $this->config_vars['name']);
-			$this->CI->email->to($row->email);
-			$this->CI->email->subject($this->CI->lang->line('aauth_email_reset_subject'));
-			$this->CI->email->message($this->CI->lang->line('aauth_email_reset_text') . site_url() . $this->config_vars['reset_password_link'] . $ver_code );
-			$this->CI->email->send();
-			
-			return TRUE;
+			$ver_code_hash = hash('sha256', $ver_code);
+			$data = array(
+				// Store only a digest so a database read cannot expose a usable link.
+				'verification_code' => $ver_code_hash,
+				'forgot_exp' => date('Y-m-d H:i:s', time() + 3600),
+			);
+
+			$this->aauth_db->where('id', (int) $row->id);
+			if (!$this->aauth_db->update($this->config_vars['users'], $data)) {
+				return FALSE;
+			}
+
+			$this->CI->load->library('silaris_mailer');
+			$sent = $this->CI->silaris_mailer->send_password_reset(
+				$row->email,
+				isset($row->full_name) ? $row->full_name : $row->username,
+				site_url('administrator/reset-password/'.$ver_code)
+			);
+
+			if (!$sent) {
+				$this->aauth_db->where('id', (int) $row->id)
+					->where('verification_code', $ver_code_hash)
+					->update($this->config_vars['users'], array('verification_code' => '', 'forgot_exp' => null));
+			}
+
+			return (bool) $sent;
 		}
 		return FALSE;
 	}
 
 	/**
-	 * Reset password
-	 * Generate new password and email it to the user
+	 * Reset password using a valid single-use token.
 	 * @param string $ver_code Verification code for account
+	 * @param string|null $new_password User-selected replacement password
 	 * @return bool Password reset fails/succeeds
 	 */
-	public function reset_password($ver_code){
-
-		$query = $this->aauth_db->where('verification_code', $ver_code);
-		$query = $this->aauth_db->get( $this->config_vars['users'] );
-
-		$this->CI->load->helper('string');
-		$pass_length = ($this->config_vars['min']&1 ? $this->config_vars['min']+1 : $this->config_vars['min']);
-		$pass = random_string('alnum', $pass_length);
-
-		if( $query->num_rows() > 0 ){
-
-			$row = $query->row();
-			$data =	 array(
-				'verification_code' => '',
-				'pass' => $this->hash_password($pass, $row->id)
-			);
-
-		 	if($this->config_vars['totp_active'] == TRUE AND $this->config_vars['totp_reset_over_reset_password'] == TRUE){
-		 		$data['totp_secret'] = NULL;
-		 	}
-		 	
-			$email = $row->email;
-
-			$this->aauth_db->where('id', $row->id);
-			$this->aauth_db->update($this->config_vars['users'] , $data);
-
-			$this->CI->load->library('email');
-
-			if(isset($this->config_vars['email_config']) && is_array($this->config_vars['email_config'])){
-				$this->CI->email->initialize($this->config_vars['email_config']);
-			}
-
-			$this->CI->email->from( $this->config_vars['email'], $this->config_vars['name']);
-			$this->CI->email->to($email);
-			$this->CI->email->subject($this->CI->lang->line('aauth_email_reset_success_subject'));
-			$this->CI->email->message($this->CI->lang->line('aauth_email_reset_success_new_password') . $pass);
-			$this->CI->email->send();
-
-			return TRUE;
+	public function reset_password($ver_code, $new_password = null){
+		if ($new_password === null || !$this->valid_password_reset_token($ver_code)) {
+			return FALSE;
 		}
 
-		return FALSE;
+		if (strlen($new_password) < 8 || strlen($new_password) > 72) {
+			return FALSE;
+		}
+
+		$ver_code_hash = hash('sha256', $ver_code);
+		$row = $this->aauth_db->where('verification_code', $ver_code_hash)
+			->get($this->config_vars['users'])->row();
+		if (!$row) {
+			return FALSE;
+		}
+
+		$data = array(
+			'verification_code' => '',
+			'forgot_exp' => null,
+			'pass' => $this->hash_password($new_password, $row->id),
+		);
+		if ($this->config_vars['totp_active'] == TRUE && $this->config_vars['totp_reset_over_reset_password'] == TRUE) {
+			$data['totp_secret'] = null;
+		}
+
+		return (bool) $this->aauth_db->where('id', (int) $row->id)
+			->where('verification_code', $ver_code_hash)
+			->update($this->config_vars['users'], $data);
+	}
+
+	/** Validate a single-use password-reset token and its one-hour expiry. */
+	public function valid_password_reset_token($ver_code){
+		$ver_code = trim((string) $ver_code);
+		if (!preg_match('/^[a-f0-9]{64}$/', $ver_code)) {
+			return FALSE;
+		}
+
+		$row = $this->aauth_db->select('forgot_exp')
+			->where('verification_code', hash('sha256', $ver_code))
+			->get($this->config_vars['users'])->row();
+		if (!$row || empty($row->forgot_exp)) {
+			return FALSE;
+		}
+
+		$expiry = strtotime((string) $row->forgot_exp);
+		return $expiry !== FALSE && $expiry >= time();
 	}
 
 	//tested

@@ -56,7 +56,7 @@ class Model_dashboard extends CI_Model
             'dashboard_compliance' => $compliance,
             'dashboard_compliance_rows' => $compliance_rows,
             'dashboard_regions' => $profile === 'executive' ? $this->regional_distribution() : [],
-            'dashboard_attention' => $profile !== 'user' ? $this->notaries_needing_attention($scope_regions) : [],
+            'dashboard_attention' => $profile === 'executive' ? $this->notaries_needing_attention($scope_regions) : [],
             'dashboard_quick_links' => $this->quick_links($profile),
         ];
     }

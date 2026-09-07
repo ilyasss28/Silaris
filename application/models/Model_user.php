@@ -8,7 +8,7 @@ class Model_user extends MY_Model {
 	private $table_name 	= 'aauth_users';
 	private $field_search 	= array('id', 'email', 'username', 'full_name', 'phone_number');
 	private $filterable_groups = array('Admin', 'User', 'Kanwil', 'MPD');
-	private $filterable_statuses = array('active', 'inactive');
+	private $filterable_statuses = array('active', 'inactive', 'pending');
 
 	public function __construct()
 	{
@@ -97,7 +97,15 @@ class Model_user extends MY_Model {
 			return;
 		}
 
+		if ($status === 'pending' && $this->db->field_exists('is_verified', $this->table_name)) {
+			$this->db->where($this->table_name . '.is_verified', 0);
+			return;
+		}
+
 		$this->db->where($this->table_name . '.banned', $status === 'inactive' ? 1 : 0);
+		if ($this->db->field_exists('is_verified', $this->table_name)) {
+			$this->db->where($this->table_name . '.is_verified', 1);
+		}
 	}
 
 	public function get_group_user($user_id = false)

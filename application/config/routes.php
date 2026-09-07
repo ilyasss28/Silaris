@@ -96,6 +96,7 @@ $route['administrator/logout'] = 'administrator/auth/logout';
 $route['administrator/register'] = 'administrator/auth/register';
 $route['administrator/forgot-password'] = 'administrator/auth/forgot_password';
 $route['administrator/forgot_password'] = 'administrator/auth/forgot_password';
+$route['administrator/reset-password/(:any)'] = 'administrator/auth/reset_password/$1';
 
 /* Authenticated account shortcuts ------------------------------------ */
 $route['profile'] = 'administrator/user/profile';

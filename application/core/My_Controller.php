@@ -192,7 +192,7 @@ class MY_Controller extends CI_Controller {
 
 	public function valid_indonesian_phone($str)
 	{
-		$this->form_validation->set_message('valid_indonesian_phone', 'The %s field must be an Indonesian mobile number (08xxxxxxxxxx).');
+		$this->form_validation->set_message('valid_indonesian_phone', '%s harus berupa nomor seluler Indonesia yang valid (08xxxxxxxxxx).');
 		if (trim((string) $str) === '') {
 			return true;
 		}
@@ -328,7 +328,7 @@ class MY_Controller extends CI_Controller {
     * @return boolean
     */
     public function valid_captcha($str) {
-       $this->form_validation->set_message('valid_captcha','You must submit %s word that appears in the %s image.');
+       $this->form_validation->set_message('valid_captcha','Kode %s tidak sesuai dengan gambar atau telah kedaluwarsa.');
 
        $expiration = time() - 7200;
 

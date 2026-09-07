@@ -4426,6 +4426,12 @@ input[type="file"].form-control { height: auto; min-height: var(--control-h); pa
   background: #f5f7fa;
   color: #7a8493;
 }
+.admin-silaris .user-status-control.is-pending {
+  border-color: #f4d27a;
+  background: #fff9e8;
+  color: #8a6500;
+}
+.admin-silaris .user-status-control.is-pending .user-status-badge { min-width: 128px; }
 .admin-silaris .user-status-control:hover { box-shadow: 0 3px 10px rgba(15, 23, 42, .08); }
 .admin-silaris .user-status-control.is-loading { opacity: .58; cursor: wait; }
 .admin-silaris .user-status-control.is-loading .switch-button-background { cursor: wait; }

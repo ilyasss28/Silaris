@@ -180,6 +180,7 @@
       line-height: 1.55;
     }
     .alert-message--success { border-color: #b8e0cb; background: #f0faf5; color: #19744a; }
+    .alert-message--warning { border-color: #efd371; background: #fffbea; color: #735900; }
     .alert-message p { margin: 0; }
     .login-field { margin-bottom: 12px; }
     .login-field label { margin: 0 0 5px; display: block; color: #344054; font-size: 11.5px; font-weight: 700; }
@@ -374,8 +375,9 @@
           <div class="alert-message" role="alert"><i class="fa fa-exclamation-circle"></i><div><?= $error; ?></div></div>
         <?php endif; ?>
         <?php $message = $this->session->flashdata('f_message'); ?>
+        <?php $message_type = $this->session->flashdata('f_type'); ?>
         <?php if ($message): ?>
-          <div class="alert-message alert-message--success" role="status"><i class="fa fa-check-circle"></i><p><?= _ent($message); ?></p></div>
+          <div class="alert-message <?= $message_type === 'success' ? 'alert-message--success' : ($message_type === 'warning' ? 'alert-message--warning' : ''); ?>" role="status"><i class="fa <?= $message_type === 'success' ? 'fa-check-circle' : 'fa-exclamation-circle'; ?>"></i><p><?= _ent($message); ?></p></div>
         <?php endif; ?>
 
         <?= form_open('', ['name' => 'form_login', 'id' => 'form_login', 'method' => 'POST']); ?>

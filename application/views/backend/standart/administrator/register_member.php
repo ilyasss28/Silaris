@@ -1,242 +1,37 @@
-<!DOCTYPE html>
-<html>
-<head>
-  <meta charset="utf-8">
-  <meta http-equiv="X-UA-Compatible" content="IE=edge">
-  <title><?= get_option('site_name'); ?> | <?= cclang('register'); ?></title>
-  <meta content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" name="viewport">
-  <link rel="stylesheet" href="<?= BASE_ASSET; ?>/bootstrap5/css/bootstrap.min.css">
-  <link rel="stylesheet" href="<?= BASE_ASSET; ?>vendor/font-awesome/css/font-awesome.min.css">
-  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-
-  <style>
-    :root {
-      --brand: #05063E;
-      --brand-dark: #030228;
-      --accent: #FECD08;
-      --accent-dark: #CBA406;
-      --ink-900: #0F1B2D;
-      --ink-500: #6B7686;
-      --border: #E3E7EF;
-      --radius-sm: 8px;
-      --control-h: 44px;
-    }
-    html, body {
-      height: 100%;
-      margin: 0;
-      font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
-    }
-    body {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      background: linear-gradient(135deg, var(--ink-900) 0%, var(--brand-dark) 55%, var(--brand) 100%);
-      padding: 24px;
-    }
-    .login-shell { width: 100%; max-width: 460px; }
-    .login-brand { text-align: center; margin-bottom: 22px; color: #fff; }
-    .login-brand .site-name { font-weight: 800; font-size: 20px; letter-spacing: .02em; }
-    .login-card {
-      background: #fff;
-      border-radius: 16px;
-      border-top: 4px solid var(--accent);
-      box-shadow: 0 24px 60px rgba(0,0,0,.28);
-      padding: 32px 30px;
-    }
-    .login-card h2 { margin: 0 0 4px 0; font-size: 19px; font-weight: 800; color: var(--ink-900); }
-    .login-card .sub { margin: 0 0 22px 0; font-size: 13.5px; color: var(--ink-500); }
-    .field { margin-bottom: 16px; position: relative; }
-    .field label {
-      display: block;
-      font-size: 12.5px;
-      font-weight: 700;
-      color: var(--ink-900);
-      margin-bottom: 6px;
-      text-transform: uppercase;
-      letter-spacing: .03em;
-    }
-    .field label .required { color: #C0242F; }
-    .field .fa {
-      position: absolute;
-      left: 13px;
-      top: 40px;
-      color: #B9BCC9;
-    }
-    .field input {
-      width: 100%;
-      height: var(--control-h);
-      box-sizing: border-box;
-      padding: 0 12px 0 36px;
-      border: 1.5px solid var(--border);
-      border-radius: var(--radius-sm);
-      font-size: 14px;
-      font-family: inherit;
-      transition: border-color .15s ease, box-shadow .15s ease;
-    }
-    .field input:focus {
-      outline: none;
-      border-color: var(--brand);
-      box-shadow: 0 0 0 3px rgba(5,6,62,.12);
-    }
-    .field.has-error input { border-color: #C0242F; }
-    .captcha-row { display: flex; align-items: center; gap: 10px; }
-    .captcha-row input[type="text"] {
-      flex: 1 1 auto;
-      height: var(--control-h);
-      box-sizing: border-box;
-      padding: 0 12px;
-      border: 1.5px solid var(--border);
-      border-radius: var(--radius-sm);
-      font-size: 14px;
-    }
-    .captcha-row .box-image { flex: 0 0 auto; }
-    .captcha-row .box-image svg,
-    .captcha-row .box-image img { display: block; height: var(--control-h); }
-    .refresh-captcha {
-      flex: 0 0 auto;
-      width: var(--control-h);
-      height: var(--control-h);
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      border: 1.5px solid var(--border);
-      border-radius: var(--radius-sm);
-      color: var(--brand);
-      cursor: pointer;
-      text-decoration: none;
-    }
-    .refresh-captcha:hover { background: var(--border); }
-    .agree-row {
-      display: flex;
-      align-items: center;
-      gap: 7px;
-      font-size: 13px;
-      color: var(--ink-500);
-      cursor: pointer;
-      font-weight: 500;
-      margin-bottom: 18px;
-    }
-    .btn-submit {
-      width: 100%;
-      height: var(--control-h);
-      box-sizing: border-box;
-      border: none;
-      background: var(--accent);
-      color: var(--ink-900);
-      font-weight: 700;
-      font-size: 14.5px;
-      border-radius: var(--radius-sm);
-      cursor: pointer;
-      transition: background .15s ease, color .15s ease;
-    }
-    .btn-submit:hover { background: var(--accent-dark); color: var(--ink-900); }
-    .callout-box {
-      background: #FCEAEB;
-      border: 1px solid #F3C3C6;
-      color: #C0242F;
-      border-radius: 8px;
-      padding: 10px 14px;
-      font-size: 13px;
-      margin-bottom: 16px;
-    }
-    .callout-box h4 { margin: 0 0 2px 0; font-size: 13px; }
-    .callout-box p { margin: 0; }
-    .back-link {
-      display: block;
-      text-align: center;
-      margin-top: 18px;
-      font-size: 13px;
-      color: rgba(255,255,255,.8);
-    }
-    .back-link a { color: #fff; font-weight: 600; text-decoration: none; }
-    .back-link a:hover { text-decoration: underline; }
-  </style>
-</head>
-<body>
-<div class="login-shell">
-  <div class="login-brand">
-    <div class="site-name"><?= get_option('site_name'); ?></div>
-  </div>
-
-  <div class="login-card">
-    <h2><?= cclang('register'); ?></h2>
-    <p class="sub"><?= cclang('register_a_new_membership'); ?></p>
-
-    <?php if (isset($error) AND !empty($error)): ?>
-      <div class="callout-box">
-        <h4><?= cclang('error'); ?>!</h4>
-        <p><?= $error; ?></p>
-      </div>
-    <?php endif; ?>
-
-    <?= form_open('', [
-      'name'    => 'form_login',
-      'id'      => 'form_login',
-      'method'  => 'POST'
-    ]); ?>
-      <div class="field <?= form_error('full_name') ? 'has-error' : ''; ?>">
-        <label>Full Name</label>
-        <i class="fa fa-user"></i>
-        <input placeholder="Full Name" name="full_name" value="<?= set_value('full_name'); ?>">
-      </div>
-      <div class="field <?= form_error('username') ? 'has-error' : ''; ?>">
-        <label>Username <span class="required">*</span></label>
-        <i class="fa fa-user"></i>
-        <input placeholder="Username" name="username" value="<?= set_value('username'); ?>">
-      </div>
-      <div class="field <?= form_error('email') ? 'has-error' : ''; ?>">
-        <label>Email <span class="required">*</span></label>
-        <i class="fa fa-envelope"></i>
-        <input type="email" placeholder="Email" name="email" value="<?= set_value('email'); ?>">
-      </div>
-      <div class="field <?= form_error('password') ? 'has-error' : ''; ?>">
-        <label>Password <span class="required">*</span></label>
-        <i class="fa fa-lock"></i>
-        <input type="password" placeholder="Password" name="password">
-      </div>
-
-      <?php $cap = get_captcha(); ?>
-      <div class="field <?= form_error('email') ? 'has-error' : ''; ?>">
-        <label><?= cclang('human_challenge'); ?> <span class="required">*</span></label>
-        <div class="captcha-row" data-captcha-time="<?= $cap['time']; ?>">
-          <input type="text" name="captcha" placeholder="">
-          <span class="box-image"><?= $cap['image']; ?></span>
-          <a class="refresh-captcha" title="Refresh"><i class="fa fa-refresh"></i></a>
-        </div>
-      </div>
-
-      <label class="agree-row">
-        <input type="checkbox" name="agree" value="1"> <?= cclang('i_agree_to_the_terms'); ?>
-      </label>
-
-      <button type="submit" class="btn-submit"><?= cclang('register'); ?></button>
-    <?= form_close(); ?>
-  </div>
-
-  <div class="back-link">
-    <a href="<?= site_url('administrator/login'); ?>"><?= cclang('i_already_a_new_membership'); ?></a>
-  </div>
-</div>
-
-<script src="<?= BASE_ASSET; ?>/jquery4/jquery.min.js"></script>
-<script src="<?= BASE_ASSET; ?>/jquery4/jquery-compat-shim.js"></script>
-<script>
-  $(function() {
-     var BASE_URL = "<?= base_url(); ?>";
-
-     $('.refresh-captcha').on('click', function() {
-         var capparent = $(this).closest('.captcha-row');
-
-         $.ajax({
-                 url: BASE_URL + '/captcha/reload/' + capparent.attr('data-captcha-time'),
-                 dataType: 'JSON',
-             })
-             .done(function(res) {
-                 capparent.find('.box-image').html(res.image);
-                 capparent.attr('data-captcha-time', res.captcha.time);
-             });
-     });
- });
-</script>
-</body>
-</html>
+<!doctype html>
+<html lang="id"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title><?= _ent(get_option('site_name')); ?> | Tambah Anggota Baru</title>
+<link rel="stylesheet" href="<?= BASE_ASSET; ?>vendor/font-awesome/css/font-awesome.min.css">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap">
+<link rel="stylesheet" href="<?= base_url('asset/css/auth-account.css'); ?>"></head>
+<body class="account-auth"><main class="auth-shell">
+<aside class="auth-brand-panel">
+  <div class="auth-brand"><img src="<?= base_url('assets/assets-guest/img/kemenkumham.png'); ?>" alt="Logo Kementerian Hukum"><div><strong><?= _ent(get_option('site_name') ?: 'Silaris'); ?></strong><span>Kementerian Hukum Sulawesi Tenggara</span></div></div>
+  <div class="auth-brand-copy"><small>Keanggotaan SILARIS</small><h1>Daftarkan akun Notaris Anda.</h1><p>Gunakan identitas dan kontak yang sama dengan data resmi. Admin akan memeriksa pendaftaran sebelum akun dapat digunakan.</p></div>
+  <div class="auth-security"><i class="fa fa-check-circle"></i><span>Akun baru otomatis berstatus menunggu verifikasi dan tidak dapat masuk sebelum diaktifkan admin.</span></div>
+</aside>
+<section class="auth-form-panel"><div class="auth-form-wrap">
+  <header class="auth-heading"><p class="auth-eyebrow">Tambah Anggota Baru</p><h2>Buat akun SILARIS</h2><p>Lengkapi data berikut dengan benar. Seluruh field wajib diisi.</p></header>
+  <div class="auth-notice"><i class="fa fa-info-circle"></i><p>Pendaftaran ini khusus akun Notaris/User dan memerlukan persetujuan admin.</p></div>
+  <?php if (!empty($error)): ?><div class="auth-alert" role="alert"><i class="fa fa-exclamation-circle"></i><div><?= $error; ?></div></div><?php endif; ?>
+  <?= form_open('', array('id'=>'form_register','method'=>'POST')); ?>
+    <div class="auth-field <?= form_error('full_name') ? 'has-error' : ''; ?>"><label for="full_name">Nama Lengkap <span class="required">*</span></label><div class="auth-control-wrap"><i class="fa fa-user"></i><input class="auth-control" id="full_name" name="full_name" value="<?= _ent(set_value('full_name')); ?>" maxlength="200" autocomplete="name" placeholder="Nama lengkap beserta gelar" required autofocus></div></div>
+    <div class="auth-grid">
+      <div class="auth-field <?= form_error('username') ? 'has-error' : ''; ?>"><label for="username">Username <span class="required">*</span></label><div class="auth-control-wrap"><i class="fa fa-id-badge"></i><input class="auth-control" id="username" name="username" value="<?= _ent(set_value('username')); ?>" minlength="3" maxlength="50" autocomplete="username" placeholder="username" pattern="[A-Za-z0-9._-]+" required></div></div>
+      <div class="auth-field <?= form_error('phone_number') ? 'has-error' : ''; ?>"><label for="phone_number">Nomor Telepon <span class="required">*</span></label><div class="auth-control-wrap"><i class="fa fa-phone"></i><input class="auth-control" id="phone_number" type="tel" name="phone_number" value="<?= _ent(set_value('phone_number')); ?>" maxlength="16" inputmode="numeric" autocomplete="tel" placeholder="08xxxxxxxxxx" required></div></div>
+    </div>
+    <div class="auth-field <?= form_error('email') ? 'has-error' : ''; ?>"><label for="email">Email <span class="required">*</span></label><div class="auth-control-wrap"><i class="fa fa-envelope"></i><input class="auth-control" id="email" type="email" name="email" value="<?= _ent(set_value('email')); ?>" maxlength="100" autocomplete="email" placeholder="nama@domain.go.id" required></div></div>
+    <div class="auth-grid">
+      <div class="auth-field <?= form_error('password') ? 'has-error' : ''; ?>"><label for="password">Password <span class="required">*</span></label><div class="auth-control-wrap"><i class="fa fa-lock"></i><input class="auth-control" id="password" type="password" name="password" minlength="8" maxlength="72" autocomplete="new-password" required><button class="password-toggle" type="button" data-toggle-password="password" aria-label="Tampilkan password"><i class="fa fa-eye"></i></button></div></div>
+      <div class="auth-field <?= form_error('password_confirmation') ? 'has-error' : ''; ?>"><label for="password_confirmation">Konfirmasi <span class="required">*</span></label><div class="auth-control-wrap"><i class="fa fa-lock"></i><input class="auth-control" id="password_confirmation" type="password" name="password_confirmation" minlength="8" maxlength="72" autocomplete="new-password" required><button class="password-toggle" type="button" data-toggle-password="password_confirmation" aria-label="Tampilkan konfirmasi password"><i class="fa fa-eye"></i></button></div></div>
+    </div>
+    <small class="auth-hint" style="margin:-8px 0 14px">Minimal 8 karakter serta memuat huruf besar, huruf kecil, dan angka.</small>
+    <?php $cap = get_captcha(); ?>
+    <div class="auth-field <?= form_error('captcha') ? 'has-error' : ''; ?>"><label for="captcha">Captcha <span class="required">*</span></label><div class="captcha-grid" id="captchaRow" data-captcha-time="<?= _ent($cap['time']); ?>"><div class="auth-control-wrap"><i class="fa fa-keyboard-o"></i><input class="auth-control" id="captcha" name="captcha" maxlength="20" autocomplete="off" placeholder="Kode" required></div><div class="captcha-image" id="captchaBox"><?= $cap['image']; ?></div><button class="captcha-refresh" id="refreshCaptcha" type="button" aria-label="Muat ulang captcha"><i class="fa fa-refresh"></i></button></div></div>
+    <label class="auth-agree"><input type="checkbox" name="agree" value="1" <?= set_checkbox('agree','1'); ?> required><span>Saya menyatakan data yang dimasukkan benar dan menyetujui proses verifikasi oleh administrator.</span></label>
+    <button class="auth-submit" type="submit">Kirim Pendaftaran <i class="fa fa-arrow-right"></i></button>
+  <?= form_close(); ?>
+  <p class="auth-links">Sudah memiliki akun? <a href="<?= site_url('administrator/login'); ?>">Kembali ke halaman masuk</a></p>
+</div></section></main>
+<script>(function(){document.querySelectorAll('[data-toggle-password]').forEach(function(button){button.addEventListener('click',function(){var input=document.getElementById(button.dataset.togglePassword);var show=input.type==='password';input.type=show?'text':'password';button.querySelector('i').className=show?'fa fa-eye-slash':'fa fa-eye';});});var phone=document.getElementById('phone_number');phone.addEventListener('input',function(){phone.value=phone.value.replace(/[^0-9+]/g,'');});var refresh=document.getElementById('refreshCaptcha');refresh.addEventListener('click',function(){var row=document.getElementById('captchaRow');refresh.disabled=true;fetch('<?= base_url('captcha/reload/'); ?>'+encodeURIComponent(row.dataset.captchaTime),{credentials:'same-origin',headers:{'X-Requested-With':'XMLHttpRequest'}}).then(function(r){if(!r.ok)throw new Error();return r.json();}).then(function(data){document.getElementById('captchaBox').innerHTML=data.image;row.dataset.captchaTime=data.captcha.time;}).finally(function(){refresh.disabled=false;});});})();</script>
+</body></html>

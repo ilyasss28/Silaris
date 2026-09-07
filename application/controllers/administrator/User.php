@@ -133,6 +133,13 @@ class User extends Admin
 				'date_created'	=> date('Y-m-d H:i:s'),
 				'kd_wilayah' => $this->input->post('kd_wilayah')
 			];
+			if ($this->db->field_exists('is_verified', 'aauth_users')) {
+				// Accounts created from this protected page are already reviewed by admin.
+				$save_data['is_verified'] = 1;
+				$save_data['verification_requested_at'] = date('Y-m-d H:i:s');
+				$save_data['verified_at'] = date('Y-m-d H:i:s');
+				$save_data['verified_by'] = (int) get_user_data('id');
+			}
 
 			$new_avatar = null;
 			if (!empty($user_avatar_name) && !empty($user_avatar_uuid)) {
@@ -155,6 +162,7 @@ class User extends Admin
 
 			if ($save_user) {
 				//add user to group
+				$this->aauth->remove_member_from_all($save_user);
 				if (count($selected_groups)) {
 					$user_id = $save_user;
 					foreach ($selected_groups as $group_id) {
@@ -609,8 +617,19 @@ class User extends Admin
 		$this->form_validation->set_rules('kd_wilayah', 'Wilayah Kerja', 'trim|required|callback_valid_region_code');
 		$this->form_validation->set_rules('group[]', 'Kelompok Akses', 'required|callback_valid_group_selection');
 		if ($password_required || $this->input->post('password')) {
-			$this->form_validation->set_rules('password', 'Password', 'trim|required|min_length[8]|max_length[72]');
+			$this->form_validation->set_rules('password', 'Password', 'required|min_length[8]|max_length[72]|callback_valid_account_password');
 		}
+	}
+
+	public function valid_account_password($password)
+	{
+		$valid = preg_match('/[a-z]/', (string) $password)
+			&& preg_match('/[A-Z]/', (string) $password)
+			&& preg_match('/\d/', (string) $password);
+		if (!$valid) {
+			$this->form_validation->set_message(__FUNCTION__, '%s harus memuat huruf besar, huruf kecil, dan angka.');
+		}
+		return (bool) $valid;
 	}
 
 	public function unique_username($value, $user_id)
@@ -864,8 +883,14 @@ class User extends Admin
 				'message' => cclang('sorry_you_do_not_have_permission_to_access')
 				]);
 		}
-		$status = $this->input->post('status');
-		$id = $this->input->post('id');
+		$status = strtolower(trim((string) $this->input->post('status', true)));
+		$id = (int) $this->input->post('id');
+		if (!in_array($status, array('active', 'inactive'), true) || $id < 1 || !$this->model_user->find($id)) {
+			return $this->response(array(
+				'success' => false,
+				'message' => 'Permintaan perubahan status akun tidak valid.',
+			));
+		}
 		$roster_status = $this->model_user->enforce_notary_roster($id);
 		if ($roster_status['is_notary'] && !$roster_status['listed']) {
 			return $this->response(array(
@@ -883,14 +908,20 @@ class User extends Admin
 			));
 		}
 
-		$update_status = $this->model_user->change($id, [
-			'banned' => $status == 'inactive' ? 1 : 0
-		]);
+		$account_data = array('banned' => $status === 'inactive' ? 1 : 0);
+		if ($status === 'active' && $this->db->field_exists('is_verified', 'aauth_users')) {
+			$account_data['is_verified'] = 1;
+			$account_data['verified_at'] = date('Y-m-d H:i:s');
+			$account_data['verified_by'] = (int) get_user_data('id');
+		}
+		$update_status = $this->model_user->change($id, $account_data);
 		
 		if ($update_status) {
 			$this->response = [
 				'success' => true,
-				'message' => 'User status updated',
+				'message' => $status === 'active'
+					? 'Akun telah diverifikasi dan diaktifkan.'
+					: 'Akun berhasil dinonaktifkan.',
 			];
 		} else {
 			$this->response = [
