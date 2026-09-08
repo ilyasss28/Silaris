@@ -5550,81 +5550,15 @@ input[type="file"].form-control { height: auto; min-height: var(--control-h); pa
 .admin-silaris .monthly-report-form-page .fidusia-form-grid {
   grid-template-columns: minmax(0, 1fr);
 }
-.admin-silaris .monthly-report-card__content {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr);
+.admin-silaris .monthly-report-form-page .monthly-report-inline-fields {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  align-items: start;
+  gap: 18px;
 }
-.admin-silaris .monthly-report-card__section {
-  min-width: 0;
-  padding: 0 0 24px;
-}
-.admin-silaris .monthly-report-card__section--document {
-  padding: 24px 0 0;
-  border-top: 1px solid #e3e8f0;
-}
-.admin-silaris .monthly-report-upload .qq-gallery.qq-uploader-selector,
-.admin-silaris .monthly-report-upload .qq-gallery.qq-uploader {
-  min-height: 60px !important;
-  height: auto !important;
-  padding: 8px 10px !important;
-  display: grid;
-  grid-template-columns: 148px minmax(0, 1fr);
-  align-items: center;
-  column-gap: 10px;
-  border: 1px solid #D9E0EA !important;
-  border-radius: 10px !important;
-  background: #F8FAFC !important;
-}
-.admin-silaris .monthly-report-upload .qq-gallery .qq-upload-button {
-  width: 148px;
-  height: 42px;
-  min-height: 42px;
-  padding: 0 18px;
-  border: 1px solid var(--brand);
-  border-radius: 8px;
-  font-size: 11.5px;
-}
-.admin-silaris .monthly-report-upload .qq-gallery .qq-upload-list {
-  width: 100%;
-  min-width: 0;
-  padding-top: 0 !important;
-  align-self: stretch;
-}
-.admin-silaris .monthly-report-upload .qq-gallery .qq-upload-list > li {
-  height: 42px;
-}
-.admin-silaris .monthly-report-upload .qq-gallery .qq-file-info {
-  height: 42px;
-  padding: 0 10px 0 13px;
-  border: 1px solid #DFE5EE;
-  border-radius: 8px;
-  background: #fff;
-}
-.admin-silaris .monthly-report-upload .qq-gallery .qq-upload-delete {
-  width: 28px;
-  height: 28px;
-  min-width: 28px;
-  min-height: 28px;
-  background: #FFF1F2;
-}
-.admin-silaris .monthly-report-upload .qq-gallery .qq-upload-list:empty::after {
-  padding-left: 3px;
-  align-self: center;
-}
-@media (max-width: 640px) {
-  .admin-silaris .monthly-report-upload .qq-gallery.qq-uploader-selector,
-  .admin-silaris .monthly-report-upload .qq-gallery.qq-uploader {
-    padding: 10px !important;
-    grid-template-columns: 112px minmax(0, 1fr);
-    column-gap: 8px;
-  }
-  .admin-silaris .monthly-report-upload .qq-gallery .qq-upload-button {
-    width: 100%;
-    padding: 0 10px;
-  }
-  .admin-silaris .monthly-report-upload .qq-gallery .qq-upload-list {
-    width: 100%;
-    min-height: 42px;
+@media (max-width: 767.98px) {
+  .admin-silaris .monthly-report-form-page .monthly-report-inline-fields {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 16px;
   }
 }
 
@@ -7552,4 +7486,599 @@ input[type="file"].form-control { height: auto; min-height: var(--control-h); pa
   .admin-silaris .service-recap-filter__grid { grid-template-columns: 1fr; }
   .admin-silaris .service-recap-search { grid-column: auto; }
   .admin-silaris .service-recap-summary { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+
+/* Canonical create layout. Legacy generator add screens now use the same
+   card, header, field rhythm, and action bar as their edit counterparts.
+   Purpose-built form pages keep their own richer grouped layout. */
+.admin-silaris .admin-create-page:not(.fidusia-form-page):not(.crud-builder-page):not(.settings-page) .admin-form-card {
+  overflow: visible;
+  border: 1px solid var(--border) !important;
+  border-top: 3px solid var(--accent) !important;
+  border-radius: 10px !important;
+  background: #fff !important;
+  box-shadow: 0 3px 12px rgba(15, 27, 45, .045) !important;
+}
+.admin-silaris .admin-create-page:not(.fidusia-form-page):not(.crud-builder-page):not(.settings-page) .admin-form-header {
+  min-height: 104px !important;
+  padding: 22px 26px !important;
+  border: 0 !important;
+  border-bottom: 1px solid var(--border) !important;
+  border-radius: 7px 7px 0 0 !important;
+  background: #fff !important;
+  box-shadow: none !important;
+}
+.admin-silaris .admin-create-page:not(.fidusia-form-page):not(.crud-builder-page):not(.settings-page) .admin-form-header::before,
+.admin-silaris .admin-create-page:not(.fidusia-form-page):not(.crud-builder-page):not(.settings-page) .admin-form-header .widget-user-image {
+  display: none !important;
+}
+.admin-silaris .admin-create-page:not(.fidusia-form-page):not(.crud-builder-page):not(.settings-page) .admin-form-header .widget-user-username,
+.admin-silaris .admin-create-page:not(.fidusia-form-page):not(.crud-builder-page):not(.settings-page) .admin-form-header .box-title {
+  margin: 0 0 4px !important;
+  color: var(--ink-900) !important;
+  font-size: 21px !important;
+  font-weight: 800 !important;
+  line-height: 1.3;
+}
+.admin-silaris .admin-create-page:not(.fidusia-form-page):not(.crud-builder-page):not(.settings-page) .admin-form-header .widget-user-desc {
+  margin: 0 !important;
+  color: var(--ink-500) !important;
+  font-size: 12px !important;
+  font-weight: 500;
+}
+.admin-silaris .admin-create-page:not(.fidusia-form-page):not(.crud-builder-page):not(.settings-page) .admin-modern-form {
+  padding: 18px clamp(20px, 3vw, 38px) 0 !important;
+  display: block !important;
+  background: #fff !important;
+}
+.admin-silaris .admin-create-page:not(.fidusia-form-page):not(.crud-builder-page):not(.settings-page) .admin-modern-form > .admin-form-field {
+  width: 100% !important;
+  max-width: 1100px !important;
+  min-height: 78px !important;
+  margin: 0 auto !important;
+  padding: 16px 0 !important;
+  display: grid !important;
+  grid-template-columns: minmax(160px, 210px) minmax(0, 1fr) !important;
+  align-items: start !important;
+  gap: 8px 22px !important;
+  border: 0 !important;
+  border-bottom: 1px solid #edf0f4 !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+}
+.admin-silaris .admin-create-page:not(.fidusia-form-page):not(.crud-builder-page):not(.settings-page) .admin-modern-form > .admin-form-field:last-of-type {
+  border-bottom: 0 !important;
+}
+.admin-silaris .admin-create-page:not(.fidusia-form-page):not(.crud-builder-page):not(.settings-page) .admin-form-field > .control-label {
+  width: auto !important;
+  max-width: none !important;
+  margin: 0 !important;
+  padding: 10px 0 0 !important;
+  float: none !important;
+  text-align: left !important;
+}
+.admin-silaris .admin-create-page:not(.fidusia-form-page):not(.crud-builder-page):not(.settings-page) .admin-form-field > [class*="col-"] {
+  width: 100% !important;
+  max-width: none !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  float: none !important;
+}
+.admin-silaris .admin-create-page:not(.fidusia-form-page):not(.crud-builder-page):not(.settings-page) .admin-form-field .form-control,
+.admin-silaris .admin-create-page:not(.fidusia-form-page):not(.crud-builder-page):not(.settings-page) .admin-form-field .chosen-container {
+  width: 100% !important;
+  max-width: none !important;
+}
+.admin-silaris .admin-create-page:not(.fidusia-form-page):not(.crud-builder-page):not(.settings-page) .admin-modern-form .admin-form-actions {
+  min-height: 70px;
+  margin: 22px calc(clamp(20px, 3vw, 38px) * -1) 0 !important;
+  padding: 14px clamp(20px, 3vw, 38px) !important;
+  border-radius: 0 0 9px 9px;
+  background: rgba(248, 249, 252, .97) !important;
+  box-shadow: 0 -3px 12px rgba(15, 27, 45, .03) !important;
+}
+@media (max-width: 767.98px) {
+  .admin-silaris .admin-create-page:not(.fidusia-form-page):not(.crud-builder-page):not(.settings-page) .admin-form-header {
+    min-height: 88px !important;
+    padding: 18px !important;
+  }
+  .admin-silaris .admin-create-page:not(.fidusia-form-page):not(.crud-builder-page):not(.settings-page) .admin-modern-form {
+    padding: 12px 15px 0 !important;
+  }
+  .admin-silaris .admin-create-page:not(.fidusia-form-page):not(.crud-builder-page):not(.settings-page) .admin-modern-form > .admin-form-field {
+    min-height: 0 !important;
+    padding: 13px 0 !important;
+    grid-template-columns: minmax(0, 1fr) !important;
+    gap: 6px !important;
+  }
+  .admin-silaris .admin-create-page:not(.fidusia-form-page):not(.crud-builder-page):not(.settings-page) .admin-form-field > .control-label {
+    padding-top: 0 !important;
+  }
+  .admin-silaris .admin-create-page:not(.fidusia-form-page):not(.crud-builder-page):not(.settings-page) .admin-modern-form .admin-form-actions {
+    margin: 18px -15px 0 !important;
+    padding: 13px 15px !important;
+  }
+}
+
+/* Server-rendered fallback for legacy add templates. These selectors do not
+   depend on admin-ui.js, so User, Data Notaris, regional master data, and
+   future generator output retain the same visual system on every load. */
+.admin-silaris .standard-create-page {
+  width: 100%;
+  padding: 0 !important;
+}
+
+/* Modern create pages for registry and regional master data. */
+.admin-silaris .data-notaris-modern-form-page > .row {
+  width: 100%;
+  margin: 0 !important;
+}
+.admin-silaris .data-notaris-modern-form-page > .row > [class*="col-"] {
+  width: 100% !important;
+  padding: 0 !important;
+  float: none !important;
+}
+.admin-silaris .data-notaris-modern-form-page .box-warning,
+.admin-silaris .data-notaris-modern-form-page .box-warning > .box-body {
+  margin: 0 !important;
+  padding: 0 !important;
+  border: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+}
+.admin-silaris .data-notaris-modern-form-page .data-notaris-create-card,
+.admin-silaris .region-form-page .fidusia-form-card {
+  grid-column: 1 / -1;
+}
+.admin-silaris .data-notaris-modern-form-page .fidusia-form-fields > .form-group {
+  min-width: 0;
+  margin: 0 !important;
+  padding: 0 !important;
+  display: flex !important;
+  flex-direction: column;
+  border: 0 !important;
+}
+.admin-silaris .data-notaris-modern-form-page .fidusia-form-fields > .form-group > .control-label {
+  width: auto !important;
+  margin: 0 0 7px !important;
+  padding: 0 !important;
+  float: none !important;
+  color: var(--ink-800);
+  font-size: 11.5px;
+  font-weight: 750;
+  text-align: left !important;
+}
+.admin-silaris .data-notaris-modern-form-page .fidusia-form-fields > .form-group > [class*="col-"] {
+  width: 100% !important;
+  max-width: none !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  float: none !important;
+}
+.admin-silaris .data-notaris-modern-form-page .fidusia-form-fields .form-control,
+.admin-silaris .data-notaris-modern-form-page .fidusia-form-fields .chosen-container,
+.admin-silaris .data-notaris-modern-form-page .fidusia-form-fields .input-group {
+  width: 100% !important;
+  max-width: none !important;
+}
+.admin-silaris .data-notaris-modern-form-page .fidusia-form-fields .form-control,
+.admin-silaris .data-notaris-modern-form-page .fidusia-form-fields .chosen-container-single .chosen-single,
+.admin-silaris .data-notaris-modern-form-page .fidusia-form-fields .chosen-container-multi .chosen-choices {
+  min-height: 42px;
+  border: 1px solid #d9e0ea !important;
+  border-radius: 8px !important;
+  background: #fff !important;
+  box-shadow: none !important;
+}
+.admin-silaris .data-notaris-modern-form-page .fidusia-form-fields input.form-control,
+.admin-silaris .data-notaris-modern-form-page .fidusia-form-fields select.form-control {
+  padding: 9px 12px;
+  font-size: 12px;
+}
+.admin-silaris .data-notaris-modern-form-page .fidusia-form-fields .help-block {
+  min-height: 17px;
+  margin: 6px 0 0 !important;
+  color: var(--ink-500);
+  font-size: 9.8px;
+  line-height: 1.45;
+}
+.admin-silaris .data-notaris-modern-form-page .fidusia-form-fields .help-block:empty::before {
+  content: "Informasi dapat dilengkapi sesuai dokumen resmi.";
+}
+
+/* Keep the Data Notaris workspace on the same vertical guides as its header. */
+.admin-silaris .data-notaris-modern-form-page .data-notaris-create-form,
+.admin-silaris .data-notaris-modern-form-page .data-notaris-edit-form {
+  width: 100% !important;
+  margin: 0 !important;
+  padding: 0 !important;
+}
+/* admin-ui.js adds admin-modern-form at runtime. The form ID keeps this
+   layout rule above the generic legacy form padding in the cascade. */
+body.admin-silaris #form_data_notaris.fidusia-form,
+body.admin-silaris #form_data_notaris.fidusia-form.admin-modern-form {
+  width: 100% !important;
+  max-width: none !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  box-sizing: border-box;
+}
+.admin-silaris .data-notaris-modern-form-page .fidusia-form-grid {
+  width: 100%;
+  margin: 0;
+  padding: 18px 24px;
+  box-sizing: border-box;
+}
+.admin-silaris .data-notaris-modern-form-page .data-notaris-create-card {
+  width: 100%;
+  margin: 0;
+  box-sizing: border-box;
+}
+.admin-silaris .data-notaris-modern-form-page .fidusia-form-fields > .form-group > .control-label {
+  margin-bottom: 10px !important;
+}
+@media (max-width: 767.98px) {
+  .admin-silaris .data-notaris-modern-form-page .fidusia-form-grid {
+    padding: 14px 18px;
+  }
+}
+.admin-silaris .data-notaris-modern-form-page #data_notaris_foto_galery .qq-uploader,
+.admin-silaris .user-registry-form-page #user_avatar_galery .qq-uploader {
+  min-height: 150px;
+  border: 1px dashed #cbd3df;
+  border-radius: 9px;
+  background: #f8f9fc;
+}
+.admin-silaris .fidusia-form-actions .btn.admin-button {
+  box-shadow: none !important;
+  transform: none !important;
+}
+.admin-silaris .fidusia-form-page .fidusia-form-shell,
+.admin-silaris .fidusia-form-page .fidusia-form-actions {
+  box-shadow: none !important;
+}
+body.admin-silaris .data-notaris-modern-form-page .fidusia-form-shell.admin-form-card {
+  box-shadow: none !important;
+}
+.admin-silaris .fidusia-form-actions .btn.admin-button:hover,
+.admin-silaris .fidusia-form-actions .btn.admin-button:focus,
+.admin-silaris .fidusia-form-actions .btn.admin-button:active {
+  box-shadow: none !important;
+}
+.admin-silaris .btn.admin-button.admin-button--secondary {
+  border-color: var(--brand) !important;
+  background: #fff !important;
+  color: var(--brand) !important;
+  box-shadow: none !important;
+}
+.admin-silaris .btn.admin-button.admin-button--secondary:hover,
+.admin-silaris .btn.admin-button.admin-button--secondary:focus {
+  background: var(--brand-tint) !important;
+}
+
+/* User registry form: keep compound controls and supporting panels compact. */
+.admin-silaris .user-registry-form-page .fidusia-form-grid {
+  grid-template-columns: minmax(0, 1fr);
+}
+.admin-silaris .user-registry-form-page .fidusia-form-card {
+  width: 100%;
+  height: auto;
+}
+.admin-silaris .user-registry-form-page .input-password {
+  width: 100% !important;
+  max-width: none !important;
+  min-height: 42px;
+  margin: 0 !important;
+  padding: 0 !important;
+  display: flex !important;
+  align-items: stretch;
+  overflow: hidden;
+  border: 0 !important;
+  border-radius: 9px !important;
+  background: transparent !important;
+}
+.admin-silaris .user-registry-form-page .input-password > .form-control {
+  width: 1% !important;
+  min-width: 0 !important;
+  height: 42px !important;
+  min-height: 42px !important;
+  margin: 0 !important;
+  flex: 1 1 auto !important;
+  border-right: 0 !important;
+  border-radius: 9px 0 0 9px !important;
+}
+.admin-silaris .user-registry-form-page .input-password > .input-group-btn {
+  width: 44px !important;
+  min-width: 44px !important;
+  height: 42px;
+  margin: 0 !important;
+  padding: 0 !important;
+  display: flex !important;
+  flex: 0 0 44px !important;
+}
+.admin-silaris .user-registry-form-page .input-password .show-password {
+  width: 44px !important;
+  min-width: 44px !important;
+  height: 42px !important;
+  min-height: 42px !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  display: inline-flex !important;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid #d9e0ea !important;
+  border-left: 0 !important;
+  border-radius: 0 9px 9px 0 !important;
+  background: #f8f9fc !important;
+  color: var(--brand) !important;
+  box-shadow: none !important;
+}
+.admin-silaris .user-registry-form-page .input-password:focus-within {
+  border-radius: 9px;
+  box-shadow: 0 0 0 3px rgba(254, 205, 8, .18);
+}
+.admin-silaris .user-registry-form-page .input-password:focus-within > .form-control,
+.admin-silaris .user-registry-form-page .input-password:focus-within .show-password {
+  border-color: #d2a800 !important;
+  box-shadow: none !important;
+}
+.admin-silaris .user-registry-form-page .user-registry-guidance-list {
+  display: grid;
+  gap: 8px;
+}
+.admin-silaris .user-registry-form-page .user-registry-guidance-list[hidden],
+.admin-silaris .user-registry-form-page .user-registry-guidance[hidden] {
+  display: none !important;
+}
+.admin-silaris .user-registry-form-page .user-registry-guidance {
+  min-height: 0;
+  margin: 0 !important;
+  padding: 11px 13px;
+  border: 1px solid #c9d8fb;
+  border-radius: 9px;
+  background: #f3f6ff;
+  color: #315baf;
+  font-size: 11px;
+  line-height: 1.55;
+  box-shadow: none;
+}
+.admin-silaris .user-registry-form-page #user_avatar_galery,
+.admin-silaris .user-registry-form-page #user_avatar_galery .qq-uploader {
+  width: 100%;
+  max-width: none;
+}
+.admin-silaris .notary-detail-identity {
+  margin-bottom: 8px;
+  padding: 12px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  border: 1px solid #edf0f4;
+  border-radius: 9px;
+  background: #f8f9fc;
+}
+.admin-silaris .notary-detail-identity img {
+  width: 52px;
+  height: 52px;
+  flex: 0 0 52px;
+  border: 2px solid var(--accent);
+  border-radius: 50%;
+  object-fit: cover;
+  background: #fff;
+}
+.admin-silaris .notary-detail-identity small {
+  display: block;
+  margin-bottom: 3px;
+  color: var(--ink-500);
+  font-size: 9px;
+  font-weight: 800;
+  letter-spacing: .06em;
+}
+.admin-silaris .notary-detail-identity strong {
+  color: var(--ink-900);
+  font-size: 12px;
+}
+.admin-silaris .region-detail-list,
+.admin-silaris .notary-detail-documents {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  column-gap: 24px;
+}
+@media (max-width: 767.98px) {
+  .admin-silaris .region-detail-list,
+  .admin-silaris .notary-detail-documents { grid-template-columns: minmax(0, 1fr); }
+}
+.admin-silaris .standard-create-legacy-header {
+  display: none !important;
+}
+.admin-silaris .standard-create-page > .row {
+  width: 100%;
+  margin: 0 !important;
+  display: block !important;
+}
+.admin-silaris .standard-create-page > .row > [class*="col-"] {
+  width: 100% !important;
+  padding: 0 !important;
+  float: none !important;
+}
+.admin-silaris .standard-create-page .box-warning,
+.admin-silaris .standard-create-page .box-warning > .box-body {
+  margin: 0 !important;
+  padding: 0 !important;
+  border: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+}
+.admin-silaris .standard-create-page .box-widget.widget-user-2 {
+  width: 100%;
+  margin: 0 !important;
+  overflow: visible;
+  border: 1px solid var(--border) !important;
+  border-top: 3px solid var(--accent) !important;
+  border-radius: 10px !important;
+  background: #fff !important;
+  box-shadow: 0 3px 12px rgba(15, 27, 45, .045) !important;
+}
+.admin-silaris .standard-create-page .box-widget.widget-user-2 > .widget-user-header {
+  position: relative;
+  min-height: 104px !important;
+  padding: 22px 26px 22px 82px !important;
+  display: grid !important;
+  align-content: center;
+  border: 0 !important;
+  border-bottom: 1px solid var(--border) !important;
+  border-radius: 7px 7px 0 0 !important;
+  background: #fff !important;
+  box-shadow: none !important;
+}
+.admin-silaris .standard-create-page .box-widget.widget-user-2 > .widget-user-header::before {
+  position: absolute;
+  top: 50%;
+  left: 26px;
+  width: 40px;
+  height: 40px;
+  display: grid;
+  place-items: center;
+  border-radius: 9px;
+  background: var(--brand);
+  color: var(--accent);
+  font-family: FontAwesome;
+  font-size: 14px;
+  content: "\f067";
+  transform: translateY(-50%);
+}
+.admin-silaris .standard-create-page .box-widget.widget-user-2 > .widget-user-header .widget-user-image,
+.admin-silaris .standard-create-page .box-widget.widget-user-2 > .widget-user-header hr {
+  display: none !important;
+}
+.admin-silaris .standard-create-page .box-widget.widget-user-2 > .widget-user-header .widget-user-username {
+  margin: 0 0 4px !important;
+  color: var(--ink-900) !important;
+  font-size: 21px !important;
+  font-weight: 800 !important;
+  line-height: 1.3;
+}
+.admin-silaris .standard-create-page .box-widget.widget-user-2 > .widget-user-header .widget-user-desc {
+  margin: 0 !important;
+  color: var(--ink-500) !important;
+  font-size: 12px !important;
+  font-weight: 500;
+}
+.admin-silaris .standard-create-page .box-widget.widget-user-2 > form.form-horizontal,
+.admin-silaris form.form-horizontal > .standard-create-page .box-widget.widget-user-2 {
+  padding-bottom: 0 !important;
+}
+.admin-silaris .standard-create-page .box-widget.widget-user-2 > .form-group,
+.admin-silaris .standard-create-page .box-widget.widget-user-2 > form.form-horizontal > .form-group {
+  width: calc(100% - 76px) !important;
+  max-width: 1100px !important;
+  min-height: 78px;
+  margin: 0 auto !important;
+  padding: 16px 0 !important;
+  display: grid !important;
+  grid-template-columns: minmax(160px, 210px) minmax(0, 1fr) !important;
+  align-items: start !important;
+  gap: 8px 22px !important;
+  border: 0 !important;
+  border-bottom: 1px solid #edf0f4 !important;
+  background: transparent !important;
+}
+.admin-silaris .standard-create-page .box-widget.widget-user-2 > .form-group > .control-label,
+.admin-silaris .standard-create-page .box-widget.widget-user-2 > form.form-horizontal > .form-group > .control-label {
+  width: auto !important;
+  max-width: none !important;
+  margin: 0 !important;
+  padding: 10px 0 0 !important;
+  float: none !important;
+  color: var(--ink-800) !important;
+  text-align: left !important;
+}
+.admin-silaris .standard-create-page .box-widget.widget-user-2 > .form-group > [class*="col-"],
+.admin-silaris .standard-create-page .box-widget.widget-user-2 > form.form-horizontal > .form-group > [class*="col-"] {
+  width: 100% !important;
+  max-width: none !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  float: none !important;
+}
+.admin-silaris .standard-create-page .box-widget.widget-user-2 .form-control,
+.admin-silaris .standard-create-page .box-widget.widget-user-2 .chosen-container {
+  width: 100% !important;
+  max-width: none !important;
+}
+.admin-silaris .standard-create-page .box-widget.widget-user-2 > .message,
+.admin-silaris .standard-create-page .box-widget.widget-user-2 > form.form-horizontal > .message {
+  width: calc(100% - 76px);
+  max-width: 1100px;
+  margin: 18px auto 0 !important;
+}
+.admin-silaris .standard-create-page .box-widget.widget-user-2 > .row-fluid,
+.admin-silaris .standard-create-page .box-widget.widget-user-2 > form.form-horizontal > .row-fluid {
+  position: sticky;
+  z-index: 20;
+  bottom: 0;
+  width: 100% !important;
+  max-width: none !important;
+  min-height: 70px;
+  margin: 22px 0 0 !important;
+  padding: 14px 26px !important;
+  display: flex !important;
+  align-items: center;
+  justify-content: flex-end;
+  flex-wrap: wrap;
+  gap: 9px;
+  float: none !important;
+  border-top: 1px solid var(--border);
+  border-radius: 0 0 9px 9px;
+  background: rgba(248, 249, 252, .97) !important;
+  box-shadow: 0 -3px 12px rgba(15, 27, 45, .03) !important;
+}
+.admin-silaris .standard-create-page .box-widget.widget-user-2 > .row-fluid .loading,
+.admin-silaris .standard-create-page .box-widget.widget-user-2 > form.form-horizontal > .row-fluid .loading {
+  margin-right: auto;
+}
+.admin-silaris .standard-create-page .box-widget.widget-user-2 > .row-fluid .btn,
+.admin-silaris .standard-create-page .box-widget.widget-user-2 > form.form-horizontal > .row-fluid .btn {
+  min-height: 40px;
+  padding: 0 16px !important;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  border-radius: 8px !important;
+  font-size: 11.5px;
+  font-weight: 750;
+}
+@media (max-width: 767.98px) {
+  .admin-silaris .standard-create-page .box-widget.widget-user-2 > .widget-user-header {
+    min-height: 88px !important;
+    padding: 18px 18px 18px 66px !important;
+  }
+  .admin-silaris .standard-create-page .box-widget.widget-user-2 > .widget-user-header::before {
+    left: 17px;
+    width: 36px;
+    height: 36px;
+  }
+  .admin-silaris .standard-create-page .box-widget.widget-user-2 > .form-group,
+  .admin-silaris .standard-create-page .box-widget.widget-user-2 > form.form-horizontal > .form-group {
+    width: calc(100% - 30px) !important;
+    min-height: 0;
+    padding: 13px 0 !important;
+    grid-template-columns: minmax(0, 1fr) !important;
+    gap: 6px !important;
+  }
+  .admin-silaris .standard-create-page .box-widget.widget-user-2 > .form-group > .control-label,
+  .admin-silaris .standard-create-page .box-widget.widget-user-2 > form.form-horizontal > .form-group > .control-label {
+    padding-top: 0 !important;
+  }
+  .admin-silaris .standard-create-page .box-widget.widget-user-2 > .row-fluid,
+  .admin-silaris .standard-create-page .box-widget.widget-user-2 > form.form-horizontal > .row-fluid {
+    position: static;
+    padding: 13px 15px !important;
+  }
+  .admin-silaris .standard-create-page .box-widget.widget-user-2 > .row-fluid .btn,
+  .admin-silaris .standard-create-page .box-widget.widget-user-2 > form.form-horizontal > .row-fluid .btn {
+    flex: 1 1 145px;
+  }
 }

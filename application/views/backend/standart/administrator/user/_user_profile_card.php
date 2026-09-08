@@ -1,9 +1,12 @@
 <?php
 $is_own_profile = isset($profile_mode) && $profile_mode === 'account';
-$profile_title = $is_own_profile ? 'Profil Saya' : 'Detail Profil Notaris';
+$is_notary_profile = !empty($is_notary_profile);
+$is_mpd_profile = !empty($is_mpd_profile);
+$managed_profile_type = $is_mpd_profile ? 'MPD' : ($is_notary_profile ? 'Notaris' : 'Pengguna');
+$profile_title = $is_own_profile ? 'Profil Saya' : 'Detail Profil ' . $managed_profile_type;
 $profile_description = $is_own_profile
   ? 'Kelola identitas, wilayah, dan keamanan akun yang sedang digunakan.'
-  : 'Informasi akun notaris yang dipilih dari halaman manajemen pengguna.';
+  : 'Informasi akun yang dipilih dari halaman manajemen pengguna.';
 $region_name = trim((string) (isset($region_name) ? $region_name : ''));
 $region_display = $region_name !== '' ? $region_name : '-';
 $mpd_region_names = isset($mpd_region_names) && is_array($mpd_region_names) ? $mpd_region_names : array();
@@ -20,8 +23,6 @@ $display_date = function ($value) {
   return $timestamp ? format_date_id($value) . ', ' . date('H:i', $timestamp) : $value;
 };
 $notary_profile = isset($notary_profile) ? $notary_profile : false;
-$is_notary_profile = !empty($is_notary_profile);
-$is_mpd_profile = !empty($is_mpd_profile);
 $mpd_profile = isset($mpd_profile) ? $mpd_profile : false;
 $notary_completeness = isset($notary_completeness) ? $notary_completeness : null;
 $display_value = function ($value) { return trim((string) $value) !== '' ? _ent($value) : '-'; };

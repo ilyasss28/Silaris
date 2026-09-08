@@ -26,7 +26,7 @@
 </script>
 
 <!-- Content Header (Page header) -->
-<section class="content-header">
+<section class="content-header standard-create-legacy-header">
     <h1>
       Menu Type
       <small><?= cclang('new', 'Menu Type'); ?></small>
@@ -40,7 +40,7 @@
     </ol>
 </section>
 <!-- Main content -->
-<section class="content">
+<section class="content admin-page--form admin-create-page standard-create-page">
     <div class="row">
 
         <div class="col-md-12">

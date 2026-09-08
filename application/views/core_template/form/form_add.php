@@ -38,7 +38,7 @@
     jQuery(document).ready(domo);
 </script>
 <!-- Content Header (Page header) -->
-<section class="content-header">
+<section class="content-header standard-create-legacy-header">
     <h1>
         <?= ucwords($subject); ?>
         <small>New <?= ucwords(clean_snake_case($subject)); ?></small>
@@ -50,7 +50,7 @@
     </ol>
 </section>
 <!-- Main content -->
-<section class="content">
+<section class="content admin-page--form admin-create-page standard-create-page">
     <div class="row" >
         <div class="col-md-12">
             <div class="box box-warning">

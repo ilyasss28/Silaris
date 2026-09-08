@@ -394,22 +394,25 @@
     if (!form) return;
 
     content.dataset.formUiReady = 'true';
+    var isStructuredForm = content.classList.contains('fidusia-form-page');
     var formWrapsContent = form.contains(content);
     var formSurface = formWrapsContent
       ? (content.querySelector('.box-widget') || content.querySelector('.box') || content)
       : form;
     var controlsRoot = formWrapsContent ? content : form;
-    formSurface.classList.add('admin-modern-form');
+    if (!isStructuredForm) {
+      formSurface.classList.add('admin-modern-form');
 
-    var card = formSurface.matches('.box-widget, .box') ? formSurface : formSurface.closest('.box-widget, .box');
-    if (card) card.classList.add('admin-form-card');
+      var card = formSurface.matches('.box-widget, .box') ? formSurface : formSurface.closest('.box-widget, .box');
+      if (card) card.classList.add('admin-form-card');
 
-    var header = content.querySelector('.widget-user-header, .box-header');
-    if (header) header.classList.add('admin-form-header');
+      var header = content.querySelector('.widget-user-header, .box-header');
+      if (header) header.classList.add('admin-form-header');
+    }
 
     controlsRoot.querySelectorAll('.form-group').forEach(function (group) {
       group.classList.add('admin-form-field');
-      if (isEditRoutePath(window.location.pathname) && !group.closest('table, .wrapper-crud, .wrapper-rest, .crud-builder-form')) {
+      if (!isStructuredForm && isEditRoutePath(window.location.pathname) && !group.closest('table, .wrapper-crud, .wrapper-rest, .crud-builder-form')) {
         group.classList.add('admin-standard-edit-field');
       }
 
@@ -457,7 +460,7 @@
     }
 
     var primaryAction = controlsRoot.querySelector('.btn_save, .btn_action');
-    if (primaryAction) {
+    if (primaryAction && !isStructuredForm) {
       var actionBar = primaryAction.closest('.row-fluid, .view-nav, .form-actions, .box-footer');
       if (!actionBar) actionBar = primaryAction.parentElement;
       if (actionBar && actionBar !== form && !actionBar.classList.contains('form-group')) {
@@ -471,6 +474,40 @@
         control.setAttribute('aria-label', control.name || 'Isian formulir');
       }
     });
+  }
+
+  function enhanceUserRegistryGuidance(content) {
+    if (!content.classList.contains('user-registry-form-page')) return;
+
+    var groupSelect = content.querySelector('#group');
+    var guidanceList = content.querySelector('#registry-group-guidance');
+    if (!groupSelect || !guidanceList || guidanceList.dataset.guidanceReady) return;
+
+    guidanceList.dataset.guidanceReady = 'true';
+
+    function syncGuidance() {
+      var selectedGroups = Array.from(groupSelect.options)
+        .filter(function (option) { return option.selected; })
+        .map(function (option) { return option.textContent.trim().toLowerCase(); });
+      var showNotary = selectedGroups.some(function (name) {
+        return name === 'user' || name === 'notaris' || /\bnotaris\b/.test(name);
+      });
+      var showMpd = selectedGroups.some(function (name) {
+        return name === 'mpd' || /\bmpd\b/.test(name);
+      });
+      var notaryGuidance = guidanceList.querySelector('[data-group-guidance="notaris"]');
+      var mpdGuidance = guidanceList.querySelector('[data-group-guidance="mpd"]');
+
+      if (notaryGuidance) notaryGuidance.hidden = !showNotary;
+      if (mpdGuidance) mpdGuidance.hidden = !showMpd;
+      guidanceList.hidden = !(showNotary || showMpd);
+    }
+
+    groupSelect.addEventListener('change', syncGuidance);
+    if (window.jQuery) {
+      window.jQuery(groupSelect).on('chosen:updated.userRegistryGuidance', syncGuidance);
+    }
+    syncGuidance();
   }
 
   function isReportRecordPath(pathname) {
@@ -607,8 +644,9 @@
     var content = root.querySelector('.content');
     if (!content) return;
 
-    content.classList.remove('admin-page--list', 'admin-page--form', 'admin-page--detail');
+    content.classList.remove('admin-page--list', 'admin-page--form', 'admin-page--detail', 'admin-create-page');
     content.classList.toggle('admin-edit-page', isEditRoutePath(window.location.pathname));
+    content.classList.toggle('admin-create-page', /\/(?:add|create)(?:\/|$)/i.test(window.location.pathname));
 
     var isListPage = Boolean(content.querySelector('.table-responsive > table, table.dataTable'));
 
@@ -657,6 +695,7 @@
     var editorRoute = /\/(add|edit|update)(\/|$)/i.test(window.location.pathname) ||
       /\/(edit_profile|setting)(\/|$)/i.test(window.location.pathname);
     if (content.classList.contains('admin-page--form') && editorRoute) enhanceFormPage(content);
+    enhanceUserRegistryGuidance(content);
 
     enhanceReportRecordPage(content);
     normalizeDetailActionButtons(content);

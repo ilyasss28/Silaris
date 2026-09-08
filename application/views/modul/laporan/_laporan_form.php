@@ -29,27 +29,19 @@ $file_value = set_value('laporan_Laporan_name', $record ? $record->Laporan : '')
             <div><h2>Data Laporan Bulanan</h2><p>Lengkapi periode dan dokumen laporan dalam satu formulir.</p></div>
           </div>
 
-          <div class="monthly-report-card__content">
-            <div class="monthly-report-card__section">
-              <div class="fidusia-form-fields">
-                <div class="fidusia-form-field fidusia-form-field--full">
-                  <label for="Tanggal_Laporan">Tanggal Laporan <i class="required">*</i></label>
-                  <input type="date" class="form-control native-date-input" name="Tanggal_Laporan" id="Tanggal_Laporan" value="<?= _ent($date_value); ?>" required>
-                  <small><i class="fa fa-calendar" aria-hidden="true"></i>Pilih tanggal sesuai periode laporan.</small>
-                </div>
-              </div>
+          <div class="fidusia-form-fields fidusia-form-fields--document monthly-report-inline-fields">
+            <div class="fidusia-form-field">
+              <label for="Tanggal_Laporan">Tanggal Laporan <i class="required">*</i></label>
+              <input type="date" class="form-control native-date-input" name="Tanggal_Laporan" id="Tanggal_Laporan" value="<?= _ent($date_value); ?>" required>
+              <small><i class="fa fa-calendar" aria-hidden="true"></i>Pilih tanggal sesuai periode laporan.</small>
             </div>
 
-            <div class="monthly-report-card__section monthly-report-card__section--document">
-              <div class="fidusia-form-fields">
-                <div class="fidusia-form-field fidusia-form-field--full monthly-report-upload">
-                  <label>File Laporan <?= $is_edit ? '' : '<i class="required">*</i>'; ?></label>
-                  <div id="laporan_Laporan_galery"></div>
-                  <input class="data_file data_file_uuid" name="laporan_Laporan_uuid" id="laporan_Laporan_uuid" type="hidden" value="<?= _ent(set_value('laporan_Laporan_uuid')); ?>">
-                  <input class="data_file" name="laporan_Laporan_name" id="laporan_Laporan_name" type="hidden" value="<?= _ent($file_value); ?>">
-                  <small><i class="fa fa-info-circle" aria-hidden="true"></i><?= $is_edit ? 'Biarkan file saat ini jika tidak ingin menggantinya.' : 'PDF, Office, atau gambar; ukuran maksimal 10 MB.'; ?></small>
-                </div>
-              </div>
+            <div class="fidusia-form-field monthly-report-upload">
+              <label>File Laporan <?= $is_edit ? '' : '<i class="required">*</i>'; ?></label>
+              <div id="laporan_Laporan_galery"></div>
+              <input class="data_file data_file_uuid" name="laporan_Laporan_uuid" id="laporan_Laporan_uuid" type="hidden" value="<?= _ent(set_value('laporan_Laporan_uuid')); ?>">
+              <input class="data_file" name="laporan_Laporan_name" id="laporan_Laporan_name" type="hidden" value="<?= _ent($file_value); ?>">
+              <small><i class="fa fa-info-circle" aria-hidden="true"></i><?= $is_edit ? 'Biarkan file saat ini jika tidak ingin menggantinya.' : 'PDF, Office, atau gambar; ukuran maksimal 10 MB.'; ?></small>
             </div>
           </div>
         </section>

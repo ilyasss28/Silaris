@@ -32,29 +32,28 @@
 </script>
 
 <!-- Main content -->
-<section class="content">
+<section class="content fidusia-form-page data-notaris-modern-form-page data-notaris-edit-page">
     <div class="row" >
         <div class="col-md-12">
             <div class="box box-warning">
                 <div class="box-body ">
                     <!-- Widget: user widget style 1 -->
-                    <div class="box box-widget widget-user-2">
+                    <div class="box box-widget widget-user-2 fidusia-form-shell">
                         <!-- Add the bg color to the header using any of the bg-* classes -->
-                        <div class="widget-user-header ">
-                            <div class="widget-user-image">
-                                <img class="img-circle" src="<?= BASE_ASSET; ?>/img/add2.png" alt="User Avatar">
-                            </div>
-                            <!-- /.widget-user-image -->
-                            <h3 class="widget-user-username"><b>Data Notaris</b></h3>
-                            <h5 class="widget-user-desc">Edit Data Notaris</h5>
-                            <hr>
-                        </div>
+                        <header class="fidusia-form-header">
+                            <div class="fidusia-form-header__copy"><span class="fidusia-form-header__icon"><i class="fa fa-pencil"></i></span><div><span class="fidusia-form-eyebrow">MASTER DATA NOTARIS</span><h1>Edit Data Notaris</h1><p>Perbarui identitas, kontak, wilayah kerja, dokumen, dan status Notaris.</p></div></div>
+                            <span class="fidusia-form-status"><i class="fa fa-edit"></i>Mode edit</span>
+                        </header>
                         <?= form_open(base_url('data_notaris/edit_save/'.$this->uri->segment(3)), [
                             'name'    => 'form_data_notaris', 
-                            'class'   => 'form-horizontal', 
+                            'class'   => 'fidusia-form data-notaris-edit-form',
                             'id'      => 'form_data_notaris', 
                             'method'  => 'POST'
                             ]); ?>
+                        <div class="message fidusia-form-message"></div>
+                        <div class="fidusia-form-grid"><section class="fidusia-form-card data-notaris-create-card">
+                          <div class="fidusia-form-card__heading"><span><i class="fa fa-user"></i></span><div><h2>Informasi Data Notaris</h2><p>Pastikan perubahan sesuai dengan dokumen dan akun SILARIS.</p></div></div>
+                          <div class="fidusia-form-fields fidusia-form-fields--document">
                          
                                                 <div class="form-group ">
                             <label for="nama_notaris" class="col-sm-2 control-label">Nama Notaris 
@@ -73,7 +72,7 @@
                             <div class="col-sm-8">
                                 <input type="text" class="form-control" name="tempat_lahir" id="tempat_lahir" maxlength="100" placeholder="Tempat lahir" value="<?= set_value('tempat_lahir', $data_notaris->tempat_lahir); ?>">
                                 <small class="info help-block">
-                                <b>Input Tempat Lahir</b> Max Length : 100.</small>
+                                Masukkan kabupaten/kota tempat lahir sesuai dokumen identitas; maksimal 100 karakter.</small>
                             </div>
                         </div>
                                                  
@@ -81,11 +80,9 @@
                             <label for="tanggal_lahir" class="col-sm-2 control-label">Tanggal Lahir 
                             </label>
                             <div class="col-sm-6">
-                            <div class="input-group date col-sm-8">
-<input type="date" class="form-control pull-right native-date-input" name="tanggal_lahir" id="tanggal_lahir" max="<?= date('Y-m-d'); ?>" value="<?= set_value('tanggal_lahir', $data_notaris->tanggal_lahir); ?>">
-                            </div>
+                            <input type="date" class="form-control native-date-input" name="tanggal_lahir" id="tanggal_lahir" max="<?= date('Y-m-d'); ?>" value="<?= set_value('tanggal_lahir', $data_notaris->tanggal_lahir); ?>">
                             <small class="info help-block">
-                            </small>
+                            Pilih tanggal lahir sesuai dokumen identitas; tanggal tidak boleh melebihi hari ini.</small>
                             </div>
                         </div>
                        
@@ -101,7 +98,7 @@
                                     <option <?= $data_notaris->jenis_kelamin == "Perempuan" ? 'selected' :''; ?> value="Perempuan">Perempuan</option>
                                     </select>
                                 <small class="info help-block">
-                                </small>
+                                Pilih jenis kelamin sesuai dokumen identitas Notaris.</small>
                             </div>
                         </div>
                                                  
@@ -111,7 +108,7 @@
                             <div class="col-sm-8">
                                 <input type="email" class="form-control" name="email" id="email" maxlength="150" required placeholder="nama@contoh.com" value="<?= set_value('email', $data_notaris->email); ?>">
                                 <small class="info help-block">
-                                <b>Input Email</b> Max Length : 100.</small>
+                                Masukkan alamat email aktif dengan format yang valid; maksimal 150 karakter.</small>
                             </div>
                         </div>
                                                  
@@ -121,7 +118,7 @@
                             <div class="col-sm-8">
                                 <input type="text" class="form-control" name="surat_pindah" id="surat_pindah" placeholder="Surat Pindah" value="<?= set_value('surat_pindah', $data_notaris->surat_pindah); ?>">
                                 <small class="info help-block">
-                                <b>Input Surat Pindah</b> Max Length : 100.</small>
+                                Isi nomor surat pindah apabila Notaris pernah berpindah wilayah kerja.</small>
                             </div>
                         </div>
                                                  
@@ -131,7 +128,7 @@
                             <div class="col-sm-8">
                                 <input type="text" class="form-control" name="surat_keputusan" id="surat_keputusan" placeholder="Surat Keputusan" value="<?= set_value('surat_keputusan', $data_notaris->surat_keputusan); ?>">
                                 <small class="info help-block">
-                                <b>Input Surat Keputusan</b> Max Length : 100.</small>
+                                Masukkan nomor surat keputusan pengangkatan Notaris sesuai dokumen resmi.</small>
                             </div>
                         </div>
                                                  
@@ -141,7 +138,7 @@
                             <div class="col-sm-8">
                                 <input type="text" class="form-control" name="alamat_rumah" id="alamat_rumah" placeholder="Alamat Rumah" value="<?= set_value('alamat_rumah', $data_notaris->alamat_rumah); ?>">
                                 <small class="info help-block">
-                                <b>Input Alamat Rumah</b> Max Length : 100.</small>
+                                Masukkan alamat tempat tinggal secara lengkap dan mudah dikenali.</small>
                             </div>
                         </div>
                                                  
@@ -151,7 +148,7 @@
                             <div class="col-sm-8">
                                 <input type="text" class="form-control" name="alamat_kantor" id="alamat_kantor" placeholder="Alamat Kantor" value="<?= set_value('alamat_kantor', $data_notaris->alamat_kantor); ?>">
                                 <small class="info help-block">
-                                <b>Input Alamat Kantor</b> Max Length : 100.</small>
+                                Masukkan alamat kantor Notaris secara lengkap sesuai kedudukan.</small>
                             </div>
                         </div>
                                                  
@@ -163,7 +160,7 @@
                                 <input class="data_file data_file_uuid" name="data_notaris_foto_uuid" id="data_notaris_foto_uuid" type="hidden" value="<?= set_value('data_notaris_foto_uuid'); ?>">
                                 <input class="data_file" name="data_notaris_foto_name" id="data_notaris_foto_name" type="hidden" value="<?= set_value('data_notaris_foto_name', $data_notaris->foto); ?>">
                                 <small class="info help-block">
-                                </small>
+                                Gunakan foto profil resmi yang sama dengan foto pada akun pengguna SILARIS.</small>
                             </div>
                         </div>
                                                   
@@ -178,7 +175,7 @@
                                     <?php endforeach; ?>  
                                 </select>
                                 <small class="info help-block">
-                                </small>
+                                Pilih satu kabupaten/kota yang menjadi wilayah kerja resmi Notaris.</small>
                             </div>
                         </div>
 
@@ -189,7 +186,7 @@
                             <div class="col-sm-8">
                                 <input type="number" step="any" min="-90" max="90" class="form-control" name="lat" id="lat" placeholder="Contoh: -3.998" value="<?= set_value('lat', $data_notaris->lat); ?>">
                                 <small class="info help-block">
-                                </small>
+                                Masukkan koordinat lintang kantor antara -90 hingga 90, misalnya -3.998.</small>
                             </div>
                         </div>
                                                  
@@ -199,7 +196,7 @@
                             <div class="col-sm-8">
                                 <input type="tel" inputmode="numeric" minlength="10" maxlength="13" pattern="08[0-9]{8,11}" class="form-control" name="no_telepon" id="no_telepon" required placeholder="Contoh: 081234567890" value="<?= set_value('no_telepon', format_phone_number($data_notaris->no_telepon)); ?>">
                                 <small class="info help-block">
-                                </small>
+                                Gunakan format lokal diawali 08, terdiri dari 10–13 digit tanpa spasi.</small>
                             </div>
                         </div>
                                                  
@@ -209,7 +206,7 @@
                             <div class="col-sm-8">
                                 <input type="number" step="any" min="-180" max="180" class="form-control" name="long" id="long" placeholder="Contoh: 122.512" value="<?= set_value('long', $data_notaris->long); ?>">
                                 <small class="info help-block">
-                                </small>
+                                Masukkan koordinat bujur kantor antara -180 hingga 180, misalnya 122.512.</small>
                             </div>
                         </div>
                                                  
@@ -219,7 +216,7 @@
                             <div class="col-sm-8">
                                 <input type="text" inputmode="numeric" maxlength="16" pattern="(?:[0-9]{15}|[0-9]{16})" class="form-control" name="npwp" id="npwp" placeholder="15 atau 16 digit" value="<?= set_value('npwp', preg_replace('/\D+/', '', (string) $data_notaris->npwp)); ?>">
                                 <small class="info help-block">
-                                </small>
+                                Masukkan NPWP 15 atau 16 digit tanpa titik, spasi, atau tanda hubung.</small>
                             </div>
                         </div>
                                                  
@@ -229,7 +226,7 @@
                             <div class="col-sm-8">
                                 <input type="text" inputmode="numeric" minlength="16" maxlength="16" pattern="[0-9]{16}" class="form-control" name="nomor_ktp" id="nomor_ktp" placeholder="16 digit NIK" value="<?= set_value('nomor_ktp', preg_replace('/\D+/', '', (string) $data_notaris->nomor_ktp)); ?>">
                                 <small class="info help-block">
-                                </small>
+                                Masukkan NIK sesuai KTP, terdiri dari tepat 16 digit angka.</small>
                             </div>
                         </div>
                                                  
@@ -239,7 +236,7 @@
                             <div class="col-sm-8">
                                 <input type="text" class="form-control" name="nomor_bap" id="nomor_bap" placeholder="Masukkan nomor BAP" value="<?= set_value('nomor_bap', $data_notaris->nomor_bap); ?>">
                                 <small class="info help-block">
-                                </small>
+                                Masukkan nomor Berita Acara Pengambilan Sumpah sesuai dokumen resmi.</small>
                             </div>
                         </div>
                                                  
@@ -249,7 +246,7 @@
                             <div class="col-sm-8">
                                 <input type="date" class="form-control" name="tanggal_bap" id="tanggal_bap" max="<?= date('Y-m-d'); ?>" value="<?= set_value('tanggal_bap', $data_notaris->tanggal_bap); ?>">
                                 <small class="info help-block">
-                                </small>
+                                Pilih tanggal Berita Acara Pengambilan Sumpah; tidak boleh melebihi hari ini.</small>
                             </div>
                         </div>
                                                  
@@ -259,7 +256,7 @@
                             <div class="col-sm-8">
                                 <input type="text" class="form-control" name="pemegang_protokol" id="pemegang_protokol" placeholder="Pemegang Protokol" value="<?= set_value('pemegang_protokol', $data_notaris->pemegang_protokol); ?>">
                                 <small class="info help-block">
-                                </small>
+                                Isi nama pemegang protokol apabila protokol Notaris telah dialihkan.</small>
                             </div>
                         </div>
                                                  
@@ -273,26 +270,13 @@
                                     <?php endforeach; ?>
                                 </select>
                                 <small class="info help-block">
-                                </small>
+                                Pilih status terakhir Notaris sesuai kondisi dan dokumen administratif.</small>
                             </div>
                         </div>
                                                 
-                        <div class="message"></div>
-                        <div class="row-fluid col-md-7">
-                            <button class="btn btn-flat btn-primary btn_save btn_action" id="btn_save" data-stype='stay' title="<?= cclang('save_button'); ?> (Ctrl+s)">
-                            <i class="fa fa-save" ></i> <?= cclang('save_button'); ?>
-                            </button>
-                            <a class="btn btn-flat btn-info btn_save btn_action btn_save_back" id="btn_save" data-stype='back' title="<?= cclang('save_and_go_the_list_button'); ?> (Ctrl+d)">
-                            <i class="fa fa-list"></i> <?= cclang('save_and_go_the_list_button'); ?>
-                            </a>
-                            <a class="btn btn-flat btn-default btn_action" id="btn_cancel" title="<?= cclang('cancel_button'); ?> (Ctrl+x)">
-                            <i class="fa fa-undo" ></i> <?= cclang('cancel_button'); ?>
-                            </a>
-                            <span class="loading loading-hide">
-                            <img src="<?= BASE_ASSET; ?>/img/loading-spin-primary.svg"> 
-                            <i><?= cclang('loading_saving_data'); ?></i>
-                            </span>
-                        </div>
+                          </div>
+                        </section></div>
+                        <footer class="fidusia-form-actions"><div class="fidusia-form-actions__hint"><i class="fa fa-info-circle"></i><span>Perubahan data akan digunakan pada profil, dashboard, dan laporan.</span></div><div class="fidusia-form-actions__buttons"><a class="btn admin-button admin-button--neutral btn_action" id="btn_cancel"><i class="fa fa-times"></i> Batal</a><button type="button" class="btn admin-button admin-button--secondary btn_save btn_action btn_save_back" data-stype="back"><i class="fa fa-list"></i> Simpan & kembali</button><button type="button" class="btn admin-button admin-button--save btn_save btn_action" id="btn_save" data-stype="stay"><i class="fa fa-save"></i> Simpan Perubahan</button><span class="loading loading-hide"><img src="<?= BASE_ASSET; ?>/img/loading-spin-primary.svg"><i><?= cclang('loading_saving_data'); ?></i></span></div></footer>
                         <?= form_close(); ?>
                     </div>
                 </div>

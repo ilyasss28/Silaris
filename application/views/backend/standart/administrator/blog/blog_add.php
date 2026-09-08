@@ -31,7 +31,7 @@
     jQuery(document).ready(domo);
 </script>
 <!-- Content Header (Page header) -->
-<section class="content-header">
+<section class="content-header standard-create-legacy-header">
     <h1>
         Blog        <small><?= cclang('new', ['Blog']); ?> </small>
     </h1>
@@ -49,7 +49,7 @@
   'method'  => 'POST'
   ]); ?>
 <!-- Main content -->
-<section class="content">
+<section class="content admin-page--form admin-create-page standard-create-page">
     <div class="row" >
         <div class="col-md-8">
             <div class="box box-warning">

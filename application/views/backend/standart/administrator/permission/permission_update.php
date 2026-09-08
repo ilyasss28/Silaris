@@ -1,20 +1,27 @@
+<?php
+$permission_is_add = isset($permission_form_mode) && $permission_form_mode === 'add';
+$permission_record = isset($permission) ? $permission : (object) ['name' => '', 'definition' => ''];
+$permission_action = $permission_is_add
+  ? site_url('administrator/permission/add_save')
+  : site_url('administrator/permission/edit_save/'.$this->uri->segment(4));
+?>
 <script src="<?= BASE_ASSET; ?>js/jquery.hotkeys.js"></script>
 
 <section class="content fidusia-form-page permission-form-page">
   <div class="fidusia-form-shell">
     <header class="fidusia-form-header">
       <div class="fidusia-form-header__copy">
-        <span class="fidusia-form-header__icon"><i class="fa fa-pencil"></i></span>
+        <span class="fidusia-form-header__icon"><i class="fa <?= $permission_is_add ? 'fa-plus' : 'fa-pencil'; ?>"></i></span>
         <div>
           <span class="fidusia-form-eyebrow">MANAJEMEN AKSES</span>
-          <h1>Edit Permission</h1>
-          <p>Perbarui nama dan definisi hak akses aplikasi.</p>
+          <h1><?= $permission_is_add ? 'Tambah Permission' : 'Edit Permission'; ?></h1>
+          <p><?= $permission_is_add ? 'Buat hak akses baru untuk kebutuhan aplikasi.' : 'Perbarui nama dan definisi hak akses aplikasi.'; ?></p>
         </div>
       </div>
-      <span class="fidusia-form-status"><i class="fa fa-edit"></i> Mode edit</span>
+      <span class="fidusia-form-status"><i class="fa <?= $permission_is_add ? 'fa-file-o' : 'fa-edit'; ?>"></i> <?= $permission_is_add ? 'Data baru' : 'Mode edit'; ?></span>
     </header>
 
-    <?= form_open('administrator/permission/edit_save/' . $this->uri->segment(4), [
+    <?= form_open($permission_action, [
       'name' => 'form_permission',
       'class' => 'form-horizontal fidusia-form',
       'id' => 'form_permission',
@@ -31,12 +38,12 @@
           <div class="fidusia-form-fields fidusia-form-fields--document">
             <div class="fidusia-form-field">
               <label for="name">Nama Permission <i class="required">*</i></label>
-              <input type="text" class="form-control" name="name" id="name" placeholder="Contoh: laporan_view" value="<?= _ent(set_value('name', $permission->name)); ?>" maxlength="100" autocomplete="off" required>
+              <input type="text" class="form-control" name="name" id="name" placeholder="Contoh: laporan_view" value="<?= _ent(set_value('name', $permission_record->name)); ?>" maxlength="100" autocomplete="off" required>
               <small><i class="fa fa-info-circle"></i>Gunakan nama unik yang menggambarkan hak akses.</small>
             </div>
             <div class="fidusia-form-field">
               <label for="definition">Definisi</label>
-              <input type="text" class="form-control" name="definition" id="definition" placeholder="Jelaskan fungsi permission" value="<?= _ent(set_value('definition', $permission->definition)); ?>">
+              <input type="text" class="form-control" name="definition" id="definition" placeholder="Jelaskan fungsi permission" value="<?= _ent(set_value('definition', $permission_record->definition)); ?>">
               <small><i class="fa fa-align-left"></i>Penjelasan singkat mengenai fungsi hak akses ini.</small>
             </div>
           </div>
@@ -83,6 +90,7 @@ $(function () {
         if (saveType === 'back') { window.location.href = response.redirect; return; }
         $('.fidusia-form-message').printMessage({message: response.message});
         $('.fidusia-form-message').fadeIn();
+        <?php if ($permission_is_add): ?>form[0].reset();<?php endif; ?>
         window.scrollTo({top: 0, behavior: 'smooth'});
       })
       .fail(function () {

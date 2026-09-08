@@ -1,20 +1,27 @@
+<?php
+$group_is_add = isset($group_form_mode) && $group_form_mode === 'add';
+$group_record = isset($group) ? $group : (object) ['name' => '', 'definition' => ''];
+$group_action = $group_is_add
+  ? site_url('administrator/group/add_save')
+  : site_url('administrator/group/edit_save/'.$this->uri->segment(4));
+?>
 <script src="<?= BASE_ASSET; ?>js/jquery.hotkeys.js"></script>
 
 <section class="content fidusia-form-page group-form-page">
   <div class="fidusia-form-shell">
     <header class="fidusia-form-header">
       <div class="fidusia-form-header__copy">
-        <span class="fidusia-form-header__icon"><i class="fa fa-pencil"></i></span>
+        <span class="fidusia-form-header__icon"><i class="fa <?= $group_is_add ? 'fa-plus' : 'fa-pencil'; ?>"></i></span>
         <div>
           <span class="fidusia-form-eyebrow">MANAJEMEN PENGGUNA</span>
-          <h1>Edit Groups</h1>
-          <p>Perbarui nama dan definisi kelompok pengguna.</p>
+          <h1><?= $group_is_add ? 'Tambah Group' : 'Edit Group'; ?></h1>
+          <p><?= $group_is_add ? 'Buat kelompok pengguna baru beserta definisinya.' : 'Perbarui nama dan definisi kelompok pengguna.'; ?></p>
         </div>
       </div>
-      <span class="fidusia-form-status"><i class="fa fa-edit"></i> Mode edit</span>
+      <span class="fidusia-form-status"><i class="fa <?= $group_is_add ? 'fa-file-o' : 'fa-edit'; ?>"></i> <?= $group_is_add ? 'Data baru' : 'Mode edit'; ?></span>
     </header>
 
-    <?= form_open(base_url('administrator/group/edit_save/' . $this->uri->segment(4)), [
+    <?= form_open($group_action, [
       'name' => 'form_group',
       'class' => 'form-horizontal fidusia-form',
       'id' => 'form_group',
@@ -33,14 +40,14 @@
               <label for="name">Nama Group <i class="required">*</i></label>
               <select class="form-control" name="name" id="name" required>
                 <?php foreach (['Admin', 'User', 'Kanwil', 'MPD'] as $group_name): ?>
-                  <option value="<?= $group_name; ?>" <?= set_select('name', $group_name, strcasecmp((string) $group->name, $group_name) === 0); ?>><?= $group_name; ?></option>
+                  <option value="<?= $group_name; ?>" <?= set_select('name', $group_name, strcasecmp((string) $group_record->name, $group_name) === 0); ?>><?= $group_name; ?></option>
                 <?php endforeach; ?>
               </select>
               <small><i class="fa fa-info-circle"></i>Pilih salah satu kelompok pengguna yang didukung aplikasi.</small>
             </div>
             <div class="fidusia-form-field">
               <label for="definition">Definisi</label>
-              <input type="text" class="form-control" name="definition" id="definition" placeholder="Jelaskan fungsi group" value="<?= _ent(set_value('definition', $group->definition)); ?>">
+              <input type="text" class="form-control" name="definition" id="definition" placeholder="Jelaskan fungsi group" value="<?= _ent(set_value('definition', $group_record->definition)); ?>">
               <small><i class="fa fa-align-left"></i>Penjelasan singkat mengenai tanggung jawab kelompok ini.</small>
             </div>
           </div>
@@ -87,6 +94,7 @@ $(function () {
         if (saveType === 'back') { window.location.href = response.redirect; return; }
         $('.fidusia-form-message').printMessage({message: response.message});
         $('.fidusia-form-message').fadeIn();
+        <?php if ($group_is_add): ?>form[0].reset();<?php endif; ?>
         window.scrollTo({top: 0, behavior: 'smooth'});
       })
       .fail(function () {

@@ -233,3 +233,14 @@ $lang['created_at'] = 'Dibuat Pada';
 $lang['value'] = 'Nilai';
 $lang['label'] = 'Label';
 
+/* Label antarmuka administrator */
+$lang['user'] = 'Pengguna';
+$lang['full_name'] = 'Nama Lengkap';
+$lang['groups'] = 'Kelompok Akses';
+$lang['avatar'] = 'Foto Profil';
+$lang['menu'] = 'Menu';
+$lang['parent'] = 'Menu Induk';
+$lang['menu_type'] = 'Jenis Menu';
+$lang['group_privilage'] = 'Hak Akses Kelompok';
+$lang['select_icon'] = 'Pilih Ikon';
+

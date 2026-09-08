@@ -33,159 +33,44 @@ jQuery(document).ready(domo);
 <?php $this->load->view('core_template/fine_upload'); ?>
 
 <!-- Main content -->
-<section class="content">
-   <div class="row" >
-     
-      <div class="col-md-12">
-         <div class="box box-warning">
-            <div class="box-body ">
-
-               <!-- Widget: user widget style 1 -->
-               <div class="box box-widget widget-user-2">
-                  <!-- Add the bg color to the header using any of the bg-* classes -->
-                  <div class="widget-user-header ">
-                    
-                     <div class="widget-user-image">
-                        <img class="img-circle" src="<?= BASE_ASSET; ?>/img/add2.png" alt="User Avatar">
-                     </div>
-                     <!-- /.widget-user-image -->
-                     <h3 class="widget-user-username"><?= cclang('user') ?></h3>
-                     <h5 class="widget-user-desc"><?= cclang('new', cclang('user')) ?></h5>
-                     <hr>
-                  </div>
-
-                  <?= form_open('', [
-                    'name'    => 'form_user', 
-                    'class'   => 'form-horizontal', 
-                    'id'      => 'form_user', 
-                    'enctype' => 'multipart/form-data', 
-                    'method'  => 'POST'
-                  ]); ?>
-                    <div class="form-group ">
-                        <label for="username" class="col-sm-2 control-label"><?= cclang('username') ?> <i class="required">*</i></label>
-
-                        <div class="col-sm-8">
-                          <input type="text" class="form-control" name="username" id="username" minlength="3" maxlength="100" pattern="[A-Za-z0-9._-]+" autocomplete="username" required placeholder="Contoh: nama.pengguna" value="<?= set_value('username'); ?>">
-                          <small class="info help-block">3-100 karakter: huruf, angka, titik, garis bawah, atau tanda hubung.</small>
-                        </div>
-                    </div>
-
-                    <div class="form-group ">
-                        <label for="email" class="col-sm-2 control-label"><?= cclang('email') ?> <i class="required">*</i></label>
-
-                        <div class="col-sm-8">
-                          <input type="email" class="form-control" name="email" id="email" maxlength="100" autocomplete="email" required placeholder="nama@contoh.go.id" value="<?= set_value('email'); ?>">
-                          <small class="info help-block">Alamat email aktif dan unik.</small>
-                        </div>
-                    </div>
-
-                    <div class="form-group ">
-                        <label for="full_name" class="col-sm-2 control-label"><?= cclang('full_name') ?> <i class="required">*</i></label>
-
-                        <div class="col-sm-8">
-                          <input type="text" class="form-control" name="full_name" id="full_name" maxlength="200" required placeholder="Nama lengkap beserta gelar" value="<?= set_value('full_name'); ?>">
-                          <small class="info help-block">Nama lengkap yang tampil pada sistem.</small>
-                        </div>
-                    </div>
-
-                    <div class="form-group ">
-                        <label for="phone_number" class="col-sm-2 control-label">Nomor Telepon <i class="required">*</i></label>
-
-                        <div class="col-sm-8">
-                          <input type="tel" class="form-control" name="phone_number" id="phone_number" inputmode="numeric" minlength="10" maxlength="13" pattern="08[0-9]{8,11}" autocomplete="tel" required placeholder="Contoh: 081234567890" value="<?= set_value('phone_number'); ?>">
-                          <small class="info help-block">Gunakan format lokal 08, sebanyak 10-13 digit tanpa spasi.</small>
-                        </div>
-                    </div>
-
-                    <div class="form-group ">
-                        <label for="password" class="col-sm-2 control-label"><?= cclang('password') ?> <i class="required">*</i></label>
-
-                        <div class="col-sm-6">
-                          <div class="input-group col-md-8 input-password">
-                          <input type="password" class="form-control password" name="password" id="password" minlength="8" maxlength="72" autocomplete="new-password" required placeholder="Minimal 8 karakter" value="<?= set_value('password'); ?>">
-                            <span class="input-group-btn">
-                              <button type="button" class="btn btn-flat show-password"><i class="fa fa-eye eye"></i></button>
-                            </span>
-                          </div>
-                           <small class="info help-block">
-                             Gunakan 8-72 karakter.
-                          </small>
-                        </div>
-                    </div>
-
-                    <div class="form-group ">
-                            <label for="kd_wilayah" class="col-sm-2 control-label">wilayah 
-                            <i class="required">*</i>
-                            </label>
-                            <div class="col-sm-8">
-                                <select class="form-control chosen chosen-select-deselect" name="kd_wilayah" id="kd_wilayah" data-placeholder="Pilih wilayah kerja" required>
-                                    <option value=""></option>
-                                    <?php foreach (db_get_all_data('wilayah') as $row): ?>
-                                    <option value="<?= $row->kd_wilayah ?>"><?= "[ ".$row->kd_wilayah." ] ".$row->nama; ?></option>
-                                    <?php endforeach; ?>  
-                                </select>
-                                <small class="info help-block">
-                                <b>Input wilayah</b> Max Length : 10.</small>
-                            </div>
-                        </div>
-
-                    <div class="form-group ">
-                        <label for="content" class="col-sm-2 control-label"><?= cclang('groups') ?> <i class="required">*</i></label>
-
-                        <div class="col-sm-8">
-                           <select class="form-control chosen chosen-select" name="group[]" id="group" tabindex="5" multiple required data-placeholder="Pilih kelompok akses">
-                            <?php foreach (get_application_groups() as $row): ?>
-                            <option value="<?= $row->id; ?>"><?= ucwords($row->name); ?></option>
-                            <?php endforeach; ?>  
-                           </select>
-                            <small class="info help-block">
-                             Select one or more groups.
-                          </small>
-                        </div>
-                    </div>
-
-                    <div class="form-group" id="mpd-region-field">
-                        <label class="col-sm-2 control-label">Data MPD</label>
-                        <div class="col-sm-8">
-                            <div class="alert alert-info" style="margin-bottom:0">
-                                Jika memilih role MPD, simpan akun ini terlebih dahulu. Setelah itu daftarkan identitas, verifikasi, dan satu atau beberapa wilayah kerjanya melalui menu <strong>SETUP &rarr; Data MPD</strong>. Akun belum dapat digunakan sebelum proses tersebut selesai.
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="form-group ">
-                        <label for="username" class="col-sm-2 control-label"><?= cclang('avatar') ?> </label>
-
-                        <div class="col-sm-8">
-                            <div id="user_avatar_galery"></div>
-                            <input name="user_avatar_uuid" id="user_avatar_uuid" type="hidden" value="<?= set_value('user_avatar_uuid'); ?>">
-                            <input name="user_avatar_name" id="user_avatar_name" type="hidden" value="<?= set_value('user_avatar_name'); ?>">
-                            <small class="info help-block">
-                              Format file must PNG, JPEG.
-                            </small>
-                        </div>
-
-                    </div>
-                    <div class="message">
-                      
-                    </div>
-
-                    <div class="row-fluid col-md-7">
-                       <button class="btn btn-flat btn-primary btn_save btn_action" id="btn_save" data-stype='stay' title="save (Ctrl+s)"><i class="fa fa-save" ></i> <?= cclang('save_button'); ?></button>
-                     <a class="btn btn-flat btn-info btn_save btn_action btn_save_back" id="btn_save" data-stype='back' title="<?= cclang('save_and_go_the_list_button'); ?> (Ctrl+d)"><i class="fa fa-list"></i> <?= cclang('save_and_go_the_list_button'); ?></a>
-                     <a class="btn btn-flat btn-default btn_action" id="btn_cancel" title="<?= cclang('cancel_button'); ?> (Ctrl+x)"><i class="fa fa-undo" ></i> <?= cclang('cancel_button'); ?></a>
-                     <span class="loading loading-hide"><img src="<?= BASE_ASSET; ?>/img/loading-spin-primary.svg"> <i><?= cclang('loading_saving_data'); ?></i></span>
-                     </div>
-                    
-                  <?= form_close(); ?>
-               </div>
-            </div>
-            <!--/box body -->
-         </div>
-         <!--/box -->
-
+<section class="content fidusia-form-page user-registry-form-page">
+  <div class="fidusia-form-shell">
+    <header class="fidusia-form-header">
+      <div class="fidusia-form-header__copy">
+        <span class="fidusia-form-header__icon"><i class="fa fa-user-plus" aria-hidden="true"></i></span>
+        <div><span class="fidusia-form-eyebrow">MANAJEMEN PENGGUNA</span><h1>Tambah Pengguna</h1><p>Buat akun, tentukan wilayah kerja, dan atur kelompok akses pengguna.</p></div>
       </div>
-   </div>
+      <span class="fidusia-form-status"><i class="fa fa-file-o" aria-hidden="true"></i>Data baru</span>
+    </header>
+    <?= form_open('', ['name' => 'form_user', 'class' => 'fidusia-form user-registry-form', 'id' => 'form_user', 'enctype' => 'multipart/form-data', 'method' => 'POST']); ?>
+      <div class="message fidusia-form-message"></div>
+      <div class="fidusia-form-grid">
+        <section class="fidusia-form-card">
+          <div class="fidusia-form-card__heading"><span><i class="fa fa-user"></i></span><div><h2>Identitas Akun</h2><p>Informasi utama yang digunakan pengguna untuk mengakses SILARIS.</p></div></div>
+          <div class="fidusia-form-fields fidusia-form-fields--document">
+            <div class="fidusia-form-field"><label for="username">Username <i class="required">*</i></label><input type="text" class="form-control" name="username" id="username" minlength="3" maxlength="100" pattern="[A-Za-z0-9._-]+" autocomplete="username" required placeholder="Contoh: nama.pengguna" value="<?= _ent(set_value('username')); ?>"><small><i class="fa fa-info-circle"></i>3–100 karakter: huruf, angka, titik, garis bawah, atau tanda hubung.</small></div>
+            <div class="fidusia-form-field"><label for="email">Email <i class="required">*</i></label><input type="email" class="form-control" name="email" id="email" maxlength="100" autocomplete="email" required placeholder="nama@contoh.go.id" value="<?= _ent(set_value('email')); ?>"><small><i class="fa fa-envelope-o"></i>Gunakan alamat email aktif dan unik.</small></div>
+            <div class="fidusia-form-field"><label for="full_name">Nama Lengkap <i class="required">*</i></label><input type="text" class="form-control" name="full_name" id="full_name" maxlength="200" required placeholder="Nama lengkap beserta gelar" value="<?= _ent(set_value('full_name')); ?>"><small><i class="fa fa-user"></i>Nama ini akan ditampilkan pada sistem.</small></div>
+            <div class="fidusia-form-field"><label for="phone_number">Nomor Telepon <i class="required">*</i></label><input type="tel" class="form-control" name="phone_number" id="phone_number" inputmode="numeric" minlength="10" maxlength="13" pattern="08[0-9]{8,11}" autocomplete="tel" required placeholder="Contoh: 081234567890" value="<?= _ent(set_value('phone_number')); ?>"><small><i class="fa fa-phone"></i>Gunakan 10–13 digit dalam format 08xxxxxxxxxx.</small></div>
+            <div class="fidusia-form-field fidusia-form-field--full"><label for="password">Kata Sandi <i class="required">*</i></label><div class="input-group input-password"><input type="password" class="form-control password" name="password" id="password" minlength="8" maxlength="72" autocomplete="new-password" required placeholder="Minimal 8 karakter" value=""><span class="input-group-btn"><button type="button" class="btn btn-flat show-password" aria-label="Tampilkan kata sandi"><i class="fa fa-eye eye"></i></button></span></div><small><i class="fa fa-lock"></i>Gunakan 8–72 karakter.</small></div>
+          </div>
+        </section>
+        <section class="fidusia-form-card">
+          <div class="fidusia-form-card__heading"><span><i class="fa fa-shield"></i></span><div><h2>Wilayah dan Hak Akses</h2><p>Tentukan cakupan kerja dan kewenangan akun.</p></div></div>
+          <div class="fidusia-form-fields fidusia-form-fields--document">
+            <div class="fidusia-form-field"><label for="kd_wilayah">Wilayah Kerja <i class="required">*</i></label><select class="form-control chosen chosen-select-deselect" name="kd_wilayah" id="kd_wilayah" data-placeholder="Pilih wilayah kerja" required><option value=""></option><?php foreach (db_get_all_data('wilayah') as $row): ?><option value="<?= _ent($row->kd_wilayah); ?>" <?= set_select('kd_wilayah', $row->kd_wilayah); ?>>[ <?= _ent($row->kd_wilayah); ?> ] <?= _ent($row->nama); ?></option><?php endforeach; ?></select><small><i class="fa fa-map-marker"></i>Pilih kabupaten/kota tempat pengguna bertugas.</small></div>
+            <div class="fidusia-form-field"><label for="group">Kelompok Akses <i class="required">*</i></label><select class="form-control chosen chosen-select" name="group[]" id="group" multiple required data-placeholder="Pilih kelompok akses"><?php foreach (get_application_groups() as $row): ?><option value="<?= (int) $row->id; ?>" <?= set_select('group[]', $row->id); ?>><?= _ent(ucwords($row->name)); ?></option><?php endforeach; ?></select><small><i class="fa fa-users"></i>Pilih satu atau beberapa kelompok akses.</small></div>
+            <div class="fidusia-form-field fidusia-form-field--full user-registry-guidance-list" id="registry-group-guidance" hidden>
+              <div class="alert alert-info user-registry-guidance" data-group-guidance="notaris" hidden><strong>Data Notaris:</strong> setelah akun disimpan, lengkapi identitas, dokumen, wilayah kerja, dan statusnya melalui menu Setup → Data Notaris.</div>
+              <div class="alert alert-info user-registry-guidance" data-group-guidance="mpd" hidden><strong>Data MPD:</strong> setelah akun disimpan, lengkapi identitas, verifikasi, dan wilayah pengawasannya melalui menu Setup → Data MPD.</div>
+            </div>
+            <div class="fidusia-form-field fidusia-form-field--full"><label for="user_avatar_galery">Foto Profil</label><div id="user_avatar_galery"></div><input name="user_avatar_uuid" id="user_avatar_uuid" type="hidden" value="<?= _ent(set_value('user_avatar_uuid')); ?>"><input name="user_avatar_name" id="user_avatar_name" type="hidden" value="<?= _ent(set_value('user_avatar_name')); ?>"><small><i class="fa fa-image"></i>Gunakan berkas PNG atau JPEG.</small></div>
+          </div>
+        </section>
+      </div>
+      <footer class="fidusia-form-actions"><div class="fidusia-form-actions__hint"><i class="fa fa-info-circle"></i><span>Pastikan email, wilayah, dan kelompok akses sudah benar.</span></div><div class="fidusia-form-actions__buttons"><a class="btn admin-button admin-button--neutral btn_action" id="btn_cancel"><i class="fa fa-times"></i> Batal</a><button class="btn admin-button admin-button--secondary btn_save btn_action btn_save_back" type="button" data-stype="back"><i class="fa fa-list"></i> Simpan & kembali</button><button class="btn admin-button admin-button--save btn_save btn_action" id="btn_save" type="button" data-stype="stay"><i class="fa fa-save"></i> Simpan Pengguna</button><span class="loading loading-hide"><img src="<?= BASE_ASSET; ?>/img/loading-spin-primary.svg"> <i><?= cclang('loading_saving_data'); ?></i></span></div></footer>
+    <?= form_close(); ?>
+  </div>
 </section>
 <!-- /.content -->
 
