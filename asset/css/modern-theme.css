@@ -6292,8 +6292,14 @@ input[type="file"].form-control { height: auto; min-height: var(--control-h); pa
   font-size: 10px;
 }
 .admin-silaris .mpd-list-footer .dataTables_paginate { margin: 0 !important; }
-.admin-silaris .mpd-form-grid-modern { align-items: stretch; }
-.admin-silaris .mpd-form-grid-modern .fidusia-form-card { height: 100%; }
+.admin-silaris .mpd-form-grid-modern {
+  grid-template-columns: minmax(0, 1fr);
+  align-items: start;
+}
+.admin-silaris .mpd-form-grid-modern .fidusia-form-card {
+  width: 100%;
+  height: auto;
+}
 .admin-silaris .mpd-form-message { margin: 18px 22px 0; }
 .admin-silaris .mpd-form .fidusia-form-field textarea { min-height: 94px; resize: vertical; }
 .admin-silaris .mpd-form .chosen-container { width: 100% !important; }
