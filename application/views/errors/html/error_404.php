@@ -14,6 +14,8 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 <head>
 <meta charset="utf-8">
 <title>404 Page Not Found</title>
+<link rel="icon" type="image/png" href="<?= function_exists('base_url') ? base_url('asset/img/favicon.png') : '/asset/img/favicon.png'; ?>">
+<link rel="shortcut icon" type="image/png" href="<?= function_exists('base_url') ? base_url('asset/img/favicon.png') : '/asset/img/favicon.png'; ?>">
 <style type="text/css">
 
 ::selection { background-color: #E13300; color: white; }

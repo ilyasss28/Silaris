@@ -3,7 +3,10 @@
 <html>
 <head>
 	<title><?= $title; ?></title>
-	<?php 
+	<link rel="icon" type="image/png" href="<?= BASE_ASSET; ?>/img/favicon.png">
+	<link rel="shortcut icon" type="image/png" href="<?= BASE_ASSET; ?>/img/favicon.png">
+	<link rel="apple-touch-icon" href="<?= BASE_ASSET; ?>/img/favicon.png">
+	<?php
 	foreach ($css_top as $css) {
 		echo $css;
 	}

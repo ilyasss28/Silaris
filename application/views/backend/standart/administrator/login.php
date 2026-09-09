@@ -5,6 +5,9 @@
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
   <title>Silaris | Login</title>
+  <link rel="icon" type="image/png" href="<?= base_url('asset/img/favicon.png'); ?>?v=<?= @filemtime(FCPATH.'asset/img/favicon.png'); ?>">
+  <link rel="shortcut icon" type="image/png" href="<?= base_url('asset/img/favicon.png'); ?>?v=<?= @filemtime(FCPATH.'asset/img/favicon.png'); ?>">
+  <link rel="apple-touch-icon" href="<?= base_url('asset/img/favicon.png'); ?>?v=<?= @filemtime(FCPATH.'asset/img/favicon.png'); ?>">
   <link rel="stylesheet" href="<?= BASE_ASSET; ?>/bootstrap5/css/bootstrap.min.css">
   <link rel="stylesheet" href="<?= BASE_ASSET; ?>vendor/font-awesome/css/font-awesome.min.css">
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">

@@ -7,7 +7,9 @@
   <title>SILARIS | Sistem Pelaporan Notaris Kanwil Kemenkum Sultra</title>
 
   <!-- Favicons -->
-  <link href="<?php echo base_url('assets')?>/assets-guest/img/logo/logo.png" rel="icon">
+  <link rel="icon" type="image/png" href="<?= base_url('asset/img/favicon.png'); ?>?v=<?= @filemtime(FCPATH.'asset/img/favicon.png'); ?>">
+  <link rel="shortcut icon" type="image/png" href="<?= base_url('asset/img/favicon.png'); ?>?v=<?= @filemtime(FCPATH.'asset/img/favicon.png'); ?>">
+  <link rel="apple-touch-icon" href="<?= base_url('asset/img/favicon.png'); ?>?v=<?= @filemtime(FCPATH.'asset/img/favicon.png'); ?>">
 
   <!-- Google Fonts -->
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">

@@ -52,6 +52,9 @@ $last_login_label = $last_login_timestamp
   <meta name="author" content="<?= get_option('author'); ?>">
   <meta name="csrf-name" content="<?= $this->security->get_csrf_token_name(); ?>">
   <meta name="csrf-token" content="<?= $this->security->get_csrf_hash(); ?>">
+  <link rel="icon" type="image/png" href="<?= base_url('asset/img/favicon.png'); ?>?v=<?= @filemtime(FCPATH.'asset/img/favicon.png'); ?>">
+  <link rel="shortcut icon" type="image/png" href="<?= base_url('asset/img/favicon.png'); ?>?v=<?= @filemtime(FCPATH.'asset/img/favicon.png'); ?>">
+  <link rel="apple-touch-icon" href="<?= base_url('asset/img/favicon.png'); ?>?v=<?= @filemtime(FCPATH.'asset/img/favicon.png'); ?>">
 
   <title><?= get_option('site_name'); ?> | <?= $template['title']; ?></title>
   <meta content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" name="viewport">
