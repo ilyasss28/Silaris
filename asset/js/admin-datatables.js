@@ -859,6 +859,20 @@
   $(document).on('click.serverTableDelete', 'table[data-server-side="true"] .remove-data', function (event) {
     var button = this;
     if (button.dataset.confirmingDelete === 'true') return;
+
+    var recordId = String(button.getAttribute('data-id') || '').trim();
+    var deleteUrl = String(button.getAttribute('data-delete-url') || button.getAttribute('data-href') || '').trim();
+    var invalidUrl = !deleteUrl || /^(?:null|undefined|#|javascript:)/i.test(deleteUrl);
+
+    // Some generated modules submit an ID via POST and therefore intentionally
+    // do not use data-href. Never turn a missing attribute into the `/null` URL.
+    if (invalidUrl) {
+      event.preventDefault();
+      event.stopImmediatePropagation();
+      swal('Aksi tidak tersedia', 'Alamat tujuan tombol hapus tidak valid. Muat ulang halaman atau hubungi administrator.', 'error');
+      return;
+    }
+
     event.preventDefault();
     event.stopImmediatePropagation();
     button.dataset.confirmingDelete = 'true';
@@ -874,7 +888,38 @@
       closeOnConfirm: true
     }, function (confirmed) {
       button.dataset.confirmingDelete = 'false';
-      if (confirmed) window.location.href = button.getAttribute('data-href');
+      if (!confirmed) return;
+
+      if (recordId || button.getAttribute('data-delete-method') === 'post') {
+        var form = document.createElement('form');
+        form.method = 'post';
+        form.action = deleteUrl;
+        form.style.display = 'none';
+
+        if (recordId) {
+          var idInput = document.createElement('input');
+          idInput.type = 'hidden';
+          idInput.name = 'id[]';
+          idInput.value = recordId;
+          form.appendChild(idInput);
+        }
+
+        var csrfName = document.querySelector('meta[name="csrf-name"]');
+        var csrfToken = document.querySelector('meta[name="csrf-token"]');
+        if (csrfName && csrfToken && csrfName.content && csrfToken.content) {
+          var csrfInput = document.createElement('input');
+          csrfInput.type = 'hidden';
+          csrfInput.name = csrfName.content;
+          csrfInput.value = csrfToken.content;
+          form.appendChild(csrfInput);
+        }
+
+        document.body.appendChild(form);
+        form.submit();
+        return;
+      }
+
+      window.location.assign(deleteUrl);
     });
   });
 })(jQuery);

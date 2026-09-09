@@ -123,7 +123,7 @@ jQuery(document).ready(domo);
                               <a href="{php_open_tag_echo} site_url('<?= $table_name; ?>/edit/' . ${table_name}->{primary_key}); {php_close_tag}" title="Ubah" class="label-default"><i class="fa fa-edit "></i> </a>
                               {php_open_tag} }) {php_close_tag}
                               <?php } ?>{php_open_tag} is_allowed('<?= $table_name; ?>_delete', function() use ($<?= $table_name; ?>){{php_close_tag}
-                              <a href="javascript:void(0);" data-id="{php_open_tag_echo} (int) ${table_name}->{primary_key}; {php_close_tag}" title="Hapus" class="label-default remove-data"><i class="fa fa-close" style="color: red"></i> </a>
+                              <a href="javascript:void(0);" data-id="{php_open_tag_echo} (int) ${table_name}->{primary_key}; {php_close_tag}" data-delete-url="{php_open_tag_echo} site_url('<?= $table_name; ?>/delete'); {php_close_tag}" data-delete-method="post" title="Hapus" class="label-default remove-data"><i class="fa fa-close" style="color: red"></i> </a>
                                {php_open_tag} }) {php_close_tag}
                            </td>
                         </tr>

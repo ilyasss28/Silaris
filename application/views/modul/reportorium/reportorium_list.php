@@ -93,7 +93,7 @@ jQuery(document).ready(domo);
                               <a href="<?= site_url('reportorium/edit/' . $reportorium->id_reportorium); ?>" title="Ubah" class="label-default"><i class="fa fa-edit "></i> </a>
                               <?php }) ?>
                               <?php is_allowed('reportorium_delete', function() use ($reportorium){?>
-                              <a href="javascript:void(0);" data-id="<?= (int) $reportorium->id_reportorium; ?>" title="Hapus" class="label-default remove-data"><i class="fa fa-close" style="color: red"></i> </a>
+                              <a href="javascript:void(0);" data-id="<?= (int) $reportorium->id_reportorium; ?>" data-delete-url="<?= site_url('reportorium/delete'); ?>" data-delete-method="post" title="Hapus" class="label-default remove-data"><i class="fa fa-close" style="color: red"></i> </a>
                                <?php }) ?>
                            </td>
                         </tr>

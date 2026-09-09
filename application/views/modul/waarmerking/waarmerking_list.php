@@ -93,7 +93,7 @@ jQuery(document).ready(domo);
                               <a href="<?= site_url('waarmerking/edit/' . $waarmerking->id_waarmerking); ?>" title="Ubah" class="label-default"><i class="fa fa-edit "></i> </a>
                               <?php }) ?>
                               <?php is_allowed('waarmerking_delete', function() use ($waarmerking){?>
-                              <a href="javascript:void(0);" data-id="<?= (int) $waarmerking->id_waarmerking; ?>" title="Hapus" class="label-default remove-data"><i class="fa fa-close" style="color: red"></i> </a>
+                              <a href="javascript:void(0);" data-id="<?= (int) $waarmerking->id_waarmerking; ?>" data-delete-url="<?= site_url('waarmerking/delete'); ?>" data-delete-method="post" title="Hapus" class="label-default remove-data"><i class="fa fa-close" style="color: red"></i> </a>
                                <?php }) ?>
                            </td>
                         </tr>

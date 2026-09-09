@@ -348,7 +348,7 @@
                     <?= _ent(ucwords($row->name)); ?>
                   
                  </span>
-                 <a class="menu-type-action remove-data" data-href="<?= base_url('administrator/menu_type/delete/'.$row->id); ?>" href="javascript:void()">
+                 <a class="menu-type-action remove-data" data-href="<?= base_url('administrator/menu_type/delete/'.$row->id); ?>" href="javascript:void(0);">
                      <i class="fa fa-trash"></i>
                  </a>
                </div>

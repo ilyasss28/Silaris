@@ -93,7 +93,7 @@ jQuery(document).ready(domo);
                               <a href="<?= site_url('daftar_proses/edit/' . $daftar_proses->id_daftar_proses); ?>" title="Ubah" class="label-default"><i class="fa fa-edit "></i> </a>
                               <?php }) ?>
                               <?php is_allowed('daftar_proses_delete', function() use ($daftar_proses){?>
-                              <a href="javascript:void(0);" data-id="<?= (int) $daftar_proses->id_daftar_proses; ?>" title="Hapus" class="label-default remove-data"><i class="fa fa-close" style="color: red"></i> </a>
+                              <a href="javascript:void(0);" data-id="<?= (int) $daftar_proses->id_daftar_proses; ?>" data-delete-url="<?= site_url('daftar_proses/delete'); ?>" data-delete-method="post" title="Hapus" class="label-default remove-data"><i class="fa fa-close" style="color: red"></i> </a>
                                <?php }) ?>
                            </td>
                         </tr>

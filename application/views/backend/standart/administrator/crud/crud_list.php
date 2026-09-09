@@ -89,7 +89,7 @@ jQuery(document).ready(domo);
                               <a href="<?= site_url('administrator/crud/edit/' . $crud->id); ?>" class="label-default"><i class="fa fa-edit "></i> <?= cclang('update_button'); ?></a>
                               <?php }) ?>
                               <?php is_allowed('crud_delete', function() use ($crud){?>
-                              <a href="javascript:void(0);" data-id="<?= (int) $crud->id; ?>" class="label-default remove-data"><i class="fa fa-close"></i> <?= cclang('remove_button'); ?></a>
+                              <a href="javascript:void(0);" data-id="<?= (int) $crud->id; ?>" data-delete-url="<?= site_url('administrator/crud/delete'); ?>" data-delete-method="post" class="label-default remove-data"><i class="fa fa-close"></i> <?= cclang('remove_button'); ?></a>
                                <?php }) ?>
                            </td>
                         </tr>

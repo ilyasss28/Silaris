@@ -106,9 +106,9 @@ jQuery(document).ready(domo);
                     ?>
 
                     <?php if ($up_to_date == false): ?>
-                    <a  href="" data-href="<?= site_url('administrator/extension/update?ex='.$extension->path) ?>" class="btn btn-sm btn-default btn-flat pull-right btn-update-extension" <?= $classUpdate ?> >Update Now</a>
+                    <a href="<?= site_url('administrator/extension/update?ex='.$extension->path) ?>" data-href="<?= site_url('administrator/extension/update?ex='.$extension->path) ?>" class="btn btn-sm btn-default btn-flat pull-right btn-update-extension" <?= $classUpdate ?> >Update Now</a>
                     <?php endif ?>
-                    <a href="" data-href="<?= site_url('administrator/extension/install?ex='.$extension->path) ?>" class="  btn btn-sm btn-default btn-flat pull-right btn-install-extension" <?= $classInstall ?>>Install Now</a>
+                    <a href="<?= site_url('administrator/extension/install?ex='.$extension->path) ?>" data-href="<?= site_url('administrator/extension/install?ex='.$extension->path) ?>" class="btn btn-sm btn-default btn-flat pull-right btn-install-extension" <?= $classInstall ?>>Install Now</a>
                     <a href="<?= site_url('administrator/extension/activation?ex='.$regid) ?>" class="  btn btn-sm btn-primary btn-flat pull-right btn-active-extension" <?= $classInstall ?> style="display: none;">Activate</a>
 
                     <?php if ($up_to_date): ?>

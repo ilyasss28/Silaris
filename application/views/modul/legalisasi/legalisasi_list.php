@@ -93,7 +93,7 @@ jQuery(document).ready(domo);
                               <a href="<?= site_url('legalisasi/edit/' . $legalisasi->id_legalisasi); ?>" title="Ubah" class="label-default"><i class="fa fa-edit "></i> </a>
                               <?php }) ?>
                               <?php is_allowed('legalisasi_delete', function() use ($legalisasi){?>
-                              <a href="javascript:void(0);" data-id="<?= (int) $legalisasi->id_legalisasi; ?>" title="Hapus" class="label-default remove-data"><i class="fa fa-close" style="color: red"></i> </a>
+                              <a href="javascript:void(0);" data-id="<?= (int) $legalisasi->id_legalisasi; ?>" data-delete-url="<?= site_url('legalisasi/delete'); ?>" data-delete-method="post" title="Hapus" class="label-default remove-data"><i class="fa fa-close" style="color: red"></i> </a>
                                <?php }) ?>
                            </td>
                         </tr>
