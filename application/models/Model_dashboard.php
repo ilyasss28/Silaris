@@ -110,12 +110,14 @@ class Model_dashboard extends CI_Model
             ];
         }
 
-        $active_notaries = (int) $this->db
-            ->where("UPPER(TRIM(status_notaris)) = 'NOTARIS AKTIF'", null, false)
-            ->count_all_results('data_notaris');
+        // Use the same source and filters as Administrator > User so the
+        // dashboard never mixes profile status with account status.
+        $this->load->model('model_user');
+        $active_notaries = $this->model_user->count_all('', '', 'User', 'active');
+        $registered_notaries = $this->model_user->count_all('', '', 'User', '');
 
         return [
-            ['label' => 'Notaris Aktif', 'value' => $active_notaries, 'detail' => 'Dari ' . $this->db->count_all('data_notaris') . ' data notaris terdaftar', 'icon' => 'fa-users', 'tone' => 'navy'],
+            ['label' => 'Notaris Aktif', 'value' => $active_notaries, 'detail' => 'Dari ' . $registered_notaries . ' akun notaris terdaftar', 'icon' => 'fa-users', 'tone' => 'navy'],
             ['label' => 'Laporan Tahun Ini', 'value' => $report_count, 'detail' => 'Laporan tercatat sampai hari ini', 'icon' => 'fa-file-text-o', 'tone' => 'gold'],
             ['label' => 'Aktivitas Layanan', 'value' => $service_total, 'detail' => 'Akumulasi lima layanan tahun berjalan', 'icon' => 'fa-line-chart', 'tone' => 'blue'],
             ['label' => 'Kepatuhan Pelaporan', 'value' => $compliance['percentage'] . '%', 'detail' => $compliance['submitted'] . ' dari ' . $compliance['total'] . ' notaris telah melapor', 'icon' => 'fa-shield', 'tone' => $compliance['percentage'] >= 75 ? 'green' : 'red'],
