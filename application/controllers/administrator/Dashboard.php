@@ -79,9 +79,10 @@ class Dashboard extends Admin
 
 		$sheet = $this->excel->setActiveSheetIndex(0);
 		$sheet->setTitle($status === 'submitted' ? 'Sudah Melapor' : 'Belum Melapor');
-		$sheet->mergeCells('A1:H1')->setCellValue('A1', 'DAFTAR NOTARIS ' . $status_title);
-		$sheet->mergeCells('A2:H2')->setCellValue('A2', 'Periode Pemantauan: ' . $export['period_label']);
-		$headers = ['No.', 'Nama Notaris', 'Nomor Telepon', 'Wilayah', 'Status', 'Jumlah Laporan', 'Laporan Terakhir', 'Periode'];
+		$sheet->mergeCells('A1:I1')->setCellValue('A1', 'DAFTAR NOTARIS ' . $status_title);
+		$sheet->mergeCells('A2:I2')->setCellValue('A2', 'Periode Pemantauan: ' . $export['period_label']);
+		$sheet->mergeCells('A3:I3')->setCellValue('A3', 'Bulan wajib: ' . ($export['required_months'] ? implode(', ', array_values($export['required_months'])) : 'Periode belum dimulai'));
+		$headers = ['No.', 'Nama Notaris', 'Nomor Telepon', 'Wilayah', 'Status', 'Kelengkapan Bulan', 'Bulan Belum Dilaporkan', 'Laporan Terakhir', 'Periode'];
 		foreach ($headers as $column => $header) {
 			$sheet->setCellValueByColumnAndRow($column, 4, $header);
 		}
@@ -93,48 +94,56 @@ class Dashboard extends Admin
 			$sheet->setCellValueExplicit('C' . $row_number, $row['phone_number'] === '-' ? 'Belum tersedia' : format_phone_number($row['phone_number']), PHPExcel_Cell_DataType::TYPE_STRING);
 			$sheet->setCellValueExplicit('D' . $row_number, (string) $row['region_name'], PHPExcel_Cell_DataType::TYPE_STRING);
 			$sheet->setCellValue('E' . $row_number, $row['status'] === 'submitted' ? 'Sudah Melapor' : 'Belum Melapor');
-			$sheet->setCellValueExplicit('F' . $row_number, (int) $row['report_count'], PHPExcel_Cell_DataType::TYPE_NUMERIC);
-			$sheet->setCellValue('G' . $row_number, $row['last_report'] ? format_date_id($row['last_report']) : '-');
-			$sheet->setCellValue('H' . $row_number, $export['period_label']);
+			$sheet->setCellValue('F' . $row_number, (int) $row['reported_month_count'] . '/' . (int) $row['required_month_count'] . ' bulan');
+			$sheet->setCellValue('G' . $row_number, (string) $row['missing_month_labels']);
+			$sheet->setCellValue('H' . $row_number, $row['last_report'] ? format_date_id($row['last_report']) : '-');
+			$sheet->setCellValue('I' . $row_number, $export['period_label']);
 			if ($row_number % 2 === 0) {
-				$sheet->getStyle('A' . $row_number . ':H' . $row_number)->getFill()
+				$sheet->getStyle('A' . $row_number . ':I' . $row_number)->getFill()
 					->setFillType(PHPExcel_Style_Fill::FILL_SOLID)->getStartColor()->setRGB('F7F9FC');
 			}
 			$row_number++;
 		}
 		$last_row = max(4, $row_number - 1);
 
-		$sheet->getStyle('A1:H1')->applyFromArray([
+		$sheet->getStyle('A1:I1')->applyFromArray([
 			'font' => ['bold' => true, 'size' => 16, 'color' => ['rgb' => 'FFFFFF']],
 			'fill' => ['type' => PHPExcel_Style_Fill::FILL_SOLID, 'color' => ['rgb' => '07064F']],
 			'alignment' => ['horizontal' => PHPExcel_Style_Alignment::HORIZONTAL_CENTER, 'vertical' => PHPExcel_Style_Alignment::VERTICAL_CENTER],
 		]);
-		$sheet->getStyle('A2:H2')->applyFromArray([
+		$sheet->getStyle('A2:I2')->applyFromArray([
 			'font' => ['bold' => true, 'size' => 11, 'color' => ['rgb' => '725B00']],
 			'fill' => ['type' => PHPExcel_Style_Fill::FILL_SOLID, 'color' => ['rgb' => 'FFF7D8']],
 			'alignment' => ['horizontal' => PHPExcel_Style_Alignment::HORIZONTAL_CENTER],
 		]);
-		$sheet->getStyle('A4:H4')->applyFromArray([
+		$sheet->getStyle('A3:I3')->applyFromArray([
+			'font' => ['italic' => true, 'size' => 10, 'color' => ['rgb' => '667085']],
+			'alignment' => ['horizontal' => PHPExcel_Style_Alignment::HORIZONTAL_CENTER],
+		]);
+		$sheet->getStyle('A4:I4')->applyFromArray([
 			'font' => ['bold' => true, 'color' => ['rgb' => 'FFFFFF']],
 			'fill' => ['type' => PHPExcel_Style_Fill::FILL_SOLID, 'color' => ['rgb' => '07064F']],
 			'alignment' => ['horizontal' => PHPExcel_Style_Alignment::HORIZONTAL_CENTER, 'vertical' => PHPExcel_Style_Alignment::VERTICAL_CENTER, 'wrap' => true],
 		]);
 		if ($last_row >= 5) {
-			$sheet->getStyle('A5:H' . $last_row)->applyFromArray([
+			$sheet->getStyle('A5:I' . $last_row)->applyFromArray([
 				'borders' => ['allborders' => ['style' => PHPExcel_Style_Border::BORDER_THIN, 'color' => ['rgb' => 'DFE5EE']]],
 				'alignment' => ['vertical' => PHPExcel_Style_Alignment::VERTICAL_CENTER],
 			]);
 			$sheet->getStyle('A5:A' . $last_row)->getAlignment()->setHorizontal(PHPExcel_Style_Alignment::HORIZONTAL_CENTER);
-			$sheet->getStyle('E5:H' . $last_row)->getAlignment()->setHorizontal(PHPExcel_Style_Alignment::HORIZONTAL_CENTER);
+			$sheet->getStyle('E5:F' . $last_row)->getAlignment()->setHorizontal(PHPExcel_Style_Alignment::HORIZONTAL_CENTER);
+			$sheet->getStyle('H5:I' . $last_row)->getAlignment()->setHorizontal(PHPExcel_Style_Alignment::HORIZONTAL_CENTER);
+			$sheet->getStyle('G5:G' . $last_row)->getAlignment()->setWrapText(true);
 			$sheet->getStyle('E5:E' . $last_row)->getFont()->setBold(true)->getColor()->setRGB($status === 'submitted' ? '168252' : 'C23949');
 		}
 
-		$widths = ['A' => 7, 'B' => 34, 'C' => 21, 'D' => 30, 'E' => 19, 'F' => 16, 'G' => 21, 'H' => 22];
+		$widths = ['A' => 7, 'B' => 32, 'C' => 19, 'D' => 25, 'E' => 17, 'F' => 18, 'G' => 38, 'H' => 19, 'I' => 20];
 		foreach ($widths as $column => $width) {
 			$sheet->getColumnDimension($column)->setWidth($width);
 		}
 		$sheet->getRowDimension(1)->setRowHeight(30);
 		$sheet->getRowDimension(2)->setRowHeight(22);
+		$sheet->getRowDimension(3)->setRowHeight(22);
 		$sheet->getRowDimension(4)->setRowHeight(28);
 		$sheet->freezePane('A5');
 		$sheet->setAutoFilter('A4:H4');
@@ -142,7 +151,7 @@ class Dashboard extends Admin
 			->setOrientation(PHPExcel_Worksheet_PageSetup::ORIENTATION_LANDSCAPE)
 			->setFitToWidth(1)->setFitToHeight(0)
 			->setRowsToRepeatAtTopByStartAndEnd(1, 4)
-			->setPrintArea('A1:H' . $last_row)
+			->setPrintArea('A1:I' . $last_row)
 			->setHorizontalCentered(true);
 		$sheet->getPageMargins()->setTop(0.5)->setRight(0.4)->setLeft(0.4)->setBottom(0.5);
 		$sheet->getHeaderFooter()->setOddHeader('&LSILARIS&RKEPATUHAN NOTARIS')

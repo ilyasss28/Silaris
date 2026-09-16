@@ -3,6 +3,8 @@
   $total_laporan = $summary['total_laporan'] ?? 0;
   $aktif_melapor = $summary['aktif_melapor'] ?? 0;
   $tingkat       = $summary['tingkat_persen'] ?? 0;
+  $nama_bulan    = [1 => 'Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'];
+  $bulan_berjalan = $nama_bulan[(int) date('n')];
 
 ?>
 <main id="main">
@@ -56,7 +58,7 @@
 
       <div class="section-title text-start" data-aos="fade-up">
         <h2>Daftar Kepatuhan Pelaporan</h2>
-        <p>Status penyampaian laporan pada tahun <?= date('Y'); ?> per akun notaris aktif. Data dihitung langsung dari laporan yang sama dengan panel administrasi.</p>
+        <p>Status dinyatakan patuh apabila laporan lengkap untuk setiap bulan dari Januari sampai <?= _ent($bulan_berjalan); ?> <?= date('Y'); ?>.</p>
       </div>
 
       <div class="compliance-search" data-aos="fade-up" data-aos-delay="100">
@@ -70,7 +72,8 @@
             <tr>
               <th>Nama Notaris</th>
               <th>Username</th>
-              <th class="text-center">Jumlah Laporan</th>
+              <th class="text-center">Kelengkapan Bulan</th>
+              <th>Bulan Belum Dilaporkan</th>
               <th>Laporan Terakhir</th>
               <th class="text-center">Status</th>
             </tr>
@@ -78,22 +81,23 @@
           <tbody>
             <?php if (empty($notaris)): ?>
               <tr>
-                <td colspan="5" class="compliance-empty">
+                <td colspan="6" class="compliance-empty">
                   <i class="icofont-search-document"></i>
                   <p>Tidak ada data notaris yang cocok.</p>
                 </td>
               </tr>
             <?php else: ?>
               <?php foreach ($notaris as $row): ?>
-                <?php $patuh = $row->jumlah_laporan > 0; ?>
+                <?php $patuh = $row->status_kepatuhan === 'submitted'; ?>
                 <tr>
                   <td class="compliance-name"><?= _ent(format_gelar($row->full_name)); ?></td>
                   <td class="compliance-username">@<?= _ent($row->username); ?></td>
-                  <td class="text-center"><b><?= $row->jumlah_laporan; ?></b></td>
+                  <td class="text-center"><b><?= (int) $row->jumlah_bulan_laporan; ?>/<?= (int) $row->jumlah_bulan_wajib; ?> bulan</b></td>
+                  <td><?= _ent($row->bulan_belum_dilaporkan); ?></td>
                   <td class="table-date-cell"><?= $row->laporan_terakhir ? _ent(format_date_id($row->laporan_terakhir)) : '&mdash;'; ?></td>
                   <td class="text-center">
                     <?php if ($patuh): ?>
-                      <span class="status-badge status-ok"><i class="icofont-check-circled"></i> Aktif Melapor</span>
+                      <span class="status-badge status-ok"><i class="icofont-check-circled"></i> Sudah Melapor</span>
                     <?php else: ?>
                       <span class="status-badge status-warn"><i class="icofont-close-circled"></i> Belum Melapor</span>
                     <?php endif; ?>

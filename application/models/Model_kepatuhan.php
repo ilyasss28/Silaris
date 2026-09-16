@@ -23,6 +23,9 @@ class Model_kepatuhan extends CI_Model
         $this->db->join('aauth_groups groups_table', "groups_table.id = memberships.group_id AND groups_table.name = 'User'");
         $this->db->join('laporan reports', $owner_join, 'left', false);
         $this->db->where('users.banned', 0);
+        if ($this->db->field_exists('is_verified', 'aauth_users')) {
+            $this->db->where('users.is_verified', 1);
+        }
         $this->db->where("UPPER(TRIM(notary_profiles.status_notaris)) = 'NOTARIS AKTIF'", null, false);
         if (!empty($q)) {
             $this->db->group_start();
@@ -39,7 +42,56 @@ class Model_kepatuhan extends CI_Model
             log_message('error', 'Database query failed in get_compliance (Model_kepatuhan): ' . $this->db->last_query());
             return [];
         }
-        return $query->result();
+        $required_months = $this->current_year_required_months();
+        $rows = $query->result();
+        $reported_months_by_user = $this->reported_months_by_user(array_map(function ($row) {
+            return (int) $row->id;
+        }, $rows), $start, $end);
+        foreach ($rows as $row) {
+            $reported_months = isset($reported_months_by_user[(int) $row->id])
+                ? array_keys($reported_months_by_user[(int) $row->id])
+                : [];
+            sort($reported_months, SORT_STRING);
+            $missing_months = array_values(array_diff(array_keys($required_months), $reported_months));
+            $row->jumlah_bulan_laporan = count(array_intersect(array_keys($required_months), $reported_months));
+            $row->jumlah_bulan_wajib = count($required_months);
+            $row->bulan_belum_dilaporkan = $missing_months
+                ? implode(', ', array_map(function ($month) use ($required_months) { return $required_months[$month]; }, $missing_months))
+                : '-';
+            $row->status_kepatuhan = $required_months && !$missing_months ? 'submitted' : 'missing';
+        }
+
+        return $rows;
+    }
+
+    private function reported_months_by_user(array $user_ids, $start, $end)
+    {
+        $user_ids = array_values(array_unique(array_filter(array_map('intval', $user_ids))));
+        if (!$user_ids) {
+            return [];
+        }
+
+        $rows = $this->db
+            ->distinct()
+            ->select("users.id AS user_id, DATE_FORMAT(reports.Tanggal_Laporan, '%Y-%m') AS report_month", false)
+            ->from('aauth_users users')
+            ->join('laporan reports', $this->report_owner_join('reports', 'users'), 'inner', false)
+            ->where_in('users.id', $user_ids)
+            ->where('reports.Tanggal_Laporan >=', $start)
+            ->where('reports.Tanggal_Laporan <=', $end)
+            ->get()
+            ->result_array();
+
+        $months_by_user = [];
+        foreach ($rows as $row) {
+            $user_id = (int) $row['user_id'];
+            $month = trim((string) $row['report_month']);
+            if ($user_id > 0 && preg_match('/^\d{4}-\d{2}$/', $month)) {
+                $months_by_user[$user_id][$month] = true;
+            }
+        }
+
+        return $months_by_user;
     }
 
     /**
@@ -47,63 +99,29 @@ class Model_kepatuhan extends CI_Model
      */
     public function get_compliance_summary()
     {
-        $start = date('Y-01-01');
-        $end = date('Y-m-d');
-        $owner_join = $this->report_owner_join('reports', 'users');
-
-        $total_akun = $this->db->select('COUNT(DISTINCT users.id) AS c', false)
-            ->from('data_notaris notary_profiles')
-            ->join('aauth_users users', 'users.id = notary_profiles.user_id', 'inner')
-            ->join('aauth_user_to_group memberships', 'memberships.user_id = users.id')
-            ->join('aauth_groups groups_table', "groups_table.id = memberships.group_id AND groups_table.name = 'User'")
-            ->where('users.banned', 0)
-            ->where("UPPER(TRIM(notary_profiles.status_notaris)) = 'NOTARIS AKTIF'", null, false)
-            ->get()->row()->c ?? 0;
-
-        $total_laporan = $this->db->select('COUNT(DISTINCT reports.id) AS c', false)
-            ->from('laporan reports')
-            ->join('aauth_users users', $owner_join, 'inner', false)
-            ->join('aauth_user_to_group memberships', 'memberships.user_id = users.id')
-            ->join('aauth_groups groups_table', "groups_table.id = memberships.group_id AND groups_table.name = 'User'")
-            ->join('data_notaris notary_profiles', 'notary_profiles.user_id = users.id', 'inner')
-            ->where('users.banned', 0)
-            ->where("UPPER(TRIM(notary_profiles.status_notaris)) = 'NOTARIS AKTIF'", null, false)
-            ->where('reports.Tanggal_Laporan >=', $start)
-            ->where('reports.Tanggal_Laporan <=', $end)
-            ->get()->row()->c ?? 0;
-
-        $aktif_melapor = $this->db->select('COUNT(DISTINCT users.id) AS c', false)
-            ->from('laporan reports')
-            ->join('aauth_users users', $owner_join, 'inner', false)
-            ->join('aauth_user_to_group memberships', 'memberships.user_id = users.id')
-            ->join('aauth_groups groups_table', "groups_table.id = memberships.group_id AND groups_table.name = 'User'")
-            ->join('data_notaris notary_profiles', 'notary_profiles.user_id = users.id', 'inner')
-            ->where('users.banned', 0)
-            ->where("UPPER(TRIM(notary_profiles.status_notaris)) = 'NOTARIS AKTIF'", null, false)
-            ->where('reports.Tanggal_Laporan >=', $start)
-            ->where('reports.Tanggal_Laporan <=', $end)
-            ->get()->row()->c ?? 0;
-
-        $periode = $this->db->select('MIN(reports.Tanggal_Laporan) AS awal, MAX(reports.Tanggal_Laporan) AS akhir', false)
-            ->from('laporan reports')
-            ->join('aauth_users users', $owner_join, 'inner', false)
-            ->join('aauth_user_to_group memberships', 'memberships.user_id = users.id')
-            ->join('aauth_groups groups_table', "groups_table.id = memberships.group_id AND groups_table.name = 'User'")
-            ->join('data_notaris notary_profiles', 'notary_profiles.user_id = users.id', 'inner')
-            ->where('users.banned', 0)
-            ->where("UPPER(TRIM(notary_profiles.status_notaris)) = 'NOTARIS AKTIF'", null, false)
-            ->where('reports.Tanggal_Laporan >=', $start)
-            ->where('reports.Tanggal_Laporan <=', $end)
-            ->get()->row();
+        $rows = $this->get_compliance();
+        $total_akun = count($rows);
+        $total_laporan = array_sum(array_map(function ($row) { return (int) $row->jumlah_laporan; }, $rows));
+        $aktif_melapor = count(array_filter($rows, function ($row) { return $row->status_kepatuhan === 'submitted'; }));
 
         return [
             'total_notaris'  => (int) $total_akun,
             'total_laporan'  => (int) $total_laporan,
             'aktif_melapor'  => (int) $aktif_melapor,
             'tingkat_persen' => $total_akun > 0 ? round(($aktif_melapor / $total_akun) * 100) : 0,
-            'periode_awal'   => $periode->awal ?? null,
-            'periode_akhir'  => $periode->akhir ?? null,
+            'periode_awal'   => date('Y-01-01'),
+            'periode_akhir'  => date('Y-m-d'),
         ];
+    }
+
+    private function current_year_required_months()
+    {
+        $month_names = [1 => 'Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'];
+        $months = [];
+        for ($month = 1; $month <= (int) date('n'); $month++) {
+            $months[sprintf('%04d-%02d', (int) date('Y'), $month)] = $month_names[$month];
+        }
+        return $months;
     }
 
     private function report_owner_join($report_alias, $user_alias)

@@ -37,10 +37,20 @@ class Model_dashboard extends CI_Model
         $current_year_services = $this->service_breakdown($scope_username, $scope_regions);
         $service_total = array_sum(array_column($current_year_services, 'total'));
         $chart_services = $this->filtered_service_breakdown($chart_period, $scope_username, $scope_regions);
-        $compliance_rows = $profile === 'user'
-            ? []
-            : $this->compliance_notaries($scope_username, $scope_regions, $chart_period);
-        $compliance = $this->compliance_summary($compliance_rows);
+        $compliance_rows = $this->compliance_notaries($scope_username, $scope_regions, $chart_period);
+        $compliance = $this->compliance_summary($compliance_rows, $chart_period);
+        $user_compliance_reminder = null;
+        if ($profile === 'user') {
+            $reminder_period = [
+                'mode' => 'year',
+                'year' => (int) date('Y'),
+                'month' => (int) date('n'),
+                'quarter' => (int) ceil(date('n') / 3),
+                'semester' => (int) ceil(date('n') / 6),
+            ];
+            $reminder_rows = $this->compliance_notaries($username, null, $reminder_period);
+            $user_compliance_reminder = $reminder_rows ? $reminder_rows[0] : null;
+        }
         $region_name = $scope_regions !== null ? $this->region_names($scope_regions) : null;
 
         return [
@@ -52,11 +62,12 @@ class Model_dashboard extends CI_Model
             'dashboard_chart_years' => $this->available_chart_years($scope_username, $scope_regions),
             'dashboard_stats' => $this->stats($profile, $report_count, $service_total, $compliance, $scope_username, $scope_regions),
             'dashboard_services' => $chart_services,
-            'dashboard_trend' => $this->filtered_trend($chart_period, $scope_username, $scope_regions),
+            'dashboard_trend' => $this->filtered_report_trend($chart_period, $scope_username, $scope_regions),
             'dashboard_compliance' => $compliance,
             'dashboard_compliance_rows' => $compliance_rows,
+            'dashboard_user_compliance' => $user_compliance_reminder,
             'dashboard_regions' => $profile === 'executive' ? $this->regional_distribution() : [],
-            'dashboard_attention' => $profile === 'executive' ? $this->notaries_needing_attention($scope_regions) : [],
+            'dashboard_attention' => $profile === 'executive' ? $this->compliance_attention($compliance_rows) : [],
             'dashboard_quick_links' => $this->quick_links($profile),
         ];
     }
@@ -83,6 +94,7 @@ class Model_dashboard extends CI_Model
         return [
             'period' => $period,
             'period_label' => $this->chart_period_label($period),
+            'required_months' => $this->required_report_months($period),
             'rows' => $rows,
         ];
     }
@@ -208,24 +220,19 @@ class Model_dashboard extends CI_Model
         return $result;
     }
 
-    private function filtered_trend(array $period, $username = null, $region_codes = null)
+    private function filtered_report_trend(array $period, $username = null, $region_codes = null)
     {
         $buckets = $this->trend_buckets($period);
         $group_expression = $period['mode'] === 'month'
             ? 'DAY(records.%s)'
             : 'MONTH(records.%s)';
-        $sources = array_merge(
-            [['table' => 'laporan', 'date' => 'Tanggal_Laporan']],
-            array_map(function ($service) { return ['table' => $service['table'], 'date' => $service['date']]; }, $this->services)
-        );
+        $source = ['table' => 'laporan', 'date' => 'Tanggal_Laporan'];
+        $expression = sprintf($group_expression, $source['date']);
 
-        foreach ($sources as $source) {
-            $expression = sprintf($group_expression, $source['date']);
-            foreach ($this->aggregate_source($source, $expression, $period, $username, $region_codes) as $row) {
-                $key = (int) $row['bucket_key'];
-                if (isset($buckets[$key])) {
-                    $buckets[$key]['total'] += (int) $row['total'];
-                }
+        foreach ($this->aggregate_source($source, $expression, $period, $username, $region_codes) as $row) {
+            $key = (int) $row['bucket_key'];
+            if (isset($buckets[$key])) {
+                $buckets[$key]['total'] = (int) $row['total'];
             }
         }
 
@@ -266,7 +273,10 @@ class Model_dashboard extends CI_Model
     {
         $table = $source['table'];
         $date = $source['date'];
-        $count = $table === 'laporan' ? 'COUNT(DISTINCT records.id)' : 'COUNT(*)';
+        // The compliance card counts notaries, not uploaded rows. Count each
+        // reporting account once per chart bucket so duplicate/replacement
+        // uploads do not make the graph disagree with compliance totals.
+        $count = $table === 'laporan' ? 'COUNT(DISTINCT users.id)' : 'COUNT(*)';
         $this->db->select($group_expression . ' AS bucket_key, ' . $count . ' AS total', false)
             ->from($table . ' records');
 
@@ -434,6 +444,7 @@ class Model_dashboard extends CI_Model
     private function compliance_notaries($username, $region_codes, array $period)
     {
         list($start, $end) = $this->period_bounds($period);
+        $required_months = $this->required_report_months($period);
         $report_join = $this->report_owner_join('reports', 'users')
             . ' AND reports.Tanggal_Laporan >= ' . $this->db->escape($start)
             . ' AND reports.Tanggal_Laporan <= ' . $this->db->escape($end);
@@ -448,6 +459,9 @@ class Model_dashboard extends CI_Model
             ->join('laporan reports', $report_join, 'left', false)
             ->where('users.banned', 0)
             ->where("UPPER(TRIM(notary_profiles.status_notaris)) = 'NOTARIS AKTIF'", null, false);
+        if ($this->db->field_exists('is_verified', 'aauth_users')) {
+            $this->db->where('users.is_verified', 1);
+        }
         if ($region_codes !== null) {
             $this->apply_region_codes('notary_profiles.kode_wilayah', $region_codes);
         }
@@ -461,17 +475,63 @@ class Model_dashboard extends CI_Model
             ->order_by('display_name', 'ASC')
             ->get()
             ->result_array();
+        $reported_months_by_user = $this->reported_months_by_user(array_column($rows, 'id'), $start, $end);
         foreach ($rows as &$row) {
             $row['report_count'] = (int) $row['report_count'];
-            $row['status'] = $row['report_count'] > 0 ? 'submitted' : 'missing';
+            $reported_months = isset($reported_months_by_user[(int) $row['id']])
+                ? array_keys($reported_months_by_user[(int) $row['id']])
+                : [];
+            sort($reported_months, SORT_STRING);
+            $missing_months = array_values(array_diff(array_keys($required_months), $reported_months));
+            $row['reported_months'] = $reported_months;
+            $row['reported_month_count'] = count(array_intersect(array_keys($required_months), $reported_months));
+            $row['required_month_count'] = count($required_months);
+            $row['missing_months'] = $missing_months;
+            $row['missing_month_labels'] = !$required_months
+                ? 'Periode belum dimulai'
+                : ($missing_months
+                    ? implode(', ', array_map(function ($month) use ($required_months) { return $required_months[$month]; }, $missing_months))
+                    : '-');
+            $row['status'] = $required_months && !$missing_months ? 'submitted' : 'missing';
         }
         unset($row);
 
         return $rows;
     }
 
-    private function compliance_summary(array $rows)
+    private function reported_months_by_user(array $user_ids, $start, $end)
     {
+        $user_ids = array_values(array_unique(array_filter(array_map('intval', $user_ids))));
+        if (!$user_ids) {
+            return [];
+        }
+
+        $rows = $this->db
+            ->distinct()
+            ->select("users.id AS user_id, DATE_FORMAT(reports.Tanggal_Laporan, '%Y-%m') AS report_month", false)
+            ->from('aauth_users users')
+            ->join('laporan reports', $this->report_owner_join('reports', 'users'), 'inner', false)
+            ->where_in('users.id', $user_ids)
+            ->where('reports.Tanggal_Laporan >=', $start)
+            ->where('reports.Tanggal_Laporan <=', $end)
+            ->get()
+            ->result_array();
+
+        $months_by_user = [];
+        foreach ($rows as $row) {
+            $user_id = (int) $row['user_id'];
+            $month = trim((string) $row['report_month']);
+            if ($user_id > 0 && preg_match('/^\d{4}-\d{2}$/', $month)) {
+                $months_by_user[$user_id][$month] = true;
+            }
+        }
+
+        return $months_by_user;
+    }
+
+    private function compliance_summary(array $rows, array $period)
+    {
+        $required_months = $this->required_report_months($period);
         $total = count($rows);
         $submitted = count(array_filter($rows, function ($row) {
             return $row['status'] === 'submitted';
@@ -481,7 +541,46 @@ class Model_dashboard extends CI_Model
             'submitted' => $submitted,
             'missing' => max(0, $total - $submitted),
             'percentage' => $total > 0 ? (int) round(($submitted / $total) * 100) : 0,
+            'required_month_count' => count($required_months),
+            'required_month_labels' => $required_months ? implode(', ', array_values($required_months)) : 'Periode belum dimulai',
         ];
+    }
+
+    private function required_report_months(array $period)
+    {
+        list($start, $end) = $this->period_bounds($period);
+        if ($start > $end) {
+            return [];
+        }
+
+        $month_names = [1 => 'Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'];
+        $months = [];
+        $cursor = new DateTime(date('Y-m-01', strtotime($start)));
+        $last = new DateTime(date('Y-m-01', strtotime($end)));
+        while ($cursor <= $last) {
+            $key = $cursor->format('Y-m');
+            $months[$key] = $month_names[(int) $cursor->format('n')];
+            $cursor->modify('+1 month');
+        }
+
+        return $months;
+    }
+
+    private function compliance_attention(array $rows)
+    {
+        $missing_rows = array_values(array_filter($rows, function ($row) {
+            return $row['status'] === 'missing';
+        }));
+
+        return array_slice(array_map(function ($row) {
+            return [
+                'full_name' => $row['display_name'],
+                'username' => $row['username'],
+                'region_name' => $row['region_name'],
+                'last_report' => $row['last_report'],
+                'missing_month_labels' => $row['missing_month_labels'],
+            ];
+        }, $missing_rows), 0, 6);
     }
 
     private function regional_distribution()
@@ -495,31 +594,6 @@ class Model_dashboard extends CI_Model
             ->group_by(['regions.id', 'regions.kd_wilayah', 'regions.nama'])
             ->order_by('total', 'DESC')
             ->order_by('regions.nama', 'ASC')
-            ->get()
-            ->result_array();
-    }
-
-    private function notaries_needing_attention($region_codes = null)
-    {
-        $this->db->select('users.id, users.username, users.full_name, regions.nama AS region_name, MAX(reports.Tanggal_Laporan) AS last_report', false)
-            ->from('data_notaris attention_notaries')
-            ->join('aauth_users users', 'users.id = attention_notaries.user_id', 'inner')
-            ->join('aauth_user_to_group memberships', 'memberships.user_id = users.id')
-            ->join('aauth_groups groups_table', "groups_table.id = memberships.group_id AND groups_table.name = 'User'")
-            ->join('wilayah regions', 'regions.kd_wilayah = attention_notaries.kode_wilayah', 'left')
-            ->join('laporan reports', $this->report_owner_join('reports', 'users') . " AND reports.Tanggal_Laporan <= '" . date('Y-m-d') . "'", 'left', false)
-            ->where('users.banned', 0)
-            ->where("UPPER(TRIM(attention_notaries.status_notaris)) = 'NOTARIS AKTIF'", null, false)
-            ->where("NOT EXISTS (SELECT 1 FROM laporan current_reports WHERE " . $this->report_owner_join('current_reports', 'users') . " AND current_reports.Tanggal_Laporan >= '" . date('Y-01-01') . "' AND current_reports.Tanggal_Laporan <= '" . date('Y-m-d') . "')", null, false);
-        if ($region_codes !== null) {
-            $this->apply_region_codes('attention_notaries.kode_wilayah', $region_codes);
-        }
-
-        return $this->db
-            ->group_by(['users.id', 'users.username', 'users.full_name', 'regions.nama'])
-            ->order_by('last_report', 'ASC')
-            ->order_by('users.full_name', 'ASC')
-            ->limit(6)
             ->get()
             ->result_array();
     }

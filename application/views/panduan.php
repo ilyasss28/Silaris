@@ -73,7 +73,7 @@
 
       <div class="panduan-note" data-aos="fade-up">
         <i class="icofont-info-circle"></i>
-        <div><strong>Arti status kepatuhan:</strong> “Aktif Melapor” berarti sedikitnya satu laporan tahun <?= html_escape($tahun_panduan); ?> telah tercatat. “Belum Melapor” berarti belum ada laporan pada tahun <?= html_escape($tahun_panduan); ?> dan tidak selalu berarti notaris tersebut belum pernah melapor pada tahun sebelumnya.</div>
+        <div><strong>Arti status kepatuhan:</strong> “Sudah Melapor” berarti laporan lengkap untuk setiap bulan wajib dari Januari sampai bulan berjalan pada tahun <?= html_escape($tahun_panduan); ?>. Jika satu atau lebih bulan belum tercatat, statusnya “Belum Melapor” dan sistem menampilkan bulan yang masih kurang.</div>
       </div>
 
       <div class="section-title text-start panduan-section-gap" data-aos="fade-up">
